@@ -29,7 +29,7 @@
 #define SAMPLE_AREA_WIDTH 314
 
 #define SCREEN_W 320
-#define SCREEN_H 255
+#define SCREEN_H 511
 
 /* "60Hz" ranges everywhere from 59..61Hz depending on the monitor, so with
 ** no vsync we will get stuttering because the rate is not perfect...
