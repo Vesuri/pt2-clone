@@ -38,6 +38,7 @@ extern uint16_t vuMeterColors[48];
 #define EDITOP3_BUTTONS 29
 #define EDITOP4_BUTTONS 29
 #define SAMPLER_BUTTONS 25
+#define SYNTH_BUTTONS 1
 // -----------------------------------------------
 
 extern const guiButton_t bAsk[];
@@ -53,3 +54,4 @@ extern const guiButton_t bEditOp2[];
 extern const guiButton_t bEditOp3[];
 extern const guiButton_t bEditOp4[];
 extern const guiButton_t bSampler[];
+extern const guiButton_t bSynth[];

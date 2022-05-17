@@ -227,7 +227,10 @@ enum ptbuttons
 	PTB_SA_VOL_FROM_NUM,
 	PTB_SA_VOL_TO_NUM,
 	PTB_SA_FIL_LP_CUTOFF,
-	PTB_SA_FIL_HP_CUTOFF
+	PTB_SA_FIL_HP_CUTOFF,
+
+    // SYNTH SCREEN
+    PTB_SY_RENDER
 };
 
 typedef struct guiButton_t

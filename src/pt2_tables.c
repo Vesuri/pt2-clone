@@ -525,3 +525,8 @@ const guiButton_t bSampler[] =
 	{176,244,210,254, PTB_SA_FIXDC},
 	{211,244,245,254, PTB_SA_FILTERS}
 };
+
+const guiButton_t bSynth[] =
+{
+	{  0,256,319,511, PTB_SY_RENDER}
+};

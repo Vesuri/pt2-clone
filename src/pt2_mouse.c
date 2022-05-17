@@ -14,6 +14,7 @@
 #include "pt2_helpers.h"
 #include "pt2_diskop.h"
 #include "pt2_sampler.h"
+#include "pt2_synth.h"
 #include "pt2_module_loader.h"
 #include "pt2_edit.h"
 #include "pt2_sample_loader.h"
@@ -1988,6 +1989,8 @@ int32_t checkGUIButtons(void)
 	{
 		TEST_BUTTONS(bBotScreen, BOTSCREEN_BUTTONS);
 	}
+
+	TEST_BUTTONS(bSynth, SYNTH_BUTTONS);
 
 	return -1;
 }
@@ -4595,6 +4598,8 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 
 		case PTB_POSU: positionUpButton(); break;
 		case PTB_POSD: positionDownButton(); break;
+
+		case PTB_SY_RENDER: synthRender(); break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}
