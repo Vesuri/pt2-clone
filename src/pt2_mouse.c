@@ -4599,7 +4599,12 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_POSU: positionUpButton(); break;
 		case PTB_POSD: positionDownButton(); break;
 
-		case PTB_SY_RENDER: synthRender(); break;
+		case PTB_SY_RENDER:
+		{
+			synthRender();
+			displaySample();
+		}
+		break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}

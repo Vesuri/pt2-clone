@@ -24,6 +24,7 @@
 #include "pt2_mouse.h"
 #include "pt2_diskop.h"
 #include "pt2_sampler.h"
+#include "pt2_synth.h"
 #include "pt2_config.h"
 #include "pt2_visuals.h"
 #include "pt2_edit.h"
@@ -475,6 +476,8 @@ static bool initializeVars(void)
 
 	if (!allocSamplerVars() || !allocDiskOpVars())
 		goto oom;
+
+	initSynth();
 
 	config.defModulesDir = (char *)calloc(PATH_MAX + 1, sizeof (char));
 	config.defSamplesDir = (char *)calloc(PATH_MAX + 1, sizeof (char));
