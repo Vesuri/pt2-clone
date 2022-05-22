@@ -15,34 +15,7 @@
 
 synth_t synth; // globalized
 
-uint32_t SAMPLERATE = 22050;
-
 // Synthesizer buffers and other data
-uint32_t random_number = 0;
-
-// Synthesizer variables
-int32_t oscillator_1_position = 0;
-int32_t oscillator_1_delta = 0;
-int32_t oscillator_2_position = 0;
-int32_t oscillator_2_delta = 0;
-int32_t oscillator_3_position = 0;
-int32_t oscillator_3_delta = 0;
-int32_t oscillator_noise_position = 0;
-int32_t oscillator_1_sync_position = 0;
-int32_t oscillator_1_sync_delta = 0;
-int32_t oscillator_2_sync_position = 0;
-int32_t oscillator_2_sync_delta = 0;
-int32_t oscillator_3_sync_position = 0;
-int32_t oscillator_3_sync_delta = 0;
-int32_t lfo_1_position = 0;
-int32_t lfo_2_position = 0;
-int32_t envelope_1_current = 0;
-int32_t envelope_1_delta = 0;
-int32_t envelope_2_current = 0;
-int32_t envelope_2_delta = 0;
-int32_t envelope_3_current = 0;
-int32_t envelope_3_delta = 0;
-int32_t envelope_stretch = 0;
 int8_t waveforms[6 * 256];
 int8_t* waveform_saw = waveforms + WAVEFORM_SAW;
 int8_t* waveform_square = waveforms + WAVEFORM_SQUARE_1;
@@ -52,24 +25,17 @@ int16_t waveforms_lfo[3 * 4096];
 int16_t* waveform_lfo_saw = waveforms_lfo + WAVEFORM_LFO_SAW;
 int16_t* waveform_lfo_square = waveforms_lfo + WAVEFORM_LFO_SQUARE;
 int16_t* waveform_lfo_triangle = waveforms_lfo + WAVEFORM_LFO_TRIANGLE;
+
+// Synthesizer variables
+int16_t oscillator_1_width_current = 0;
+int16_t oscillator_2_width_current = 0;
+int16_t oscillator_3_width_current = 0;
+int16_t filter_frequency_current = 0;
+int16_t filter_resonance_current = 0;
 int16_t filter_q = 0;
 int16_t filter_p = 0;
 int16_t filter_f = 0;
 int16_t filter_in = 0;
-int16_t filter_frequency_current = 0;
-int16_t filter_resonance_current = 0;
-int16_t oscillator_1_current = 0;
-int16_t oscillator_1_width_current = 0;
-int16_t oscillator_2_current = 0;
-int16_t oscillator_2_width_current = 0;
-int16_t oscillator_3_current = 0;
-int16_t oscillator_3_width_current = 0;
-int16_t envelope_1_counter = 0;
-int16_t envelope_2_counter = 0;
-int16_t envelope_3_counter = 0;
-enum envelope_mode envelope_1_mode = ENVELOPE_INIT;
-enum envelope_mode envelope_2_mode = ENVELOPE_INIT;
-enum envelope_mode envelope_3_mode = ENVELOPE_INIT;
 
 int16_t sinus[] = {
 	0x0000, 0x00c9, 0x0192, 0x025b, 0x0324, 0x03ed, 0x04b6, 0x057f,
@@ -203,6 +169,7 @@ int16_t sinus[] = {
 };
 
 // 32 bit random number generator
+uint32_t random_number = 0xbc5d71e3;
 uint32_t generate_random()
 {
 	for (int i = 0; i < 5; i++) {
@@ -321,8 +288,6 @@ void waveform_lfo_create()
 // Initialize parameters to default values
 void initSynth(void)
 {
-	random_number = 0xbc5d71e3;
-
 	// Initialize runtime variables
 	for (int i = 0; i < MOD_SAMPLES; i++) {
 		memset(&synth.patches[i], 0, sizeof(patch_t));
@@ -351,20 +316,51 @@ void initSynth(void)
 		synth.patches[i].lfo_2_speed = 1000;
 		synth.patches[i].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
 	}
+}
 
-	// Calculate envelope stretch
-	envelope_stretch = 7;
+void synthRender(void)
+{
+	uint32_t SAMPLERATE = 22050;
+	int32_t oscillator_1_position = 0;
+	int32_t oscillator_1_delta = 0;
+	int32_t oscillator_2_position = 0;
+	int32_t oscillator_2_delta = 0;
+	int32_t oscillator_3_position = 0;
+	int32_t oscillator_3_delta = 0;
+	int32_t oscillator_noise_position = 0;
+	int32_t oscillator_1_sync_position = 0;
+	int32_t oscillator_1_sync_delta = 0;
+	int32_t oscillator_2_sync_position = 0;
+	int32_t oscillator_2_sync_delta = 0;
+	int32_t oscillator_3_sync_position = 0;
+	int32_t oscillator_3_sync_delta = 0;
+	int32_t lfo_1_position = 0;
+	int32_t lfo_2_position = 0;
+	int32_t envelope_1_current = 0;
+	int32_t envelope_1_delta = 0;
+	int32_t envelope_2_current = 0;
+	int32_t envelope_2_delta = 0;
+	int32_t envelope_3_current = 0;
+	int32_t envelope_3_delta = 0;
+	int32_t envelope_stretch = 7;
+	int16_t oscillator_1_current = 0;
+	int16_t oscillator_2_current = 0;
+	int16_t oscillator_3_current = 0;
+	int16_t envelope_1_counter = 0;
+	int16_t envelope_2_counter = 0;
+	int16_t envelope_3_counter = 0;
+	enum envelope_mode envelope_1_mode = ENVELOPE_INIT;
+	enum envelope_mode envelope_2_mode = ENVELOPE_INIT;
+	enum envelope_mode envelope_3_mode = ENVELOPE_INIT;
 
 	// Create waveforms
+	random_number = 0xbc5d71e3;
 	waveform_saw_create();
 	waveform_square_create();
 	waveform_noise_create();
 	waveform_sinus_create();
 	waveform_lfo_create();
-}
 
-void synthRender(void)
-{
 	moduleSample_t* sample = &song->samples[editor.currSample];
 	int8_t* buffer_render = &song->sampleData[sample->offset];
 	patch_t* patch = &synth.patches[editor.currSample];
