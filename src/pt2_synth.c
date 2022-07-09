@@ -290,37 +290,79 @@ void initSynth(void)
 {
 	// Initialize runtime variables
 	for (int i = 0; i < MOD_SAMPLES; i++) {
-		memset(&synth.patches[i], 0, sizeof(patch_t));
+		memset(&synth.performances[i], 0, sizeof(performance_t));
 
-		synth.patches[i].oscillator_1_waveform = WAVEFORM_SQUARE_1;
-		synth.patches[i].oscillator_1_pitch = 88;
-		synth.patches[i].oscillator_1_width = 0x800;
-		synth.patches[i].oscillator_2_waveform = WAVEFORM_SQUARE_2;
-		synth.patches[i].oscillator_2_mix = 0x8c0;
-		synth.patches[i].oscillator_2_pitch = 88;
-		synth.patches[i].oscillator_2_width = 0x800;
-		synth.patches[i].oscillator_3_waveform = WAVEFORM_SQUARE_3;
-		synth.patches[i].oscillator_3_mix = 0xfff;
-		synth.patches[i].oscillator_3_pitch = 44;
-		synth.patches[i].oscillator_3_width = 0x800;
-		synth.patches[i].oscillator_3_width_lfo_1 = 0x7ff;
-		synth.patches[i].oscillator_noise_mix_env_2 = 0xfff;
-		synth.patches[i].filter_frequency = 0x100;
-		synth.patches[i].filter_frequency_env_3 = 0xfff;
-		synth.patches[i].envelope_1_sustain = 0xfff;
-		synth.patches[i].envelope_2_decay = 0x80;
-		synth.patches[i].envelope_2_sustain = 0x500;
-		synth.patches[i].envelope_3_decay = 0x180;
-		synth.patches[i].lfo_1_speed = 1000;
-		synth.patches[i].lfo_1_waveform = WAVEFORM_LFO_SAW;
-		synth.patches[i].lfo_2_speed = 1000;
-		synth.patches[i].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
+		for (int j = 0; j < 8; j++) {
+			synth.performances[i].parts[j].sampleRate = 22050;
+		}
 	}
+
+	for (int i = 0; i < 256; i++) {
+		memset(&synth.programs[i], 0, sizeof(program_t));
+
+		synth.programs[i].oscillator_1_waveform = WAVEFORM_SAW;
+		synth.programs[i].oscillator_1_pitch = 44;
+		synth.programs[i].oscillator_1_width = 0x800;
+		synth.programs[i].oscillator_2_waveform = WAVEFORM_SAW;
+		synth.programs[i].oscillator_2_pitch = 44;
+		synth.programs[i].oscillator_2_width = 0x800;
+		synth.programs[i].oscillator_3_waveform = WAVEFORM_SAW;
+		synth.programs[i].oscillator_3_mix = 0xfff;
+		synth.programs[i].oscillator_3_pitch = 44;
+		synth.programs[i].oscillator_3_width = 0x800;
+		synth.programs[i].filter_frequency = 0xfff;
+		synth.programs[i].filter_frequency_env_3 = 0xfff;
+		synth.programs[i].envelope_3_sustain = 0xfff;
+		synth.programs[i].lfo_1_speed = 1000;
+		synth.programs[i].lfo_1_waveform = WAVEFORM_LFO_SAW;
+		synth.programs[i].lfo_2_speed = 1000;
+		synth.programs[i].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
+	}
+
+	synth.performances[0].parts[0].volume = 64;
+	synth.programs[0].oscillator_1_waveform = WAVEFORM_SQUARE_1;
+	synth.programs[0].oscillator_1_pitch = 88;
+	synth.programs[0].oscillator_1_width = 0x800;
+	synth.programs[0].oscillator_2_waveform = WAVEFORM_SQUARE_2;
+	synth.programs[0].oscillator_2_mix = 0x8c0;
+	synth.programs[0].oscillator_2_pitch = 88;
+	synth.programs[0].oscillator_2_width = 0x800;
+	synth.programs[0].oscillator_3_waveform = WAVEFORM_SQUARE_3;
+	synth.programs[0].oscillator_3_mix = 0xfff;
+	synth.programs[0].oscillator_3_pitch = 44;
+	synth.programs[0].oscillator_3_width = 0x800;
+	synth.programs[0].oscillator_3_width_lfo_1 = 0x7ff;
+	synth.programs[0].oscillator_noise_mix_env_2 = 0xfff;
+	synth.programs[0].filter_frequency = 0x100;
+	synth.programs[0].filter_frequency_env_3 = 0xfff;
+	synth.programs[0].envelope_1_sustain = 0xfff;
+	synth.programs[0].envelope_2_decay = 0x80;
+	synth.programs[0].envelope_2_sustain = 0x500;
+	synth.programs[0].envelope_3_decay = 0x180;
+	synth.programs[0].envelope_3_sustain = 0;
+	synth.programs[0].lfo_1_speed = 1000;
+	synth.programs[0].lfo_1_waveform = WAVEFORM_LFO_SAW;
+	synth.programs[0].lfo_2_speed = 1000;
+	synth.programs[0].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
 }
 
 void synthRender(void)
 {
-	uint32_t SAMPLERATE = 22050;
+	performance_t* performance = &synth.performances[editor.currSample];
+	for (int part = 0; part < 8; part++) {
+		renderPart(&performance->parts[part], part > 0);
+	}
+}
+
+void renderPart(part_t* part, bool add)
+{
+	if (part->volume == 0) {
+		return;
+	}
+
+	program_t* program = &synth.programs[part->program];
+	uint32_t SAMPLERATE = part->sampleRate;
+
 	int32_t oscillator_1_position = 0;
 	int32_t oscillator_1_delta = 0;
 	int32_t oscillator_2_position = 0;
@@ -363,7 +405,6 @@ void synthRender(void)
 
 	moduleSample_t* sample = &song->samples[editor.currSample];
 	int8_t* buffer_render = &song->sampleData[sample->offset];
-	patch_t* patch = &synth.patches[editor.currSample];
 
 	int16_t b0 = 0;
 	int16_t b1 = 0;
@@ -380,12 +421,12 @@ void synthRender(void)
 				envelope_1_mode++;
 				switch (envelope_1_mode) {
 				case ENVELOPE_ATTACK:
-					envelope_1_delta = 0xffff / (patch->envelope_1_attack + 1);
-					envelope_1_counter = patch->envelope_1_attack;
+					envelope_1_delta = 0xffff / (program->envelope_1_attack + 1);
+					envelope_1_counter = program->envelope_1_attack;
 					break;
 				case ENVELOPE_DECAY:
-					envelope_1_delta = -((0xfff - patch->envelope_1_sustain) << 4) / (patch->envelope_1_decay + 1);
-					envelope_1_counter = patch->envelope_1_decay;
+					envelope_1_delta = -((0xfff - program->envelope_1_sustain) << 4) / (program->envelope_1_decay + 1);
+					envelope_1_counter = program->envelope_1_decay;
 					break;
 				default:
 					envelope_1_delta = 0;
@@ -401,12 +442,12 @@ void synthRender(void)
 				envelope_2_mode++;
 				switch (envelope_2_mode) {
 				case ENVELOPE_ATTACK:
-					envelope_2_delta = 0xffff / (patch->envelope_2_attack + 1);
-					envelope_2_counter = patch->envelope_2_attack;
+					envelope_2_delta = 0xffff / (program->envelope_2_attack + 1);
+					envelope_2_counter = program->envelope_2_attack;
 					break;
 				case ENVELOPE_DECAY:
-					envelope_2_delta = -((0xfff - patch->envelope_2_sustain) << 4) / (patch->envelope_2_decay + 1);
-					envelope_2_counter = patch->envelope_2_decay;
+					envelope_2_delta = -((0xfff - program->envelope_2_sustain) << 4) / (program->envelope_2_decay + 1);
+					envelope_2_counter = program->envelope_2_decay;
 					break;
 				default:
 					envelope_2_delta = 0;
@@ -422,12 +463,12 @@ void synthRender(void)
 				envelope_3_mode++;
 				switch (envelope_3_mode) {
 				case ENVELOPE_ATTACK:
-					envelope_3_delta = 0xffff / (patch->envelope_3_attack + 1);
-					envelope_3_counter = patch->envelope_3_attack;
+					envelope_3_delta = 0xffff / (program->envelope_3_attack + 1);
+					envelope_3_counter = program->envelope_3_attack;
 					break;
 				case ENVELOPE_DECAY:
-					envelope_3_delta = -((0xfff - patch->envelope_3_sustain) << 4) / (patch->envelope_3_decay + 1);
-					envelope_3_counter = patch->envelope_3_decay;
+					envelope_3_delta = -((0xfff - program->envelope_3_sustain) << 4) / (program->envelope_3_decay + 1);
+					envelope_3_counter = program->envelope_3_decay;
 					break;
 				default:
 					envelope_3_delta = 0;
@@ -438,13 +479,13 @@ void synthRender(void)
 		}
 
 		// Update LFO 1
-		lfo_1_position += ((patch->lfo_1_speed << 16) / SAMPLERATE) << 2; // lfo_1_delta
+		lfo_1_position += ((program->lfo_1_speed << 16) / SAMPLERATE) << 2; // lfo_1_delta
 		if (lfo_1_position >= 0x10000000) {
 			lfo_1_position -= 0x10000000;
 		}
 
 		// Update LFO 2
-		lfo_2_position += ((patch->lfo_2_speed << 16) / SAMPLERATE) << 2; // lfo_2_delta
+		lfo_2_position += ((program->lfo_2_speed << 16) / SAMPLERATE) << 2; // lfo_2_delta
 		if (lfo_2_position >= 0x10000000) {
 			lfo_2_position -= 0x10000000;
 		}
@@ -452,145 +493,145 @@ void synthRender(void)
 		// Only update oscillator widths, pitches and square waveforms every 64th sample
 		if ((buffer_position & 63) == 0) {
 			// Update oscillator 1 width
-			oscillator_1_width_current = patch->oscillator_1_width;
-			if (patch->oscillator_1_width_lfo_1 != 0) {
-				oscillator_1_width_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_1_width_lfo_1) >> 12;
+			oscillator_1_width_current = program->oscillator_1_width;
+			if (program->oscillator_1_width_lfo_1 != 0) {
+				oscillator_1_width_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_1_width_lfo_1) >> 12;
 			}
-			if (patch->oscillator_1_width_lfo_2 != 0) {
-				oscillator_1_width_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_1_width_lfo_2) >> 12;
+			if (program->oscillator_1_width_lfo_2 != 0) {
+				oscillator_1_width_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_1_width_lfo_2) >> 12;
 			}
-			if (patch->oscillator_1_width_env_2 != 0) {
-				oscillator_1_width_current += ((envelope_2_current >> 4) * patch->oscillator_1_width_env_2) >> 12;
+			if (program->oscillator_1_width_env_2 != 0) {
+				oscillator_1_width_current += ((envelope_2_current >> 4) * program->oscillator_1_width_env_2) >> 12;
 			}
-			if (patch->oscillator_1_width_env_3 != 0) {
-				oscillator_1_width_current += ((envelope_3_current >> 4) * patch->oscillator_1_width_env_3) >> 12;
+			if (program->oscillator_1_width_env_3 != 0) {
+				oscillator_1_width_current += ((envelope_3_current >> 4) * program->oscillator_1_width_env_3) >> 12;
 			}
 
 			// Update oscillator 2 width
-			oscillator_2_width_current = patch->oscillator_2_width;
-			if (patch->oscillator_2_width_lfo_1 != 0) {
-				oscillator_2_width_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_2_width_lfo_1) >> 12;
+			oscillator_2_width_current = program->oscillator_2_width;
+			if (program->oscillator_2_width_lfo_1 != 0) {
+				oscillator_2_width_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_2_width_lfo_1) >> 12;
 			}
-			if (patch->oscillator_2_width_lfo_2 != 0) {
-				oscillator_2_width_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_2_width_lfo_2) >> 12;
+			if (program->oscillator_2_width_lfo_2 != 0) {
+				oscillator_2_width_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_2_width_lfo_2) >> 12;
 			}
-			if (patch->oscillator_2_width_env_2 != 0) {
-				oscillator_2_width_current += ((envelope_2_current >> 4) * patch->oscillator_2_width_env_2) >> 12;
+			if (program->oscillator_2_width_env_2 != 0) {
+				oscillator_2_width_current += ((envelope_2_current >> 4) * program->oscillator_2_width_env_2) >> 12;
 			}
-			if (patch->oscillator_2_width_env_3 != 0) {
-				oscillator_2_width_current += ((envelope_3_current >> 4) * patch->oscillator_2_width_env_3) >> 12;
+			if (program->oscillator_2_width_env_3 != 0) {
+				oscillator_2_width_current += ((envelope_3_current >> 4) * program->oscillator_2_width_env_3) >> 12;
 			}
 
 			// Update oscillator 3 width
-			oscillator_3_width_current = patch->oscillator_3_width;
-			if (patch->oscillator_3_width_lfo_1 != 0) {
-				oscillator_3_width_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_3_width_lfo_1) >> 12;
+			oscillator_3_width_current = program->oscillator_3_width;
+			if (program->oscillator_3_width_lfo_1 != 0) {
+				oscillator_3_width_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_3_width_lfo_1) >> 12;
 			}
-			if (patch->oscillator_3_width_lfo_2 != 0) {
-				oscillator_3_width_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_3_width_lfo_2) >> 12;
+			if (program->oscillator_3_width_lfo_2 != 0) {
+				oscillator_3_width_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_3_width_lfo_2) >> 12;
 			}
-			if (patch->oscillator_3_width_env_2 != 0) {
-				oscillator_3_width_current += ((envelope_2_current >> 4) * patch->oscillator_3_width_env_2) >> 12;
+			if (program->oscillator_3_width_env_2 != 0) {
+				oscillator_3_width_current += ((envelope_2_current >> 4) * program->oscillator_3_width_env_2) >> 12;
 			}
-			if (patch->oscillator_3_width_env_3 != 0) {
-				oscillator_3_width_current += ((envelope_3_current >> 4) * patch->oscillator_3_width_env_3) >> 12;
+			if (program->oscillator_3_width_env_3 != 0) {
+				oscillator_3_width_current += ((envelope_3_current >> 4) * program->oscillator_3_width_env_3) >> 12;
 			}
 
 			waveform_square_create();
 
 			// Update oscillator 1 pitch
-			uint16_t oscillator_1_pitch_current = patch->oscillator_1_pitch;
-			if (patch->oscillator_1_pitch_lfo_1 != 0) {
-				oscillator_1_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_1_pitch_lfo_1) >> 12;
+			uint16_t oscillator_1_pitch_current = program->oscillator_1_pitch;
+			if (program->oscillator_1_pitch_lfo_1 != 0) {
+				oscillator_1_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_1_pitch_lfo_1) >> 12;
 			}
-			if (patch->oscillator_1_pitch_lfo_2 != 0) {
-				oscillator_1_pitch_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_1_pitch_lfo_2) >> 12;
+			if (program->oscillator_1_pitch_lfo_2 != 0) {
+				oscillator_1_pitch_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_1_pitch_lfo_2) >> 12;
 			}
-			if (patch->oscillator_1_pitch_env_2 != 0) {
-				oscillator_1_pitch_current += ((envelope_2_current >> 4) * patch->oscillator_1_pitch_env_2) >> 11;
+			if (program->oscillator_1_pitch_env_2 != 0) {
+				oscillator_1_pitch_current += ((envelope_2_current >> 4) * program->oscillator_1_pitch_env_2) >> 11;
 			}
-			if (patch->oscillator_1_pitch_env_3 != 0) {
-				oscillator_1_pitch_current += ((envelope_3_current >> 4) * patch->oscillator_1_pitch_env_3) >> 11;
+			if (program->oscillator_1_pitch_env_3 != 0) {
+				oscillator_1_pitch_current += ((envelope_3_current >> 4) * program->oscillator_1_pitch_env_3) >> 11;
 			}
 			oscillator_1_delta = ((oscillator_1_pitch_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 2 pitch
-			uint16_t oscillator_2_pitch_current = patch->oscillator_2_pitch;
-			if (patch->oscillator_2_pitch_lfo_1 != 0) {
-				oscillator_2_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_2_pitch_lfo_1) >> 12;
+			uint16_t oscillator_2_pitch_current = program->oscillator_2_pitch;
+			if (program->oscillator_2_pitch_lfo_1 != 0) {
+				oscillator_2_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_2_pitch_lfo_1) >> 12;
 			}
-			if (patch->oscillator_2_pitch_lfo_2 != 0) {
-				oscillator_2_pitch_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_2_pitch_lfo_2) >> 12;
+			if (program->oscillator_2_pitch_lfo_2 != 0) {
+				oscillator_2_pitch_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_2_pitch_lfo_2) >> 12;
 			}
-			if (patch->oscillator_2_pitch_env_2 != 0) {
-				oscillator_2_pitch_current += ((envelope_2_current >> 4) * patch->oscillator_2_pitch_env_2) >> 11;
+			if (program->oscillator_2_pitch_env_2 != 0) {
+				oscillator_2_pitch_current += ((envelope_2_current >> 4) * program->oscillator_2_pitch_env_2) >> 11;
 			}
-			if (patch->oscillator_2_pitch_env_3 != 0) {
-				oscillator_2_pitch_current += ((envelope_3_current >> 4) * patch->oscillator_2_pitch_env_3) >> 11;
+			if (program->oscillator_2_pitch_env_3 != 0) {
+				oscillator_2_pitch_current += ((envelope_3_current >> 4) * program->oscillator_2_pitch_env_3) >> 11;
 			}
 			oscillator_2_delta = ((oscillator_2_pitch_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 3 pitch
-			uint16_t oscillator_3_pitch_current = patch->oscillator_3_pitch;
-			if (patch->oscillator_3_pitch_lfo_1 != 0) {
-				oscillator_3_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_3_pitch_lfo_1) >> 12;
+			uint16_t oscillator_3_pitch_current = program->oscillator_3_pitch;
+			if (program->oscillator_3_pitch_lfo_1 != 0) {
+				oscillator_3_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_3_pitch_lfo_1) >> 12;
 			}
-			if (patch->oscillator_3_pitch_lfo_2 != 0) {
-				oscillator_3_pitch_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_3_pitch_lfo_2) >> 12;
+			if (program->oscillator_3_pitch_lfo_2 != 0) {
+				oscillator_3_pitch_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_3_pitch_lfo_2) >> 12;
 			}
-			if (patch->oscillator_3_pitch_env_2 != 0) {
-				oscillator_3_pitch_current += ((envelope_2_current >> 4) * patch->oscillator_3_pitch_env_2) >> 11;
+			if (program->oscillator_3_pitch_env_2 != 0) {
+				oscillator_3_pitch_current += ((envelope_2_current >> 4) * program->oscillator_3_pitch_env_2) >> 11;
 			}
-			if (patch->oscillator_3_pitch_env_3 != 0) {
-				oscillator_3_pitch_current += ((envelope_3_current >> 4) * patch->oscillator_3_pitch_env_3) >> 11;
+			if (program->oscillator_3_pitch_env_3 != 0) {
+				oscillator_3_pitch_current += ((envelope_3_current >> 4) * program->oscillator_3_pitch_env_3) >> 11;
 			}
 			oscillator_3_delta = ((oscillator_3_pitch_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 1 sync
-			uint16_t oscillator_1_sync_current = patch->oscillator_1_sync;
-			if (patch->oscillator_1_sync_lfo_1 != 0) {
-				oscillator_1_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_1_sync_lfo_1) >> 12;
+			uint16_t oscillator_1_sync_current = program->oscillator_1_sync;
+			if (program->oscillator_1_sync_lfo_1 != 0) {
+				oscillator_1_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_1_sync_lfo_1) >> 12;
 			}
-			if (patch->oscillator_1_sync_lfo_2 != 0) {
-				oscillator_1_sync_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_1_sync_lfo_2) >> 12;
+			if (program->oscillator_1_sync_lfo_2 != 0) {
+				oscillator_1_sync_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_1_sync_lfo_2) >> 12;
 			}
-			if (patch->oscillator_1_sync_env_2 != 0) {
-				oscillator_1_sync_current += ((envelope_2_current >> 4) * patch->oscillator_1_sync_env_2) >> 11;
+			if (program->oscillator_1_sync_env_2 != 0) {
+				oscillator_1_sync_current += ((envelope_2_current >> 4) * program->oscillator_1_sync_env_2) >> 11;
 			}
-			if (patch->oscillator_1_sync_env_3 != 0) {
-				oscillator_1_sync_current += ((envelope_3_current >> 4) * patch->oscillator_1_sync_env_3) >> 11;
+			if (program->oscillator_1_sync_env_3 != 0) {
+				oscillator_1_sync_current += ((envelope_3_current >> 4) * program->oscillator_1_sync_env_3) >> 11;
 			}
 			oscillator_1_sync_delta = ((oscillator_1_sync_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 2 sync
-			uint16_t oscillator_2_sync_current = patch->oscillator_2_sync;
-			if (patch->oscillator_2_sync_lfo_1 != 0) {
-				oscillator_2_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_2_sync_lfo_1) >> 12;
+			uint16_t oscillator_2_sync_current = program->oscillator_2_sync;
+			if (program->oscillator_2_sync_lfo_1 != 0) {
+				oscillator_2_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_2_sync_lfo_1) >> 12;
 			}
-			if (patch->oscillator_2_sync_lfo_2 != 0) {
-				oscillator_2_sync_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_2_sync_lfo_2) >> 12;
+			if (program->oscillator_2_sync_lfo_2 != 0) {
+				oscillator_2_sync_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_2_sync_lfo_2) >> 12;
 			}
-			if (patch->oscillator_2_sync_env_2 != 0) {
-				oscillator_2_sync_current += ((envelope_2_current >> 4) * patch->oscillator_2_sync_env_2) >> 11;
+			if (program->oscillator_2_sync_env_2 != 0) {
+				oscillator_2_sync_current += ((envelope_2_current >> 4) * program->oscillator_2_sync_env_2) >> 11;
 			}
-			if (patch->oscillator_2_sync_env_3 != 0) {
-				oscillator_2_sync_current += ((envelope_3_current >> 4) * patch->oscillator_2_sync_env_3) >> 11;
+			if (program->oscillator_2_sync_env_3 != 0) {
+				oscillator_2_sync_current += ((envelope_3_current >> 4) * program->oscillator_2_sync_env_3) >> 11;
 			}
 			oscillator_2_sync_delta = ((oscillator_2_sync_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 3 sync
-			uint16_t oscillator_3_sync_current = patch->oscillator_3_sync;
-			if (patch->oscillator_3_sync_lfo_1 != 0) {
-				oscillator_3_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_3_sync_lfo_1) >> 12;
+			uint16_t oscillator_3_sync_current = program->oscillator_3_sync;
+			if (program->oscillator_3_sync_lfo_1 != 0) {
+				oscillator_3_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_3_sync_lfo_1) >> 12;
 			}
-			if (patch->oscillator_3_sync_lfo_2 != 0) {
-				oscillator_3_sync_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_3_sync_lfo_2) >> 12;
+			if (program->oscillator_3_sync_lfo_2 != 0) {
+				oscillator_3_sync_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_3_sync_lfo_2) >> 12;
 			}
-			if (patch->oscillator_3_sync_env_2 != 0) {
-				oscillator_3_sync_current += ((envelope_2_current >> 4) * patch->oscillator_3_sync_env_2) >> 11;
+			if (program->oscillator_3_sync_env_2 != 0) {
+				oscillator_3_sync_current += ((envelope_2_current >> 4) * program->oscillator_3_sync_env_2) >> 11;
 			}
-			if (patch->oscillator_3_sync_env_3 != 0) {
-				oscillator_3_sync_current += ((envelope_3_current >> 4) * patch->oscillator_3_sync_env_3) >> 11;
+			if (program->oscillator_3_sync_env_3 != 0) {
+				oscillator_3_sync_current += ((envelope_3_current >> 4) * program->oscillator_3_sync_env_3) >> 11;
 			}
 			oscillator_3_sync_delta = ((oscillator_3_sync_current << 16) / SAMPLERATE) << 8;
 		}
@@ -599,108 +640,108 @@ void synthRender(void)
 		int16_t sample = 0;
 
 		// Sum oscillator 1
-		oscillator_1_current = (waveform_saw[(oscillator_1_position >> 16) + patch->oscillator_1_waveform] + waveform_saw[(oscillator_1_sync_position >> 16) + patch->oscillator_1_waveform]) >> 1;
-		uint16_t oscillator_1_mix_current = patch->oscillator_1_mix;
-		if (patch->oscillator_1_mix_lfo_1 != 0) {
-			oscillator_1_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_1_mix_lfo_1) >> 12;
+		oscillator_1_current = (waveform_saw[(oscillator_1_position >> 16) + program->oscillator_1_waveform] + waveform_saw[(oscillator_1_sync_position >> 16) + program->oscillator_1_waveform]) >> 1;
+		uint16_t oscillator_1_mix_current = program->oscillator_1_mix;
+		if (program->oscillator_1_mix_lfo_1 != 0) {
+			oscillator_1_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_1_mix_lfo_1) >> 12;
 		}
-		if (patch->oscillator_1_mix_lfo_2 != 0) {
-			oscillator_1_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_1_mix_lfo_2) >> 12;
+		if (program->oscillator_1_mix_lfo_2 != 0) {
+			oscillator_1_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_1_mix_lfo_2) >> 12;
 		}
-		if (patch->oscillator_1_mix_env_2 != 0) {
-			oscillator_1_mix_current += ((envelope_2_current >> 4) * patch->oscillator_1_mix_env_2) >> 12;
+		if (program->oscillator_1_mix_env_2 != 0) {
+			oscillator_1_mix_current += ((envelope_2_current >> 4) * program->oscillator_1_mix_env_2) >> 12;
 		}
-		if (patch->oscillator_1_mix_env_3 != 0) {
-			oscillator_1_mix_current += ((envelope_3_current >> 4) * patch->oscillator_1_mix_env_3) >> 12;
+		if (program->oscillator_1_mix_env_3 != 0) {
+			oscillator_1_mix_current += ((envelope_3_current >> 4) * program->oscillator_1_mix_env_3) >> 12;
 		}
 		sample += (((((envelope_1_current >> 4) * oscillator_1_mix_current) >> 12) * oscillator_1_current) << 4) >> 16;
 
 		// Sum oscillator 2
-		oscillator_2_current = (waveform_saw[(oscillator_2_position >> 16) + patch->oscillator_2_waveform] + waveform_saw[(oscillator_2_sync_position >> 16) + patch->oscillator_2_waveform]) >> 1;
-		uint16_t oscillator_2_mix_current = patch->oscillator_2_mix;
-		if (patch->oscillator_2_mix_lfo_1 != 0) {
-			oscillator_2_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_2_mix_lfo_1) >> 12;
+		oscillator_2_current = (waveform_saw[(oscillator_2_position >> 16) + program->oscillator_2_waveform] + waveform_saw[(oscillator_2_sync_position >> 16) + program->oscillator_2_waveform]) >> 1;
+		uint16_t oscillator_2_mix_current = program->oscillator_2_mix;
+		if (program->oscillator_2_mix_lfo_1 != 0) {
+			oscillator_2_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_2_mix_lfo_1) >> 12;
 		}
-		if (patch->oscillator_2_mix_lfo_2 != 0) {
-			oscillator_2_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_2_mix_lfo_2) >> 12;
+		if (program->oscillator_2_mix_lfo_2 != 0) {
+			oscillator_2_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_2_mix_lfo_2) >> 12;
 		}
-		if (patch->oscillator_2_mix_env_2 != 0) {
-			oscillator_2_mix_current += ((envelope_2_current >> 4) * patch->oscillator_2_mix_env_2) >> 12;
+		if (program->oscillator_2_mix_env_2 != 0) {
+			oscillator_2_mix_current += ((envelope_2_current >> 4) * program->oscillator_2_mix_env_2) >> 12;
 		}
-		if (patch->oscillator_2_mix_env_3 != 0) {
-			oscillator_2_mix_current += ((envelope_3_current >> 4) * patch->oscillator_2_mix_env_3) >> 12;
+		if (program->oscillator_2_mix_env_3 != 0) {
+			oscillator_2_mix_current += ((envelope_3_current >> 4) * program->oscillator_2_mix_env_3) >> 12;
 		}
 		sample += (((((envelope_1_current >> 4) * oscillator_2_mix_current) >> 12) * oscillator_2_current) << 4) >> 16;
 
 		// Sum oscillator 3
-		oscillator_3_current = (waveform_saw[(oscillator_3_position >> 16) + patch->oscillator_3_waveform] + waveform_saw[(oscillator_3_sync_position >> 16) + patch->oscillator_3_waveform]) >> 1;
-		uint16_t oscillator_3_mix_current = patch->oscillator_3_mix;
-		if (patch->oscillator_3_mix_lfo_1 != 0) {
-			oscillator_3_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_3_mix_lfo_1) >> 12;
+		oscillator_3_current = (waveform_saw[(oscillator_3_position >> 16) + program->oscillator_3_waveform] + waveform_saw[(oscillator_3_sync_position >> 16) + program->oscillator_3_waveform]) >> 1;
+		uint16_t oscillator_3_mix_current = program->oscillator_3_mix;
+		if (program->oscillator_3_mix_lfo_1 != 0) {
+			oscillator_3_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_3_mix_lfo_1) >> 12;
 		}
-		if (patch->oscillator_3_mix_lfo_2 != 0) {
-			oscillator_3_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_3_mix_lfo_2) >> 12;
+		if (program->oscillator_3_mix_lfo_2 != 0) {
+			oscillator_3_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_3_mix_lfo_2) >> 12;
 		}
-		if (patch->oscillator_3_mix_env_2 != 0) {
-			oscillator_3_mix_current += ((envelope_2_current >> 4) * patch->oscillator_3_mix_env_2) >> 12;
+		if (program->oscillator_3_mix_env_2 != 0) {
+			oscillator_3_mix_current += ((envelope_2_current >> 4) * program->oscillator_3_mix_env_2) >> 12;
 		}
-		if (patch->oscillator_3_mix_env_3 != 0) {
-			oscillator_3_mix_current += ((envelope_3_current >> 4) * patch->oscillator_3_mix_env_3) >> 12;
+		if (program->oscillator_3_mix_env_3 != 0) {
+			oscillator_3_mix_current += ((envelope_3_current >> 4) * program->oscillator_3_mix_env_3) >> 12;
 		}
 		sample += (((((envelope_1_current >> 4) * oscillator_3_mix_current) >> 12) * oscillator_3_current) << 4) >> 16;
 
 		// Sum oscillator 1*3
-		if (patch->oscillator_13_fm == 0) {
+		if (program->oscillator_13_fm == 0) {
 			int16_t oscillator_13_current = (oscillator_1_current * oscillator_3_current) >> 7;
-			uint16_t oscillator_13_mix_current = patch->oscillator_13_mix;
-			if (patch->oscillator_13_mix_lfo_1 != 0) {
-				oscillator_13_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_13_mix_lfo_1) >> 12;
+			uint16_t oscillator_13_mix_current = program->oscillator_13_mix;
+			if (program->oscillator_13_mix_lfo_1 != 0) {
+				oscillator_13_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_13_mix_lfo_1) >> 12;
 			}
-			if (patch->oscillator_13_mix_lfo_2 != 0) {
-				oscillator_13_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_13_mix_lfo_2) >> 12;
+			if (program->oscillator_13_mix_lfo_2 != 0) {
+				oscillator_13_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_13_mix_lfo_2) >> 12;
 			}
-			if (patch->oscillator_13_mix_env_2 != 0) {
-				oscillator_13_mix_current += ((envelope_2_current >> 4) * patch->oscillator_13_mix_env_2) >> 12;
+			if (program->oscillator_13_mix_env_2 != 0) {
+				oscillator_13_mix_current += ((envelope_2_current >> 4) * program->oscillator_13_mix_env_2) >> 12;
 			}
-			if (patch->oscillator_13_mix_env_3 != 0) {
-				oscillator_13_mix_current += ((envelope_3_current >> 4) * patch->oscillator_13_mix_env_3) >> 12;
+			if (program->oscillator_13_mix_env_3 != 0) {
+				oscillator_13_mix_current += ((envelope_3_current >> 4) * program->oscillator_13_mix_env_3) >> 12;
 			}
 			sample += (((((envelope_1_current >> 4) * oscillator_13_mix_current) >> 12) * oscillator_13_current) << 4) >> 16;
 		}
 
 		// Sum oscillator 2*3
-		if (patch->oscillator_23_fm == 0) {
+		if (program->oscillator_23_fm == 0) {
 			int16_t oscillator_23_current = (oscillator_2_current * oscillator_3_current) >> 7;
-			uint16_t oscillator_23_mix_current = patch->oscillator_23_mix;
-			if (patch->oscillator_23_mix_lfo_1 != 0) {
-				oscillator_23_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_23_mix_lfo_1) >> 12;
+			uint16_t oscillator_23_mix_current = program->oscillator_23_mix;
+			if (program->oscillator_23_mix_lfo_1 != 0) {
+				oscillator_23_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_23_mix_lfo_1) >> 12;
 			}
-			if (patch->oscillator_23_mix_lfo_2 != 0) {
-				oscillator_23_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_23_mix_lfo_2) >> 12;
+			if (program->oscillator_23_mix_lfo_2 != 0) {
+				oscillator_23_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_23_mix_lfo_2) >> 12;
 			}
-			if (patch->oscillator_23_mix_env_2 != 0) {
-				oscillator_23_mix_current += ((envelope_2_current >> 4) * patch->oscillator_23_mix_env_2) >> 12;
+			if (program->oscillator_23_mix_env_2 != 0) {
+				oscillator_23_mix_current += ((envelope_2_current >> 4) * program->oscillator_23_mix_env_2) >> 12;
 			}
-			if (patch->oscillator_23_mix_env_3 != 0) {
-				oscillator_23_mix_current += ((envelope_3_current >> 4) * patch->oscillator_23_mix_env_3) >> 12;
+			if (program->oscillator_23_mix_env_3 != 0) {
+				oscillator_23_mix_current += ((envelope_3_current >> 4) * program->oscillator_23_mix_env_3) >> 12;
 			}
 			sample += (((((envelope_1_current >> 4) * oscillator_23_mix_current) >> 12) * oscillator_23_current) << 4) >> 16;
 		}
 
 		// Sum noise oscillator
 		int16_t oscillator_noise_current = waveform_saw[(oscillator_noise_position >> 16) + WAVEFORM_NOISE];
-		uint16_t oscillator_noise_mix_current = patch->oscillator_noise_mix;
-		if (patch->oscillator_noise_mix_lfo_1 != 0) {
-			oscillator_noise_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_noise_mix_lfo_1) >> 12;
+		uint16_t oscillator_noise_mix_current = program->oscillator_noise_mix;
+		if (program->oscillator_noise_mix_lfo_1 != 0) {
+			oscillator_noise_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_noise_mix_lfo_1) >> 12;
 		}
-		if (patch->oscillator_noise_mix_lfo_2 != 0) {
-			oscillator_noise_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_noise_mix_lfo_2) >> 12;
+		if (program->oscillator_noise_mix_lfo_2 != 0) {
+			oscillator_noise_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_noise_mix_lfo_2) >> 12;
 		}
-		if (patch->oscillator_noise_mix_env_2 != 0) {
-			oscillator_noise_mix_current += ((envelope_2_current >> 4) * patch->oscillator_noise_mix_env_2) >> 12;
+		if (program->oscillator_noise_mix_env_2 != 0) {
+			oscillator_noise_mix_current += ((envelope_2_current >> 4) * program->oscillator_noise_mix_env_2) >> 12;
 		}
-		if (patch->oscillator_noise_mix_env_3 != 0) {
-			oscillator_noise_mix_current += ((envelope_3_current >> 4) * patch->oscillator_noise_mix_env_3) >> 12;
+		if (program->oscillator_noise_mix_env_3 != 0) {
+			oscillator_noise_mix_current += ((envelope_3_current >> 4) * program->oscillator_noise_mix_env_3) >> 12;
 		}
 		sample += (((((envelope_1_current >> 4) * oscillator_noise_mix_current) >> 12) * oscillator_noise_current) << 4) >> 16;
 
@@ -740,19 +781,19 @@ void synthRender(void)
 		oscillator_3_position += oscillator_3_delta;
 
 		// Oscillator 1 -> oscillator 3 frequency modulation
-		if (patch->oscillator_13_fm != 0) {
-			uint16_t oscillator_13_mix_current = patch->oscillator_13_mix;
-			if (patch->oscillator_13_mix_lfo_1 != 0) {
-				oscillator_13_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_13_mix_lfo_1) >> 12;
+		if (program->oscillator_13_fm != 0) {
+			uint16_t oscillator_13_mix_current = program->oscillator_13_mix;
+			if (program->oscillator_13_mix_lfo_1 != 0) {
+				oscillator_13_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_13_mix_lfo_1) >> 12;
 			}
-			if (patch->oscillator_13_mix_lfo_2 != 0) {
-				oscillator_13_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_13_mix_lfo_2) >> 12;
+			if (program->oscillator_13_mix_lfo_2 != 0) {
+				oscillator_13_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_13_mix_lfo_2) >> 12;
 			}
-			if (patch->oscillator_13_mix_env_2 != 0) {
-				oscillator_13_mix_current += ((envelope_2_current >> 4) * patch->oscillator_13_mix_env_2) >> 12;
+			if (program->oscillator_13_mix_env_2 != 0) {
+				oscillator_13_mix_current += ((envelope_2_current >> 4) * program->oscillator_13_mix_env_2) >> 12;
 			}
-			if (patch->oscillator_13_mix_env_3 != 0) {
-				oscillator_13_mix_current += ((envelope_3_current >> 4) * patch->oscillator_13_mix_env_3) >> 12;
+			if (program->oscillator_13_mix_env_3 != 0) {
+				oscillator_13_mix_current += ((envelope_3_current >> 4) * program->oscillator_13_mix_env_3) >> 12;
 			}
 			int32_t delta = ((((oscillator_1_current * oscillator_13_mix_current) >> 16) << 20) / SAMPLERATE) << 13;
 			oscillator_3_position += delta;
@@ -761,19 +802,19 @@ void synthRender(void)
 		}
 
 		// Oscillator 2 -> oscillator 3 frequency modulation
-		if (patch->oscillator_23_fm != 0) {
-			uint16_t oscillator_23_mix_current = patch->oscillator_23_mix;
-			if (patch->oscillator_23_mix_lfo_1 != 0) {
-				oscillator_23_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->oscillator_23_mix_lfo_1) >> 12;
+		if (program->oscillator_23_fm != 0) {
+			uint16_t oscillator_23_mix_current = program->oscillator_23_mix;
+			if (program->oscillator_23_mix_lfo_1 != 0) {
+				oscillator_23_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_23_mix_lfo_1) >> 12;
 			}
-			if (patch->oscillator_23_mix_lfo_2 != 0) {
-				oscillator_23_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->oscillator_23_mix_lfo_2) >> 12;
+			if (program->oscillator_23_mix_lfo_2 != 0) {
+				oscillator_23_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_23_mix_lfo_2) >> 12;
 			}
-			if (patch->oscillator_23_mix_env_2 != 0) {
-				oscillator_23_mix_current += ((envelope_2_current >> 4) * patch->oscillator_23_mix_env_2) >> 12;
+			if (program->oscillator_23_mix_env_2 != 0) {
+				oscillator_23_mix_current += ((envelope_2_current >> 4) * program->oscillator_23_mix_env_2) >> 12;
 			}
-			if (patch->oscillator_23_mix_env_3 != 0) {
-				oscillator_23_mix_current += ((envelope_3_current >> 4) * patch->oscillator_23_mix_env_3) >> 12;
+			if (program->oscillator_23_mix_env_3 != 0) {
+				oscillator_23_mix_current += ((envelope_3_current >> 4) * program->oscillator_23_mix_env_3) >> 12;
 			}
 			int32_t delta = ((((oscillator_2_current * oscillator_23_mix_current) >> 16) << 20) / SAMPLERATE) << 13;
 			oscillator_3_position += delta;
@@ -806,18 +847,18 @@ void synthRender(void)
 		// Update filter frequency and resonance every 64th sample
 		if ((buffer_position & 63) == 0) {
 			// Update filter frequency
-			filter_frequency_current = patch->filter_frequency;
-			if (patch->filter_frequency_lfo_1 != 0) {
-				filter_frequency_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->filter_frequency_lfo_1) >> 12;
+			filter_frequency_current = program->filter_frequency;
+			if (program->filter_frequency_lfo_1 != 0) {
+				filter_frequency_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->filter_frequency_lfo_1) >> 12;
 			}
-			if (patch->filter_frequency_lfo_2 != 0) {
-				filter_frequency_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->filter_frequency_lfo_2) >> 12;
+			if (program->filter_frequency_lfo_2 != 0) {
+				filter_frequency_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->filter_frequency_lfo_2) >> 12;
 			}
-			if (patch->filter_frequency_env_2 != 0) {
-				filter_frequency_current += ((envelope_2_current >> 4) * patch->filter_frequency_env_2) >> 12;
+			if (program->filter_frequency_env_2 != 0) {
+				filter_frequency_current += ((envelope_2_current >> 4) * program->filter_frequency_env_2) >> 12;
 			}
-			if (patch->filter_frequency_env_3 != 0) {
-				filter_frequency_current += ((envelope_3_current >> 4) * patch->filter_frequency_env_3) >> 12;
+			if (program->filter_frequency_env_3 != 0) {
+				filter_frequency_current += ((envelope_3_current >> 4) * program->filter_frequency_env_3) >> 12;
 			}
 			if (filter_frequency_current < 0) {
 				filter_frequency_current = 0;
@@ -826,18 +867,18 @@ void synthRender(void)
 			}
 
 			// Update filter resonance
-			filter_resonance_current = patch->filter_resonance;
-			if (patch->filter_resonance_lfo_1 != 0) {
-				filter_resonance_current += (waveforms_lfo[(lfo_1_position >> 16) + patch->lfo_1_waveform] * patch->filter_resonance_lfo_1) >> 12;
+			filter_resonance_current = program->filter_resonance;
+			if (program->filter_resonance_lfo_1 != 0) {
+				filter_resonance_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->filter_resonance_lfo_1) >> 12;
 			}
-			if (patch->filter_resonance_lfo_2 != 0) {
-				filter_resonance_current += (waveforms_lfo[(lfo_2_position >> 16) + patch->lfo_2_waveform] * patch->filter_resonance_lfo_2) >> 12;
+			if (program->filter_resonance_lfo_2 != 0) {
+				filter_resonance_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->filter_resonance_lfo_2) >> 12;
 			}
-			if (patch->filter_resonance_env_2 != 0) {
-				filter_resonance_current += ((envelope_2_current >> 4) * patch->filter_resonance_env_2) >> 12;
+			if (program->filter_resonance_env_2 != 0) {
+				filter_resonance_current += ((envelope_2_current >> 4) * program->filter_resonance_env_2) >> 12;
 			}
-			if (patch->filter_resonance_env_3 != 0) {
-				filter_resonance_current += ((envelope_3_current >> 4) * patch->filter_resonance_env_3) >> 12;
+			if (program->filter_resonance_env_3 != 0) {
+				filter_resonance_current += ((envelope_3_current >> 4) * program->filter_resonance_env_3) >> 12;
 			}
 			if (filter_resonance_current < 0) {
 				filter_resonance_current = 0;
@@ -861,6 +902,15 @@ void synthRender(void)
 		b4 -= ((((b4 * b4) >> 12) * b4) >> 12) / 6;
 		b0 = filter_in;
 
-		buffer_render[buffer_position] = b4 >> 5;
+		int16_t output = (b4 * part->volume) >> 11;
+		if (add) {
+			output += buffer_render[buffer_position];
+			if (output < -128) {
+				output = -128;
+			} else if (output > 127) {
+				output = 127;
+			}
+		}
+		buffer_render[buffer_position] = output;
 	}
 }

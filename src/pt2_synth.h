@@ -26,7 +26,7 @@ enum waveform_lfo_t {
     WAVEFORM_LFO_TRIANGLE = 8192
 };
 
-typedef struct patch_t
+typedef struct program_t
 {
     enum waveform_t oscillator_1_waveform;
     int16_t oscillator_1_mix;
@@ -131,14 +131,28 @@ typedef struct patch_t
     enum waveform_lfo_t lfo_1_waveform;
     int16_t lfo_2_speed;
     enum waveform_lfo_t lfo_2_waveform;
-} patch_t;
+} program_t;
+
+typedef struct part_t
+{
+    uint8_t program;
+    uint8_t volume;
+    uint16_t sampleRate;
+} part_t;
+
+typedef struct performance_t
+{
+    part_t parts[8];
+} performance_t;
 
 typedef struct synth_t
 {
-    patch_t patches[MOD_SAMPLES];
+    performance_t performances[MOD_SAMPLES];
+    program_t programs[256];
 } synth_t;
 
 extern synth_t synth; // pt2_synth.c
 
 void initSynth(void);
 void synthRender(void);
+void renderPart(part_t* part, bool add);
