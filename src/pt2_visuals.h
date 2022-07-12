@@ -47,6 +47,7 @@ void sinkVisualizerBars(void);
 void updatePosEd(void);
 void updateVisualizer(void);
 void updateEditOp(void);
+void updateSynth(void);
 void toggleFullScreen(void);
 void videoClose(void);
 
@@ -64,6 +65,7 @@ void renderMOD2WAVDialog(void);
 void renderEditOpMode(void);
 void renderTextEditMarker(void);
 void renderEditOpScreen(void);
+void renderSynthScreen(void);
 void renderSamplerVolBox(void);
 void renderSamplerFiltersBox(void);
 void removeTextEditMarker(void);

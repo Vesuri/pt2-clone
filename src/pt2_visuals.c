@@ -38,6 +38,7 @@
 #include "pt2_edit.h"
 #include "pt2_pat2smp.h"
 #include "pt2_mod2wav.h"
+#include "pt2_synth.h"
 #include "pt2_config.h"
 #include "pt2_bmp.h"
 #include "pt2_sampling.h"
@@ -70,6 +71,7 @@ void updateSongInfo2(void);
 void updateSampler(void);
 void updatePatternData(void);
 void updateMOD2WAVDialog(void);
+void updateSynth(void);
 
 void blit32(int32_t x, int32_t y, int32_t w, int32_t h, const uint32_t *src)
 {
@@ -212,6 +214,7 @@ void renderFrame(void)
 	updateSampler();
 	updatePosEd();
 	updateVisualizer();
+	updateSynth();
 	handleLastGUIObjectDown();
 	drawSamplerLine();
 	writeSampleMonitorWaveform();
@@ -1574,7 +1577,9 @@ void displayMainScreen(void)
 		}
 	}
 
-	blit32(0, 255, 320, 256, synthBMP);
+	renderSynthScreen();
+
+	ui.updateSynth = true;
 }
 
 static void restoreStatusAndMousePointer(void)
@@ -2264,6 +2269,21 @@ void updateRenderSizeVars(void)
 	video.xScale = (int32_t)((video.renderW * (1.0 / SCREEN_W)) + 0.5);
 	video.yScale = (int32_t)((video.renderH * (1.0 / SCREEN_H)) + 0.5);
 	createMouseCursors();
+}
+
+void updateSynth(void)
+{
+	if (!ui.updateSynth)
+		return;
+
+	ui.updateSynth = false;
+
+	printThreeDecimalsBg(50, 327, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+}
+
+void renderSynthScreen(void)
+{
+	blit32(0, 255, 320, 256, synthBMP);
 }
 
 void toggleFullScreen(void)

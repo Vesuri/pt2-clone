@@ -254,6 +254,9 @@ typedef struct ui_t
 	// these are used when things are drawn on top, for example clear/ask dialogs
 	bool disablePosEd, disableVisualizer;
 
+	// synth
+	bool updateSynth;
+
 	int16_t lineCurX, lineCurY, editObject, sampleMarkingPos;
 	uint16_t *numPtr16, tmpDisp16, *dstOffset, dstPos, textLength, editTextPos;
 	uint16_t dstOffsetEnd, lastSampleOffset, diskOpPathTextOffset;

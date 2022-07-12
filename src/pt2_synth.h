@@ -138,6 +138,7 @@ typedef struct part_t
     uint8_t program;
     uint8_t volume;
     uint16_t sampleRate;
+    uint16_t offset;
 } part_t;
 
 typedef struct performance_t
@@ -149,6 +150,9 @@ typedef struct synth_t
 {
     performance_t performances[MOD_SAMPLES];
     program_t programs[256];
+
+    uint8_t currPart;
+    uint8_t currOsc;
 } synth_t;
 
 extern synth_t synth; // pt2_synth.c
