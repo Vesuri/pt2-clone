@@ -530,3 +530,31 @@ const guiButton_t bSynth[] =
 {
 	{  0,256,319,511, PTB_SY_RENDER}
 };
+
+/*
+PERFORMANCE:                  LOAD SAVE
+PART 1 2 3 4 5 6 7 8
+VOLUME     OFFSET      RATE
+PROGRAM:                      LOAD SAVE
+OSC1 OSC2 OSC3 OSC1*3 OSC2*3 NOISE
+WAVEFORM            MODULATION   
+MIX       PITCH     WIDTH     SYNC
+LEVEL     LEVEL     LEVEL     LEVEL  
+LFO1      LFO1      LFO1      LFO1   
+LFO2      LFO2      LFO2      LFO2   
+ENV2      ENV2      ENV2      ENV2   
+ENV3      ENV3      ENV3      ENV3   
+FREQUENCY RESONANCE
+LEVEL     LEVEL 
+LFO1      LFO1  
+LFO2      LFO2  
+ENV2      ENV2  
+ENV3      ENV3  
+ENVELOPE 1  ENVELOPE 2  ENVELOPE 3
+ATTACK      ATTACK      ATTACK  
+DECAY       DECAY       DECAY   
+SUSTAIN     SUSTAIN     SUSTAIN 
+LFO1            LFO2
+WAVEFORM        WAVEFORM 
+SPEED           SPEED    
+*/

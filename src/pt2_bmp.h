@@ -42,6 +42,7 @@ extern const uint8_t yesNoDialogPackedBMP[476];
 extern const uint8_t bigYesNoDialogPackedBMP[472];
 extern const uint8_t pat2SmpDialogPackedBMP[520];
 extern const uint8_t samplingBoxPackedBMP[1379];
+extern const uint8_t synthPackedBMP[10751];
 
 // these are filled/normalized on init, so no const
 extern uint32_t vuMeterBMP[480];
@@ -70,6 +71,7 @@ extern uint32_t *editOpModeCharsBMP;
 extern uint32_t *pat2SmpDialogBMP;
 extern uint32_t *sampleMonitorBMP;
 extern uint32_t *samplingBoxBMP;
+extern uint32_t *synthBMP;
 
 // fix-bitmaps for 128K sample mode
 extern uint32_t *fix128KTrackerBMP;

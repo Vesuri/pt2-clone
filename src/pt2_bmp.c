@@ -18,7 +18,7 @@ uint32_t *editOpScreen3BMP = NULL, *editOpScreen4BMP   = NULL, *spectrumVisualsB
 uint32_t *muteButtonsBMP   = NULL, *posEdBMP           = NULL, *samplerFiltersBMP  = NULL;
 uint32_t *samplerScreenBMP = NULL, *pat2SmpDialogBMP   = NULL, *trackerFrameBMP    = NULL;
 uint32_t *yesNoDialogBMP   = NULL, *bigYesNoDialogBMP  = NULL, *sampleMonitorBMP   = NULL;
-uint32_t *samplingBoxBMP   = NULL;
+uint32_t *samplingBoxBMP   = NULL, *synthBMP           = NULL;
 
 // fix-bitmaps for 128K sample mode
 uint32_t *fix128KTrackerBMP = NULL;
@@ -190,6 +190,7 @@ void freeBMPs(void)
 	if (editOpModeCharsBMP != NULL) free(editOpModeCharsBMP);
 	if (sampleMonitorBMP != NULL) free(sampleMonitorBMP);
 	if (samplingBoxBMP != NULL) free(samplingBoxBMP);
+	if (synthBMP != NULL) free(synthBMP);
 }
 
 uint32_t *unpackBMP(const uint8_t *src, uint32_t packedLen)
@@ -290,6 +291,7 @@ bool unpackBMPs(void)
 	editOpModeCharsBMP = unpackBMP(editOpModeCharsPackedBMP, sizeof (editOpModeCharsPackedBMP));
 	sampleMonitorBMP = unpackBMP(sampleMonitorPackedBMP, sizeof (sampleMonitorPackedBMP));
 	samplingBoxBMP = unpackBMP(samplingBoxPackedBMP, sizeof (samplingBoxPackedBMP));
+	synthBMP = unpackBMP(synthPackedBMP, sizeof (synthPackedBMP));
 
 	if (fix128KTrackerBMP  == NULL || fix128KPosBMP      == NULL || fix128KChordBMP  == NULL || 
 		trackerFrameBMP    == NULL || samplerScreenBMP   == NULL || samplerVolumeBMP == NULL ||
@@ -298,7 +300,8 @@ bool unpackBMPs(void)
 		editOpScreen1BMP   == NULL || editOpScreen2BMP   == NULL || editOpScreen3BMP == NULL ||
 		editOpScreen4BMP   == NULL || aboutScreenBMP     == NULL || muteButtonsBMP   == NULL ||
 		editOpModeCharsBMP == NULL || samplerFiltersBMP  == NULL || yesNoDialogBMP   == NULL ||
-		bigYesNoDialogBMP  == NULL || sampleMonitorBMP   == NULL || samplingBoxBMP   == NULL)
+		bigYesNoDialogBMP  == NULL || sampleMonitorBMP   == NULL || samplingBoxBMP   == NULL ||
+		synthBMP           == NULL)
 	{
 		showErrorMsgBox("Out of memory!");
 		return false; // BMPs are free'd in cleanUp()

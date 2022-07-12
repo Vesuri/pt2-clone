@@ -1573,6 +1573,8 @@ void displayMainScreen(void)
 			renderMuteButtons();
 		}
 	}
+
+	blit32(0, 255, 320, 256, synthBMP);
 }
 
 static void restoreStatusAndMousePointer(void)
