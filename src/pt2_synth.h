@@ -26,6 +26,15 @@ enum waveform_lfo_t {
     WAVEFORM_LFO_TRIANGLE = 8192
 };
 
+enum current_oscillator {
+    OSCILLATOR_1 = 0,
+    OSCILLATOR_2 = 1,
+    OSCILLATOR_3 = 2,
+    OSCILLATOR_13 = 3,
+    OSCILLATOR_23 = 4,
+    OSCILLATOR_NOISE = 5
+};
+
 typedef struct program_t
 {
     enum waveform_t oscillator_1_waveform;
@@ -152,7 +161,7 @@ typedef struct synth_t
     program_t programs[256];
 
     uint8_t currPart;
-    uint8_t currOsc;
+    enum current_oscillator currOsc;
 } synth_t;
 
 extern synth_t synth; // pt2_synth.c
