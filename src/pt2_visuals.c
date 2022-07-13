@@ -2278,6 +2278,23 @@ void updateSynth(void)
 
 	ui.updateSynth = false;
 
+	textOutBg(42, 255 + 13, "1", video.palette[synth.currPart == 0 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
+	textOut(41, 255 + 12, "1", video.palette[synth.currPart == 0 ? PAL_BORDER : PAL_GENBKG2]);
+	textOutBg(58, 255 + 13, "2", video.palette[synth.currPart == 1 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
+	textOut(57, 255 + 12, "2", video.palette[synth.currPart == 1 ? PAL_BORDER : PAL_GENBKG2]);
+	textOutBg(74, 255 + 13, "3", video.palette[synth.currPart == 2 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
+	textOut(73, 255 + 12, "3", video.palette[synth.currPart == 2 ? PAL_BORDER : PAL_GENBKG2]);
+	textOutBg(90, 255 + 13, "4", video.palette[synth.currPart == 3 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
+	textOut(89, 255 + 12, "4", video.palette[synth.currPart == 3 ? PAL_BORDER : PAL_GENBKG2]);
+	textOutBg(106, 255 + 13, "5", video.palette[synth.currPart == 4 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
+	textOut(105, 255 + 12, "5", video.palette[synth.currPart == 4 ? PAL_BORDER : PAL_GENBKG2]);
+	textOutBg(122, 255 + 13, "6", video.palette[synth.currPart == 5 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
+	textOut(121, 255 + 12, "6", video.palette[synth.currPart == 5 ? PAL_BORDER : PAL_GENBKG2]);
+	textOutBg(138, 255 + 13, "7", video.palette[synth.currPart == 6 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
+	textOut(137, 255 + 12, "7", video.palette[synth.currPart == 6 ? PAL_BORDER : PAL_GENBKG2]);
+	textOutBg(154, 255 + 13, "8", video.palette[synth.currPart == 7 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
+	textOut(153, 255 + 12, "8", video.palette[synth.currPart == 7 ? PAL_BORDER : PAL_GENBKG2]);
+
 	printTwoHexBg(58, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].volume, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printFourDecimalsBg(146, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].offset, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printFiveDecimalsBg(226, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].sampleRate, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
