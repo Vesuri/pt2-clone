@@ -4599,11 +4599,26 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_POSU: positionUpButton(); break;
 		case PTB_POSD: positionDownButton(); break;
 
+		case PTB_SY_PART_1:
+		case PTB_SY_PART_2:
+		case PTB_SY_PART_3:
+		case PTB_SY_PART_4:
+		case PTB_SY_PART_5:
+		case PTB_SY_PART_6:
+		case PTB_SY_PART_7:
+		case PTB_SY_PART_8:
+		{
+			synth.currPart = button - PTB_SY_PART_1;
+			ui.updateSynth = true;
+		}
+		break;
+/*
 		case PTB_SY_RENDER:
 		{
 			synthRender();
 			displaySample();
 		}
+		*/
 		break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
