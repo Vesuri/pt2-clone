@@ -42,7 +42,7 @@ extern const uint8_t yesNoDialogPackedBMP[476];
 extern const uint8_t bigYesNoDialogPackedBMP[472];
 extern const uint8_t pat2SmpDialogPackedBMP[520];
 extern const uint8_t samplingBoxPackedBMP[1379];
-extern const uint8_t synthPackedBMP[10898];
+extern const uint8_t synthPackedBMP[10901];
 
 // these are filled/normalized on init, so no const
 extern uint32_t vuMeterBMP[480];
