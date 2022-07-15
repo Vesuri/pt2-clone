@@ -4612,6 +4612,17 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.updateSynth = true;
 		}
 		break;
+		case PTB_SY_OSC_1:
+		case PTB_SY_OSC_2:
+		case PTB_SY_OSC_3:
+		case PTB_SY_OSC_13:
+		case PTB_SY_OSC_23:
+		case PTB_SY_OSC_NOISE:
+		{
+			synth.currOsc = button - PTB_SY_OSC_1;
+			ui.updateSynth = true;
+		}
+		break;
 /*
 		case PTB_SY_RENDER:
 		{

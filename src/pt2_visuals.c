@@ -2319,7 +2319,7 @@ void updateSynth(void)
 	case OSCILLATOR_1:
 		switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_waveform) {
 		case WAVEFORM_SAW:
-			oscillatorWaveform = "SAW";
+			oscillatorWaveform = "SAW   ";
 			break;
 		default:
 			oscillatorWaveform = "SQUARE";
@@ -2350,7 +2350,7 @@ void updateSynth(void)
 	case OSCILLATOR_2:
 		switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_waveform) {
 		case WAVEFORM_SAW:
-			oscillatorWaveform = "SAW";
+			oscillatorWaveform = "SAW   ";
 			break;
 		default:
 			oscillatorWaveform = "SQUARE";
@@ -2381,7 +2381,7 @@ void updateSynth(void)
 	case OSCILLATOR_3:
 		switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_waveform) {
 		case WAVEFORM_SAW:
-			oscillatorWaveform = "SAW";
+			oscillatorWaveform = "SAW   ";
 			break;
 		default:
 			oscillatorWaveform = "SQUARE";
@@ -2410,8 +2410,8 @@ void updateSynth(void)
 		printThreeHexBg(290, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	case OSCILLATOR_13:
-		oscillatorWaveform = "N/A";
-		oscillatorModulation = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_fm ? "FM" : "AM";
+		oscillatorWaveform = "N/A   ";
+		oscillatorModulation = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_fm ? "FM " : "AM ";
 		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		printThreeHexBg(50, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
@@ -2434,8 +2434,8 @@ void updateSynth(void)
 		textOutBg(290, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	case OSCILLATOR_23:
-		oscillatorWaveform = "N/A";
-		oscillatorModulation = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_fm ? "FM" : "AM";
+		oscillatorWaveform = "N/A   ";
+		oscillatorModulation = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_fm ? "FM " : "AM ";
 		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		printThreeHexBg(50, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
@@ -2458,7 +2458,7 @@ void updateSynth(void)
 		textOutBg(290, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	case OSCILLATOR_NOISE:
-		oscillatorWaveform = "NOISE";
+		oscillatorWaveform = "NOISE ";
 		oscillatorModulation = "N/A";
 		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
