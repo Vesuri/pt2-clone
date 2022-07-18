@@ -632,6 +632,7 @@ void exitGetTextLine(bool updateValue)
 					synth.performances[editor.currSample].parts[synth.currPart].program = tmp16;
 
 					ui.updateProgramText = true;
+					ui.updateSynth = true;
 				}
 			}
 			break;
