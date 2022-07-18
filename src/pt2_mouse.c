@@ -4644,6 +4644,25 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.updateSynth = true;
 		}
 		break;
+		case PTB_SY_OSC_WAVEFORM:
+		{
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_waveform = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_waveform == WAVEFORM_SAW ? WAVEFORM_SQUARE_1 : WAVEFORM_SAW;
+				break;
+			case OSCILLATOR_2:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_waveform = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_waveform == WAVEFORM_SAW ? WAVEFORM_SQUARE_2 : WAVEFORM_SAW;
+				break;
+			case OSCILLATOR_3:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_waveform = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_waveform == WAVEFORM_SAW ? WAVEFORM_SQUARE_3 : WAVEFORM_SAW;
+				break;
+			default:
+				break;
+			}
+
+			ui.updateSynth = true;
+		}
+		break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}
