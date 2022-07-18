@@ -547,6 +547,7 @@ static bool initializeVars(void)
 	editor.chordLengthDisp = &editor.chordLength;
 	editor.metroChannelDisp = &editor.metroChannel;
 	editor.quantizeValueDisp = &config.quantizeValue;
+	editor.currProgramDisp = &synth.performances[editor.currSample].parts[synth.currPart].program;
 
 	editor.programRunning = true;
 	return true;

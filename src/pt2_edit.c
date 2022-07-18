@@ -29,6 +29,7 @@
 #include "pt2_audio.h"
 #include "pt2_sync.h"
 #include "pt2_chordmaker.h"
+#include "pt2_synth.h"
 
 const int8_t scancode2NoteLo[52] = // "USB usage page standard" order
 {
@@ -91,6 +92,7 @@ void updateTextObject(int16_t editObject)
 		case PTB_SA_VOL_TO_NUM: ui.updateVolToText = true; break;
 		case PTB_SA_FIL_LP_CUTOFF: ui.updateLPText = true; break;
 		case PTB_SA_FIL_HP_CUTOFF: ui.updateHPText = true; break;
+		case PTB_SY_PART_PROGRAM: ui.updateProgramText = true; break;
 	}
 }
 
@@ -615,6 +617,21 @@ void exitGetTextLine(bool updateValue)
 
 						updateWindowTitle(MOD_IS_MODIFIED);
 					}
+				}
+			}
+			break;
+
+			case PTB_SY_PART_PROGRAM:
+			{
+				editor.currProgramDisp = &synth.performances[editor.currSample].parts[synth.currPart].program;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 127);
+
+					synth.performances[editor.currSample].parts[synth.currPart].program = tmp16;
+
+					ui.updateProgramText = true;
 				}
 			}
 			break;

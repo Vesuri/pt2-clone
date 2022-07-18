@@ -4612,6 +4612,16 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.updateSynth = true;
 		}
 		break;
+		case PTB_SY_PART_PROGRAM:
+		{
+			ui.tmpDisp16 = synth.performances[editor.currSample].parts[synth.currPart].program;
+			editor.currProgramDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.editTextPos = (255 + 13) * 40 + 29; // (y * 40) + x
+			getNumLine(TEXT_EDIT_DECIMAL, PTB_SY_PART_PROGRAM);
+		}
+		break;
 		case PTB_SY_OSC_1:
 		case PTB_SY_OSC_2:
 		case PTB_SY_OSC_3:
