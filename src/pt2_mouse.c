@@ -4662,6 +4662,21 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 
 			ui.updateSynth = true;
 		}
+		case PTB_SY_OSC_MODULATION:
+		{
+			switch (synth.currOsc) {
+			case OSCILLATOR_13:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_fm = !synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_fm;
+				break;
+			case OSCILLATOR_23:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_fm = !synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_fm;
+				break;
+			default:
+				break;
+			}
+
+			ui.updateSynth = true;
+		}
 		break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
