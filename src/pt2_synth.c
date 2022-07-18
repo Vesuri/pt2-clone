@@ -311,8 +311,7 @@ void initSynth(void)
 		synth.programs[i].oscillator_3_pitch = 44;
 		synth.programs[i].oscillator_3_width = 0x800;
 		synth.programs[i].filter_frequency = 0xfff;
-		synth.programs[i].filter_frequency_env_3 = 0xfff;
-		synth.programs[i].envelope_3_sustain = 0xfff;
+		synth.programs[i].envelope_1_sustain = 0xfff;
 		synth.programs[i].lfo_1_speed = 1000;
 		synth.programs[i].lfo_1_waveform = WAVEFORM_LFO_SAW;
 		synth.programs[i].lfo_2_speed = 1000;
