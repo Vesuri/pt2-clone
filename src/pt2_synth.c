@@ -203,7 +203,7 @@ void waveform_saw_create()
 {
 	int8_t sample = 127;
 	for (int offset = 0; offset < 256; offset++) {
-		waveform_saw[offset++] = sample--;
+		waveform_saw[offset] = sample--;
 	}
 }
 
