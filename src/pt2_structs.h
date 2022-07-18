@@ -155,7 +155,7 @@ typedef struct editor_t
 	volatile uint16_t *vol1Disp, *vol2Disp, *currEditPatternDisp, *currPosDisp, *currPatternDisp;
 	volatile uint16_t *currPosEdPattDisp, *currLengthDisp, *lpCutOffDisp, *hpCutOffDisp;
 	volatile int32_t *samplePosDisp, *chordLengthDisp;
-	volatile uint8_t *currProgramDisp;
+	volatile uint8_t *currPartProgramDisp, *currPartVolumeDisp;
 
 	char mixText[16];
 	char *entryNameTmp, *currPath, *dropTempFileName;
@@ -257,7 +257,7 @@ typedef struct ui_t
 
 	// synth
 	bool updateSynth;
-	bool updateProgramText;
+	bool updatePartProgramText, updatePartVolumeText;
 
 	int16_t lineCurX, lineCurY, editObject, sampleMarkingPos;
 	uint16_t *numPtr16, tmpDisp16, *dstOffset, dstPos, textLength, editTextPos;

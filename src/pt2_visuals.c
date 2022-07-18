@@ -2273,10 +2273,16 @@ void updateRenderSizeVars(void)
 
 void updateSynth(void)
 {
-	if (ui.updateProgramText)
+	if (ui.updatePartProgramText)
 	{
-		ui.updateProgramText = false;
-		printThreeDecimalsBg(232, 255 + 12, *editor.currProgramDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		ui.updatePartProgramText = false;
+		printThreeDecimalsBg(232, 255 + 12, *editor.currPartProgramDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updatePartVolumeText)
+	{
+		ui.updatePartVolumeText = false;
+		printTwoHexBg(56, 255 + 22, *editor.currPartVolumeDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
 	if (!ui.updateSynth)
@@ -2314,7 +2320,6 @@ void updateSynth(void)
 	textOutBg(274, 255 + 43, "NOISE", video.palette[synth.currOsc == OSCILLATOR_NOISE ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
 	textOut(273, 255 + 42, "NOISE", video.palette[synth.currOsc == OSCILLATOR_NOISE ? PAL_BORDER : PAL_GENBKG2]);
 
-	printTwoHexBg(56, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].volume, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printFourDecimalsBg(144, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].offset, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	textOutBg(224, 255 + 22, "C-3", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 
@@ -2547,7 +2552,8 @@ void renderSynthScreen(void)
 {
 	blit32(0, 255, 320, 256, synthBMP);
 
-	ui.updateProgramText = true;
+	ui.updatePartProgramText = true;
+	ui.updatePartVolumeText = true;
 }
 
 void toggleFullScreen(void)

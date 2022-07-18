@@ -92,7 +92,8 @@ void updateTextObject(int16_t editObject)
 		case PTB_SA_VOL_TO_NUM: ui.updateVolToText = true; break;
 		case PTB_SA_FIL_LP_CUTOFF: ui.updateLPText = true; break;
 		case PTB_SA_FIL_HP_CUTOFF: ui.updateHPText = true; break;
-		case PTB_SY_PART_PROGRAM: ui.updateProgramText = true; break;
+		case PTB_SY_PART_PROGRAM: ui.updatePartProgramText = true; break;
+		case PTB_SY_PART_VOLUME: ui.updatePartVolumeText = true; break;
 	}
 }
 
@@ -623,7 +624,7 @@ void exitGetTextLine(bool updateValue)
 
 			case PTB_SY_PART_PROGRAM:
 			{
-				editor.currProgramDisp = &synth.performances[editor.currSample].parts[synth.currPart].program;
+				editor.currPartProgramDisp = &synth.performances[editor.currSample].parts[synth.currPart].program;
 
 				if (updateValue)
 				{
@@ -631,7 +632,23 @@ void exitGetTextLine(bool updateValue)
 
 					synth.performances[editor.currSample].parts[synth.currPart].program = tmp16;
 
-					ui.updateProgramText = true;
+					ui.updatePartProgramText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PART_VOLUME:
+			{
+				editor.currPartVolumeDisp = &synth.performances[editor.currSample].parts[synth.currPart].volume;
+
+				if (updateValue)
+				{
+					tmp8 = CLAMP(ui.tmpDisp8, 0, 0x40);
+
+					synth.performances[editor.currSample].parts[synth.currPart].volume = tmp8;
+
+					ui.updatePartVolumeText = true;
 					ui.updateSynth = true;
 				}
 			}
