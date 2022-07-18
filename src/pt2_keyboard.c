@@ -4109,6 +4109,19 @@ void handleTextEditInputChar(char textChar)
 						*ui.numPtr16 |= textChar << (12 - (ui.dstPos << 2));
 					}
 				}
+				else if (ui.numBits == 12)
+				{
+					if (ui.force32BitNumPtr)
+					{
+						*ui.numPtr32 &= ~(0x0F00 >> (ui.dstPos << 2));
+						*ui.numPtr32 |= textChar << (8 - (ui.dstPos << 2));
+					}
+					else
+					{
+						*ui.numPtr16 &= ~(0x0F00 >> (ui.dstPos << 2));
+						*ui.numPtr16 |= textChar << (8 - (ui.dstPos << 2));
+					}
+				}
 				else if (ui.numBits == 8)
 				{
 					*ui.numPtr8 &= ~(0xF0 >> (ui.dstPos << 2));

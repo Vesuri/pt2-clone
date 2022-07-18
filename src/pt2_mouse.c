@@ -4678,6 +4678,38 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.updateSynth = true;
 		}
 		break;
+		case PTB_SY_MIX_LEVEL:
+		{
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix;
+				break;
+			case OSCILLATOR_13:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix;
+				break;
+			case OSCILLATOR_23:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix;
+				break;
+			case OSCILLATOR_NOISE:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix;
+				break;
+			default:
+				break;
+			}
+			editor.currMixLevelDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 73) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_LEVEL);
+		}
+		break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}

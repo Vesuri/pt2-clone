@@ -549,6 +549,7 @@ static bool initializeVars(void)
 	editor.quantizeValueDisp = &config.quantizeValue;
 	editor.currPartProgramDisp = &synth.performances[editor.currSample].parts[synth.currPart].program;
 	editor.currPartVolumeDisp = &synth.performances[editor.currSample].parts[synth.currPart].volume;
+	editor.currMixLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix;
 
 	editor.programRunning = true;
 	return true;

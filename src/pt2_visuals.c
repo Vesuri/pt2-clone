@@ -2285,6 +2285,12 @@ void updateSynth(void)
 		printTwoHexBg(56, 255 + 22, *editor.currPartVolumeDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updateMixLevelText)
+	{
+		ui.updateMixLevelText = false;
+		printThreeHexBg(48, 255 + 72, *editor.currMixLevelDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
 	if (!ui.updateSynth)
 		return;
 
