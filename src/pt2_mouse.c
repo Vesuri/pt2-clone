@@ -4633,14 +4633,6 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.updateSynth = true;
 		}
 		break;
-/*
-		case PTB_SY_RENDER:
-		{
-			synthRender();
-			displaySample();
-		}
-		*/
-		break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}

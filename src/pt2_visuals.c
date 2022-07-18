@@ -2538,6 +2538,9 @@ void updateSynth(void)
 	textOutBg(216, 255 + 232, lfo2Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(72, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(216, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+
+	synthRender();
+	displaySample();
 }
 
 void renderSynthScreen(void)
