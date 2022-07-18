@@ -2273,6 +2273,12 @@ void updateRenderSizeVars(void)
 
 void updateSynth(void)
 {
+	if (ui.updateProgramText)
+	{
+		ui.updateProgramText = false;
+		printThreeDecimalsBg(232, 255 + 12, *editor.currProgramDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
 	if (!ui.updateSynth)
 		return;
 
@@ -2308,10 +2314,9 @@ void updateSynth(void)
 	textOutBg(274, 255 + 43, "NOISE", video.palette[synth.currOsc == OSCILLATOR_NOISE ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
 	textOut(273, 255 + 42, "NOISE", video.palette[synth.currOsc == OSCILLATOR_NOISE ? PAL_BORDER : PAL_GENBKG2]);
 
-	printThreeDecimalsBg(234, 255 + 12, synth.performances[editor.currSample].parts[synth.currPart].program, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printTwoHexBg(58, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].volume, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printFourDecimalsBg(146, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].offset, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	textOutBg(226, 255 + 22, "C-3", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printTwoHexBg(56, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].volume, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printFourDecimalsBg(144, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].offset, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	textOutBg(224, 255 + 22, "C-3", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 
 	const char* oscillatorWaveform;
 	const char* oscillatorModulation;
@@ -2326,26 +2331,26 @@ void updateSynth(void)
 			break;
 		}
 		oscillatorModulation = "N/A";
-		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	case OSCILLATOR_2:
 		switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_waveform) {
@@ -2357,26 +2362,26 @@ void updateSynth(void)
 			break;
 		}
 		oscillatorModulation = "N/A";
-		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	case OSCILLATOR_3:
 		switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_waveform) {
@@ -2388,123 +2393,123 @@ void updateSynth(void)
 			break;
 		}
 		oscillatorModulation = "N/A";
-		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(130, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(210, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(290, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(128, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(208, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(288, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	case OSCILLATOR_13:
 		oscillatorWaveform = "N/A   ";
 		oscillatorModulation = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_fm ? "FM " : "AM ";
-		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	case OSCILLATOR_23:
 		oscillatorWaveform = "N/A   ";
 		oscillatorModulation = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_fm ? "FM " : "AM ";
-		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	case OSCILLATOR_NOISE:
 		oscillatorWaveform = "NOISE ";
 		oscillatorModulation = "N/A";
-		printThreeHexBg(50, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		printThreeHexBg(50, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(130, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(210, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-		textOutBg(290, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 72, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 82, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 92, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 102, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(48, 255 + 112, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(128, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(208, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 72, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 82, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 92, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 102, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		textOutBg(288, 255 + 112, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		break;
 	default:
 		break;
 	}
-	textOutBg(74, 255 + 52, oscillatorWaveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	textOutBg(250, 255 + 52, oscillatorModulation, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(50, 255 + 132, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(50, 255 + 142, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(50, 255 + 152, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(50, 255 + 162, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(50, 255 + 172, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(130, 255 + 132, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(130, 255 + 142, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(130, 255 + 152, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(130, 255 + 162, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(130, 255 + 172, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(66, 255 + 192, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(66, 255 + 202, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(66, 255 + 212, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(162, 255 + 192, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(162, 255 + 202, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(162, 255 + 212, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(258, 255 + 192, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(258, 255 + 202, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(258, 255 + 212, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	textOutBg(72, 255 + 52, oscillatorWaveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	textOutBg(248, 255 + 52, oscillatorModulation, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(48, 255 + 132, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(48, 255 + 142, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(48, 255 + 152, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(48, 255 + 162, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(48, 255 + 172, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(128, 255 + 132, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(128, 255 + 142, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(128, 255 + 152, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(128, 255 + 162, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(128, 255 + 172, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(64, 255 + 192, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(64, 255 + 202, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(64, 255 + 212, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(160, 255 + 192, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(160, 255 + 202, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(160, 255 + 212, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(256, 255 + 192, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(256, 255 + 202, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(256, 255 + 212, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	const char* lfo1Waveform;
 	const char* lfo2Waveform;
 	switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_waveform) {
@@ -2529,15 +2534,17 @@ void updateSynth(void)
 		lfo2Waveform = "TRIANGLE";
 		break;
 	}
-	textOutBg(74, 255 + 232, lfo1Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	textOutBg(218, 255 + 232, lfo2Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(74, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(218, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	textOutBg(72, 255 + 232, lfo1Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	textOutBg(216, 255 + 232, lfo2Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(72, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(216, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 }
 
 void renderSynthScreen(void)
 {
 	blit32(0, 255, 320, 256, synthBMP);
+
+	ui.updateProgramText = true;
 }
 
 void toggleFullScreen(void)
