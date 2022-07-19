@@ -4742,6 +4742,102 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_LFO1);
 		}
 		break;
+		case PTB_SY_MIX_LFO2:
+		{
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_2;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_2;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_2;
+				break;
+			case OSCILLATOR_13:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_2;
+				break;
+			case OSCILLATOR_23:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_2;
+				break;
+			case OSCILLATOR_NOISE:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_2;
+				break;
+			default:
+				break;
+			}
+			editor.currMixLFO2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 93) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_LFO2);
+		}
+		break;
+		case PTB_SY_MIX_ENV2:
+		{
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_2;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_2;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_2;
+				break;
+			case OSCILLATOR_13:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_2;
+				break;
+			case OSCILLATOR_23:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_2;
+				break;
+			case OSCILLATOR_NOISE:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_2;
+				break;
+			default:
+				break;
+			}
+			editor.currMixEnv2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 103) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_ENV2);
+		}
+		break;
+		case PTB_SY_MIX_ENV3:
+		{
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_3;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_3;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_3;
+				break;
+			case OSCILLATOR_13:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_3;
+				break;
+			case OSCILLATOR_23:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_3;
+				break;
+			case OSCILLATOR_NOISE:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_3;
+				break;
+			default:
+				break;
+			}
+			editor.currMixEnv3Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 113) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_ENV3);
+		}
+		break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}

@@ -96,6 +96,9 @@ void updateTextObject(int16_t editObject)
 		case PTB_SY_PART_VOLUME: ui.updatePartVolumeText = true; break;
 		case PTB_SY_MIX_LEVEL: ui.updateMixLevelText = true; break;
 		case PTB_SY_MIX_LFO1: ui.updateMixLFO1Text = true; break;
+		case PTB_SY_MIX_LFO2: ui.updateMixLFO2Text = true; break;
+		case PTB_SY_MIX_ENV2: ui.updateMixEnv2Text = true; break;
+		case PTB_SY_MIX_ENV3: ui.updateMixEnv3Text = true; break;
 	}
 }
 
@@ -767,6 +770,180 @@ void exitGetTextLine(bool updateValue)
 					}
 
 					ui.updateMixLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_LFO2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_2;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_2;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_2;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_ENV2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_2;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_2;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_2;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_ENV3:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_3;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_3;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_3;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_3;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_3;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_3;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_3 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixEnv3Text = true;
 					ui.updateSynth = true;
 				}
 			}

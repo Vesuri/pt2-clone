@@ -2297,6 +2297,24 @@ void updateSynth(void)
 		printThreeHexBg(48, 255 + 82, *editor.currMixLFO1Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updateMixLFO2Text)
+	{
+		ui.updateMixLFO2Text = false;
+		printThreeHexBg(48, 255 + 92, *editor.currMixLFO2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateMixEnv2Text)
+	{
+		ui.updateMixEnv2Text = false;
+		printThreeHexBg(48, 255 + 102, *editor.currMixEnv2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateMixEnv3Text)
+	{
+		ui.updateMixEnv3Text = false;
+		printThreeHexBg(48, 255 + 112, *editor.currMixEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
 	if (!ui.updateSynth)
 		return;
 
