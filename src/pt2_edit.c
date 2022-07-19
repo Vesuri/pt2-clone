@@ -95,6 +95,7 @@ void updateTextObject(int16_t editObject)
 		case PTB_SY_PART_PROGRAM: ui.updatePartProgramText = true; break;
 		case PTB_SY_PART_VOLUME: ui.updatePartVolumeText = true; break;
 		case PTB_SY_MIX_LEVEL: ui.updateMixLevelText = true; break;
+		case PTB_SY_MIX_LFO1: ui.updateMixLFO1Text = true; break;
 	}
 }
 
@@ -708,6 +709,64 @@ void exitGetTextLine(bool updateValue)
 					}
 
 					ui.updateMixLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_LFO1:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_1;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_1;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_1;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_1;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_1;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_1;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_1 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixLFO1Text = true;
 					ui.updateSynth = true;
 				}
 			}
