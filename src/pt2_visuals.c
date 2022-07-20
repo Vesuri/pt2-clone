@@ -2315,6 +2315,36 @@ void updateSynth(void)
 		printThreeHexBg(48, 255 + 112, *editor.currMixEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updatePitchLevelText)
+	{
+		ui.updatePitchLevelText = false;
+		printThreeHexBg(128, 255 + 72, *editor.currPitchLevelDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updatePitchLFO1Text)
+	{
+		ui.updatePitchLFO1Text = false;
+		printThreeHexBg(128, 255 + 82, *editor.currPitchLFO1Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updatePitchLFO2Text)
+	{
+		ui.updatePitchLFO2Text = false;
+		printThreeHexBg(128, 255 + 92, *editor.currPitchLFO2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updatePitchEnv2Text)
+	{
+		ui.updatePitchEnv2Text = false;
+		printThreeHexBg(128, 255 + 102, *editor.currPitchEnv2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updatePitchEnv3Text)
+	{
+		ui.updatePitchEnv3Text = false;
+		printThreeHexBg(128, 255 + 112, *editor.currPitchEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
 	if (!ui.updateSynth)
 		return;
 

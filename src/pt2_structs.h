@@ -157,6 +157,7 @@ typedef struct editor_t
 	volatile int32_t *samplePosDisp, *chordLengthDisp;
 	volatile uint8_t *currPartProgramDisp, *currPartVolumeDisp;
 	volatile uint16_t *currMixLevelDisp, *currMixLFO1Disp, *currMixLFO2Disp, *currMixEnv2Disp, *currMixEnv3Disp;
+	volatile uint16_t *currPitchLevelDisp, *currPitchLFO1Disp, *currPitchLFO2Disp, *currPitchEnv2Disp, *currPitchEnv3Disp;
 
 	char mixText[16];
 	char *entryNameTmp, *currPath, *dropTempFileName;
@@ -260,6 +261,7 @@ typedef struct ui_t
 	bool updateSynth;
 	bool updatePartProgramText, updatePartVolumeText;
 	bool updateMixLevelText, updateMixLFO1Text, updateMixLFO2Text, updateMixEnv2Text, updateMixEnv3Text;
+	bool updatePitchLevelText, updatePitchLFO1Text, updatePitchLFO2Text, updatePitchEnv2Text, updatePitchEnv3Text;
 
 	int16_t lineCurX, lineCurY, editObject, sampleMarkingPos;
 	uint16_t *numPtr16, tmpDisp16, *dstOffset, dstPos, textLength, editTextPos;
