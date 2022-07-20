@@ -579,6 +579,15 @@ static bool initializeVars(void)
 	editor.currResonanceLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2;
 	editor.currResonanceEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2;
 	editor.currResonanceEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3;
+	editor.currEnv1AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack;
+	editor.currEnv1DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay;
+	editor.currEnv1SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain;
+	editor.currEnv2AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack;
+	editor.currEnv2DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay;
+	editor.currEnv2SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain;
+	editor.currEnv3AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack;
+	editor.currEnv3DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay;
+	editor.currEnv3SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain;
 
 	editor.programRunning = true;
 	return true;

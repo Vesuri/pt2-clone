@@ -124,6 +124,15 @@ void updateTextObject(int16_t editObject)
 		case PTB_SY_RESONANCE_LFO2: ui.updateResonanceLFO2Text = true; break;
 		case PTB_SY_RESONANCE_ENV2: ui.updateResonanceEnv2Text = true; break;
 		case PTB_SY_RESONANCE_ENV3: ui.updateResonanceEnv3Text = true; break;
+		case PTB_SY_ENV1_ATTACK: ui.updateEnv1AttackText = true; break;
+		case PTB_SY_ENV1_DECAY: ui.updateEnv1DecayText = true; break;
+		case PTB_SY_ENV1_SUSTAIN: ui.updateEnv1SustainText = true; break;
+		case PTB_SY_ENV2_ATTACK: ui.updateEnv2AttackText = true; break;
+		case PTB_SY_ENV2_DECAY: ui.updateEnv2DecayText = true; break;
+		case PTB_SY_ENV2_SUSTAIN: ui.updateEnv2SustainText = true; break;
+		case PTB_SY_ENV3_ATTACK: ui.updateEnv3AttackText = true; break;
+		case PTB_SY_ENV3_DECAY: ui.updateEnv3DecayText = true; break;
+		case PTB_SY_ENV3_SUSTAIN: ui.updateEnv3SustainText = true; break;
 	}
 }
 
@@ -1733,6 +1742,151 @@ void exitGetTextLine(bool updateValue)
 				}
 			}
 			break;
+
+			case PTB_SY_ENV1_ATTACK:
+			{
+				editor.currEnv1AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack = tmp16;
+
+					ui.updateEnv1AttackText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV1_DECAY:
+			{
+				editor.currEnv1DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay = tmp16;
+
+					ui.updateEnv1DecayText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV1_SUSTAIN:
+			{
+				editor.currEnv1SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain = tmp16;
+
+					ui.updateEnv1SustainText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV2_ATTACK:
+			{
+				editor.currEnv2AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack = tmp16;
+
+					ui.updateEnv2AttackText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV2_DECAY:
+			{
+				editor.currEnv2DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay = tmp16;
+
+					ui.updateEnv2DecayText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV2_SUSTAIN:
+			{
+				editor.currEnv2SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain = tmp16;
+
+					ui.updateEnv2SustainText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV3_ATTACK:
+			{
+				editor.currEnv3AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack = tmp16;
+
+					ui.updateEnv3AttackText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV3_DECAY:
+			{
+				editor.currEnv3DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay = tmp16;
+
+					ui.updateEnv3DecayText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV3_SUSTAIN:
+			{
+				editor.currEnv3SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain = tmp16;
+
+					ui.updateEnv3SustainText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
 
 			default: break;
 		}

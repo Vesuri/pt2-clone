@@ -5338,6 +5338,105 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV3);
 		}
 		break;
+		case PTB_SY_ENV1_ATTACK:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack;
+			editor.currEnv1AttackDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 193) * 40 + 8; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV1_ATTACK);
+		}
+		break;
+		case PTB_SY_ENV1_DECAY:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay;
+			editor.currEnv1DecayDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 203) * 40 + 8; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV1_DECAY);
+		}
+		break;
+		case PTB_SY_ENV1_SUSTAIN:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain;
+			editor.currEnv1SustainDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 213) * 40 + 8; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV1_SUSTAIN);
+		}
+		break;
+		case PTB_SY_ENV2_ATTACK:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack;
+			editor.currEnv2AttackDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 193) * 40 + 20; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV2_ATTACK);
+		}
+		break;
+		case PTB_SY_ENV2_DECAY:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay;
+			editor.currEnv2DecayDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 203) * 40 + 20; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV2_DECAY);
+		}
+		break;
+		case PTB_SY_ENV2_SUSTAIN:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain;
+			editor.currEnv2SustainDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 213) * 40 + 20; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV2_SUSTAIN);
+		}
+		break;
+		case PTB_SY_ENV3_ATTACK:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack;
+			editor.currEnv3AttackDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 193) * 40 + 32; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV3_ATTACK);
+		}
+		break;
+		case PTB_SY_ENV3_DECAY:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay;
+			editor.currEnv3DecayDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 203) * 40 + 32; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV3_DECAY);
+		}
+		break;
+		case PTB_SY_ENV3_SUSTAIN:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain;
+			editor.currEnv3SustainDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 213) * 40 + 32; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV3_SUSTAIN);
+		}
+		break;
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}
 

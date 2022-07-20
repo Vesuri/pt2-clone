@@ -2465,6 +2465,59 @@ void updateSynth(void)
 		printThreeHexBg(128, 255 + 172, *editor.currResonanceEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updateEnv1AttackText)
+	{
+		ui.updateEnv1AttackText = false;
+		printThreeHexBg(64, 255 + 192, *editor.currEnv1AttackDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateEnv1DecayText)
+	{
+		ui.updateEnv1DecayText = false;
+		printThreeHexBg(64, 255 + 202, *editor.currEnv1DecayDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateEnv1SustainText)
+	{
+		ui.updateEnv1SustainText = false;
+		printThreeHexBg(64, 255 + 212, *editor.currEnv1SustainDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateEnv2AttackText)
+	{
+		ui.updateEnv2AttackText = false;
+		printThreeHexBg(160, 255 + 192, *editor.currEnv2AttackDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateEnv2DecayText)
+	{
+		ui.updateEnv2DecayText = false;
+		printThreeHexBg(160, 255 + 202, *editor.currEnv2DecayDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateEnv2SustainText)
+	{
+		ui.updateEnv2SustainText = false;
+		printThreeHexBg(160, 255 + 212, *editor.currEnv2SustainDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateEnv3AttackText)
+	{
+		ui.updateEnv3AttackText = false;
+		printThreeHexBg(256, 255 + 192, *editor.currEnv3AttackDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateEnv3DecayText)
+	{
+		ui.updateEnv3DecayText = false;
+		printThreeHexBg(256, 255 + 202, *editor.currEnv3DecayDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateEnv3SustainText)
+	{
+		ui.updateEnv3SustainText = false;
+		printThreeHexBg(256, 255 + 212, *editor.currEnv3SustainDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
 
 	if (!ui.updateSynth)
 		return;
