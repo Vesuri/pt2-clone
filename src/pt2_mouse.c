@@ -5228,7 +5228,116 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV3);
 		}
 		break;
-
+		case PTB_SY_FREQUENCY_LEVEL:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency;
+			editor.currFrequencyLevelDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 133) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_LEVEL);
+		}
+		break;
+		case PTB_SY_FREQUENCY_LFO1:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1;
+			editor.currFrequencyLFO1Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 143) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_LFO1);
+		}
+		break;
+		case PTB_SY_FREQUENCY_LFO2:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2;
+			editor.currFrequencyLFO2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 153) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_LFO2);
+		}
+		break;
+		case PTB_SY_FREQUENCY_ENV2:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2;
+			editor.currFrequencyEnv2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 163) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_ENV2);
+		}
+		break;
+		case PTB_SY_FREQUENCY_ENV3:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3;
+			editor.currFrequencyEnv3Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 173) * 40 + 6; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_ENV3);
+		}
+		break;
+		case PTB_SY_RESONANCE_LEVEL:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance;
+			editor.currResonanceLevelDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 133) * 40 + 16; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LEVEL);
+		}
+		break;
+		case PTB_SY_RESONANCE_LFO1:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1;
+			editor.currResonanceLFO1Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 143) * 40 + 16; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LFO1);
+		}
+		break;
+		case PTB_SY_RESONANCE_LFO2:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2;
+			editor.currResonanceLFO2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 153) * 40 + 16; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LFO2);
+		}
+		break;
+		case PTB_SY_RESONANCE_ENV2:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2;
+			editor.currResonanceEnv2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 163) * 40 + 16; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV2);
+		}
+		break;
+		case PTB_SY_RESONANCE_ENV3:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3;
+			editor.currResonanceEnv3Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 173) * 40 + 16; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV3);
+		}
+		break;
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}
 

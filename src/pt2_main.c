@@ -569,6 +569,16 @@ static bool initializeVars(void)
 	editor.currSyncLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_2;
 	editor.currSyncEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_2;
 	editor.currSyncEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_3;
+	editor.currFrequencyLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency;
+	editor.currFrequencyLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1;
+	editor.currFrequencyLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2;
+	editor.currFrequencyEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2;
+	editor.currFrequencyEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3;
+	editor.currResonanceLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance;
+	editor.currResonanceLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1;
+	editor.currResonanceLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2;
+	editor.currResonanceEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2;
+	editor.currResonanceEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3;
 
 	editor.programRunning = true;
 	return true;

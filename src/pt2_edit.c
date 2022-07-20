@@ -114,6 +114,16 @@ void updateTextObject(int16_t editObject)
 		case PTB_SY_SYNC_LFO2: ui.updateSyncLFO2Text = true; break;
 		case PTB_SY_SYNC_ENV2: ui.updateSyncEnv2Text = true; break;
 		case PTB_SY_SYNC_ENV3: ui.updateSyncEnv3Text = true; break;
+		case PTB_SY_FREQUENCY_LEVEL: ui.updateFrequencyLevelText = true; break;
+		case PTB_SY_FREQUENCY_LFO1: ui.updateFrequencyLFO1Text = true; break;
+		case PTB_SY_FREQUENCY_LFO2: ui.updateFrequencyLFO2Text = true; break;
+		case PTB_SY_FREQUENCY_ENV2: ui.updateFrequencyEnv2Text = true; break;
+		case PTB_SY_FREQUENCY_ENV3: ui.updateFrequencyEnv3Text = true; break;
+		case PTB_SY_RESONANCE_LEVEL: ui.updateResonanceLevelText = true; break;
+		case PTB_SY_RESONANCE_LFO1: ui.updateResonanceLFO1Text = true; break;
+		case PTB_SY_RESONANCE_LFO2: ui.updateResonanceLFO2Text = true; break;
+		case PTB_SY_RESONANCE_ENV2: ui.updateResonanceEnv2Text = true; break;
+		case PTB_SY_RESONANCE_ENV3: ui.updateResonanceEnv3Text = true; break;
 	}
 }
 
@@ -1559,6 +1569,166 @@ void exitGetTextLine(bool updateValue)
 					}
 
 					ui.updateSyncEnv3Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_LEVEL:
+			{
+				editor.currFrequencyLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency = tmp16;
+
+					ui.updateFrequencyLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_LFO1:
+			{
+				editor.currFrequencyLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1 = tmp16;
+
+					ui.updateFrequencyLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_LFO2:
+			{
+				editor.currFrequencyLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2 = tmp16;
+
+					ui.updateFrequencyLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_ENV2:
+			{
+				editor.currFrequencyEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2 = tmp16;
+
+					ui.updateFrequencyEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_ENV3:
+			{
+				editor.currFrequencyEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3 = tmp16;
+
+					ui.updateFrequencyEnv3Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_LEVEL:
+			{
+				editor.currResonanceLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance = tmp16;
+
+					ui.updateResonanceLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_LFO1:
+			{
+				editor.currResonanceLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1 = tmp16;
+
+					ui.updateResonanceLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_LFO2:
+			{
+				editor.currResonanceLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2 = tmp16;
+
+					ui.updateResonanceLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_ENV2:
+			{
+				editor.currResonanceEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2 = tmp16;
+
+					ui.updateResonanceEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_ENV3:
+			{
+				editor.currResonanceEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3 = tmp16;
+
+					ui.updateResonanceEnv3Text = true;
 					ui.updateSynth = true;
 				}
 			}

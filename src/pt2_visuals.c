@@ -2405,6 +2405,67 @@ void updateSynth(void)
 		printThreeHexBg(288, 255 + 112, *editor.currSyncEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updateFrequencyLevelText)
+	{
+		ui.updateFrequencyLevelText = false;
+		printThreeHexBg(48, 255 + 132, *editor.currFrequencyLevelDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateFrequencyLFO1Text)
+	{
+		ui.updateFrequencyLFO1Text = false;
+		printThreeHexBg(48, 255 + 142, *editor.currFrequencyLFO1Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateFrequencyLFO2Text)
+	{
+		ui.updateFrequencyLFO2Text = false;
+		printThreeHexBg(48, 255 + 152, *editor.currFrequencyLFO2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateFrequencyEnv2Text)
+	{
+		ui.updateFrequencyEnv2Text = false;
+		printThreeHexBg(48, 255 + 162, *editor.currFrequencyEnv2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateFrequencyEnv3Text)
+	{
+		ui.updateFrequencyEnv3Text = false;
+		printThreeHexBg(48, 255 + 172, *editor.currFrequencyEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateResonanceLevelText)
+	{
+		ui.updateResonanceLevelText = false;
+		printThreeHexBg(128, 255 + 132, *editor.currResonanceLevelDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateResonanceLFO1Text)
+	{
+		ui.updateResonanceLFO1Text = false;
+		printThreeHexBg(128, 255 + 142, *editor.currResonanceLFO1Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateResonanceLFO2Text)
+	{
+		ui.updateResonanceLFO2Text = false;
+		printThreeHexBg(128, 255 + 152, *editor.currResonanceLFO2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateResonanceEnv2Text)
+	{
+		ui.updateResonanceEnv2Text = false;
+		printThreeHexBg(128, 255 + 162, *editor.currResonanceEnv2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateResonanceEnv3Text)
+	{
+		ui.updateResonanceEnv3Text = false;
+		printThreeHexBg(128, 255 + 172, *editor.currResonanceEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+
 	if (!ui.updateSynth)
 		return;
 
