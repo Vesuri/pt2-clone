@@ -158,6 +158,8 @@ typedef struct editor_t
 	volatile uint8_t *currPartProgramDisp, *currPartVolumeDisp;
 	volatile uint16_t *currMixLevelDisp, *currMixLFO1Disp, *currMixLFO2Disp, *currMixEnv2Disp, *currMixEnv3Disp;
 	volatile uint16_t *currPitchLevelDisp, *currPitchLFO1Disp, *currPitchLFO2Disp, *currPitchEnv2Disp, *currPitchEnv3Disp;
+	volatile uint16_t *currWidthLevelDisp, *currWidthLFO1Disp, *currWidthLFO2Disp, *currWidthEnv2Disp, *currWidthEnv3Disp;
+	volatile uint16_t *currSyncLevelDisp, *currSyncLFO1Disp, *currSyncLFO2Disp, *currSyncEnv2Disp, *currSyncEnv3Disp;
 
 	char mixText[16];
 	char *entryNameTmp, *currPath, *dropTempFileName;
@@ -262,6 +264,8 @@ typedef struct ui_t
 	bool updatePartProgramText, updatePartVolumeText;
 	bool updateMixLevelText, updateMixLFO1Text, updateMixLFO2Text, updateMixEnv2Text, updateMixEnv3Text;
 	bool updatePitchLevelText, updatePitchLFO1Text, updatePitchLFO2Text, updatePitchEnv2Text, updatePitchEnv3Text;
+	bool updateWidthLevelText, updateWidthLFO1Text, updateWidthLFO2Text, updateWidthEnv2Text, updateWidthEnv3Text;
+	bool updateSyncLevelText, updateSyncLFO1Text, updateSyncLFO2Text, updateSyncEnv2Text, updateSyncEnv3Text;
 
 	int16_t lineCurX, lineCurY, editObject, sampleMarkingPos;
 	uint16_t *numPtr16, tmpDisp16, *dstOffset, dstPos, textLength, editTextPos;

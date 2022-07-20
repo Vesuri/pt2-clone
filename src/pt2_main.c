@@ -550,6 +550,25 @@ static bool initializeVars(void)
 	editor.currPartProgramDisp = &synth.performances[editor.currSample].parts[synth.currPart].program;
 	editor.currPartVolumeDisp = &synth.performances[editor.currSample].parts[synth.currPart].volume;
 	editor.currMixLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix;
+	editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_1;
+	editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_2;
+	editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_2;
+	editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_3;
+	editor.currPitchLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch;
+	editor.currPitchLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_1;
+	editor.currPitchLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_2;
+	editor.currPitchEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_2;
+	editor.currPitchEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_3;
+	editor.currWidthLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width;
+	editor.currWidthLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_1;
+	editor.currWidthLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_2;
+	editor.currWidthEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_2;
+	editor.currWidthEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_3;
+	editor.currSyncLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync;
+	editor.currSyncLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_1;
+	editor.currSyncLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_2;
+	editor.currSyncEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_2;
+	editor.currSyncEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_3;
 
 	editor.programRunning = true;
 	return true;

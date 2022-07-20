@@ -4968,6 +4968,266 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_PITCH_ENV3);
 		}
 		break;
+		case PTB_SY_WIDTH_LEVEL:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width;
+				break;
+			default:
+				break;
+			}
+			editor.currWidthLevelDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 73) * 40 + 26; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_LEVEL);
+		}
+		break;
+		case PTB_SY_WIDTH_LFO1:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_1;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_1;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_1;
+				break;
+			default:
+				break;
+			}
+			editor.currWidthLFO1Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 83) * 40 + 26; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_LFO1);
+		}
+		break;
+		case PTB_SY_WIDTH_LFO2:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_2;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_2;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_2;
+				break;
+			default:
+				break;
+			}
+			editor.currWidthLFO2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 93) * 40 + 26; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_LFO2);
+		}
+		break;
+		case PTB_SY_WIDTH_ENV2:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_2;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_2;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_2;
+				break;
+			default:
+				break;
+			}
+			editor.currWidthEnv2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 103) * 40 + 26; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_ENV2);
+		}
+		break;
+		case PTB_SY_WIDTH_ENV3:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_3;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_3;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_3;
+				break;
+			default:
+				break;
+			}
+			editor.currWidthEnv3Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 113) * 40 + 26; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_ENV3);
+		}
+		break;
+		case PTB_SY_SYNC_LEVEL:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync;
+				break;
+			default:
+				break;
+			}
+			editor.currSyncLevelDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 73) * 40 + 36; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_LEVEL);
+		}
+		break;
+		case PTB_SY_SYNC_LFO1:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_1;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_1;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_1;
+				break;
+			default:
+				break;
+			}
+			editor.currSyncLFO1Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 83) * 40 + 36; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_LFO1);
+		}
+		break;
+		case PTB_SY_SYNC_LFO2:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_2;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_2;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_2;
+				break;
+			default:
+				break;
+			}
+			editor.currSyncLFO2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 93) * 40 + 36; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_LFO2);
+		}
+		break;
+		case PTB_SY_SYNC_ENV2:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_2;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_2;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_2;
+				break;
+			default:
+				break;
+			}
+			editor.currSyncEnv2Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 103) * 40 + 36; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV2);
+		}
+		break;
+		case PTB_SY_SYNC_ENV3:
+		{
+			if (synth.currOsc == OSCILLATOR_13 || synth.currOsc == OSCILLATOR_23 || synth.currOsc == OSCILLATOR_NOISE) {
+				break;
+			}
+			switch (synth.currOsc) {
+			case OSCILLATOR_1:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_3;
+				break;
+			case OSCILLATOR_2:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_3;
+				break;
+			case OSCILLATOR_3:
+				ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_3;
+				break;
+			default:
+				break;
+			}
+			editor.currSyncEnv3Disp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 113) * 40 + 36; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV3);
+		}
+		break;
 
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}

@@ -2345,6 +2345,66 @@ void updateSynth(void)
 		printThreeHexBg(128, 255 + 112, *editor.currPitchEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updateWidthLevelText)
+	{
+		ui.updateWidthLevelText = false;
+		printThreeHexBg(208, 255 + 72, *editor.currWidthLevelDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateWidthLFO1Text)
+	{
+		ui.updateWidthLFO1Text = false;
+		printThreeHexBg(208, 255 + 82, *editor.currWidthLFO1Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateWidthLFO2Text)
+	{
+		ui.updateWidthLFO2Text = false;
+		printThreeHexBg(208, 255 + 92, *editor.currWidthLFO2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateWidthEnv2Text)
+	{
+		ui.updateWidthEnv2Text = false;
+		printThreeHexBg(208, 255 + 102, *editor.currWidthEnv2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateWidthEnv3Text)
+	{
+		ui.updateWidthEnv3Text = false;
+		printThreeHexBg(208, 255 + 112, *editor.currWidthEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateSyncLevelText)
+	{
+		ui.updateSyncLevelText = false;
+		printThreeHexBg(288, 255 + 72, *editor.currSyncLevelDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateSyncLFO1Text)
+	{
+		ui.updateSyncLFO1Text = false;
+		printThreeHexBg(288, 255 + 82, *editor.currSyncLFO1Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateSyncLFO2Text)
+	{
+		ui.updateSyncLFO2Text = false;
+		printThreeHexBg(288, 255 + 92, *editor.currSyncLFO2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateSyncEnv2Text)
+	{
+		ui.updateSyncEnv2Text = false;
+		printThreeHexBg(288, 255 + 102, *editor.currSyncEnv2Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateSyncEnv3Text)
+	{
+		ui.updateSyncEnv3Text = false;
+		printThreeHexBg(288, 255 + 112, *editor.currSyncEnv3Disp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
 	if (!ui.updateSynth)
 		return;
 
