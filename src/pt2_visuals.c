@@ -2519,6 +2519,18 @@ void updateSynth(void)
 		printThreeHexBg(256, 255 + 212, *editor.currEnv3SustainDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updateLFO1SpeedText)
+	{
+		ui.updateLFO1SpeedText = false;
+		printThreeHexBg(72, 255 + 242, *editor.currLFO1SpeedDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
+	if (ui.updateLFO2SpeedText)
+	{
+		ui.updateLFO2SpeedText = false;
+		printThreeHexBg(216, 255 + 242, *editor.currLFO2SpeedDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
 	if (!ui.updateSynth)
 		return;
 
@@ -2753,10 +2765,10 @@ void updateSynth(void)
 	const char* lfo2Waveform;
 	switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_waveform) {
 	case WAVEFORM_LFO_SAW:
-		lfo1Waveform = "SAW";
+		lfo1Waveform = "SAW     ";
 		break;
 	case WAVEFORM_LFO_SQUARE:
-		lfo1Waveform = "SQUARE";
+		lfo1Waveform = "SQUARE  ";
 		break;
 	default:
 		lfo1Waveform = "TRIANGLE";
@@ -2764,10 +2776,10 @@ void updateSynth(void)
 	}
 	switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_waveform) {
 	case WAVEFORM_LFO_SAW:
-		lfo2Waveform = "SAW";
+		lfo2Waveform = "SAW     ";
 		break;
 	case WAVEFORM_LFO_SQUARE:
-		lfo2Waveform = "SQUARE";
+		lfo2Waveform = "SQUARE  ";
 		break;
 	default:
 		lfo2Waveform = "TRIANGLE";
@@ -2776,7 +2788,7 @@ void updateSynth(void)
 	textOutBg(72, 255 + 232, lfo1Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	textOutBg(216, 255 + 232, lfo2Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(72, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(216, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(216, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 
 	synthRender();
 	displaySample();

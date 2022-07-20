@@ -5437,6 +5437,66 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_ENV3_SUSTAIN);
 		}
 		break;
+		case PTB_SY_LFO1_WAVEFORM:
+		{
+			switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_waveform) {
+			case WAVEFORM_LFO_SAW:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_waveform = WAVEFORM_LFO_SQUARE;
+				break;
+			case WAVEFORM_LFO_SQUARE:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+				break;
+			case WAVEFORM_LFO_TRIANGLE:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_waveform = WAVEFORM_LFO_SAW;
+				break;
+			default:
+				break;
+			}
+
+			ui.updateSynth = true;
+		}
+		break;
+		case PTB_SY_LFO1_SPEED:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed;
+			editor.currLFO1SpeedDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 243) * 40 + 9; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_LFO1_SPEED);
+		}
+		break;
+		case PTB_SY_LFO2_WAVEFORM:
+		{
+			switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_waveform) {
+			case WAVEFORM_LFO_SAW:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_waveform = WAVEFORM_LFO_SQUARE;
+				break;
+			case WAVEFORM_LFO_SQUARE:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
+				break;
+			case WAVEFORM_LFO_TRIANGLE:
+				synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_waveform = WAVEFORM_LFO_SAW;
+				break;
+			default:
+				break;
+			}
+
+			ui.updateSynth = true;
+		}
+		break;
+		case PTB_SY_LFO2_SPEED:
+		{
+			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed;
+			editor.currLFO2SpeedDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 3;
+			ui.numBits = 12;
+			ui.editTextPos = (255 + 243) * 40 + 27; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_LFO2_SPEED);
+		}
+		break;
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}
 

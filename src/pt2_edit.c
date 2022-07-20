@@ -133,6 +133,8 @@ void updateTextObject(int16_t editObject)
 		case PTB_SY_ENV3_ATTACK: ui.updateEnv3AttackText = true; break;
 		case PTB_SY_ENV3_DECAY: ui.updateEnv3DecayText = true; break;
 		case PTB_SY_ENV3_SUSTAIN: ui.updateEnv3SustainText = true; break;
+		case PTB_SY_LFO1_SPEED: ui.updateLFO1SpeedText = true; break;
+		case PTB_SY_LFO2_SPEED: ui.updateLFO2SpeedText = true; break;
 	}
 }
 
@@ -1887,6 +1889,37 @@ void exitGetTextLine(bool updateValue)
 			}
 			break;
 
+			case PTB_SY_LFO1_SPEED:
+			{
+				editor.currLFO1SpeedDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed = tmp16;
+
+					ui.updateLFO1SpeedText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_LFO2_SPEED:
+			{
+				editor.currLFO2SpeedDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed = tmp16;
+
+					ui.updateLFO2SpeedText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
 
 			default: break;
 		}

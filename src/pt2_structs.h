@@ -165,6 +165,7 @@ typedef struct editor_t
 	volatile uint16_t *currEnv1AttackDisp, *currEnv1DecayDisp, *currEnv1SustainDisp;
 	volatile uint16_t *currEnv2AttackDisp, *currEnv2DecayDisp, *currEnv2SustainDisp;
 	volatile uint16_t *currEnv3AttackDisp, *currEnv3DecayDisp, *currEnv3SustainDisp;
+	volatile uint16_t *currLFO1SpeedDisp, *currLFO2SpeedDisp;
 
 	char mixText[16];
 	char *entryNameTmp, *currPath, *dropTempFileName;
@@ -276,6 +277,7 @@ typedef struct ui_t
 	bool updateEnv1AttackText, updateEnv1DecayText, updateEnv1SustainText;
 	bool updateEnv2AttackText, updateEnv2DecayText, updateEnv2SustainText;
 	bool updateEnv3AttackText, updateEnv3DecayText, updateEnv3SustainText;
+	bool updateLFO1SpeedText, updateLFO2SpeedText;
 
 	int16_t lineCurX, lineCurY, editObject, sampleMarkingPos;
 	uint16_t *numPtr16, tmpDisp16, *dstOffset, dstPos, textLength, editTextPos;

@@ -588,6 +588,8 @@ static bool initializeVars(void)
 	editor.currEnv3AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack;
 	editor.currEnv3DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay;
 	editor.currEnv3SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain;
+	editor.currLFO1SpeedDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed;
+	editor.currLFO2SpeedDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed;
 
 	editor.programRunning = true;
 	return true;
