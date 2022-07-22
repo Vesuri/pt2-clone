@@ -4691,6 +4691,11 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.updateProgramName = true;
 		}
 		break;
+		case PTB_SY_PROGRAM_WRITE:
+		{
+			synthSave("protracker.jrm");
+		}
+		break;
 		case PTB_SY_OSC_1:
 		case PTB_SY_OSC_2:
 		case PTB_SY_OSC_3:

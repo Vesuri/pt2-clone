@@ -171,3 +171,5 @@ extern synth_t synth; // pt2_synth.c
 void initSynth(void);
 void synthRender(void);
 void renderPart(part_t* part, bool add);
+void synthLoad(UNICHAR *fileName);
+void synthSave(UNICHAR *fileName);

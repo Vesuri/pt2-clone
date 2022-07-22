@@ -343,6 +343,8 @@ void initSynth(void)
 	synth.programs[0].lfo_1_waveform = WAVEFORM_LFO_SAW;
 	synth.programs[0].lfo_2_speed = 1000;
 	synth.programs[0].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
+
+	synthLoad("protracker.jrm");
 }
 
 void synthRender(void)
@@ -918,4 +920,35 @@ void renderPart(part_t* part, bool add)
 		}
 		buffer_render[buffer_position] = output;
 	}
+}
+
+void synthLoad(UNICHAR *fileName)
+{
+	FILE* file = UNICHAR_FOPEN(fileName, "rb");
+	if (file == NULL)
+	{
+		return;
+	}
+
+	fseek(file, 0, SEEK_END);
+	uint32_t size = ftell(file);
+	rewind(file);
+
+	if (size == (sizeof(synth_t) - 2)) {
+		fread(&synth, 1, size, file);
+	}
+
+	fclose(file);
+}
+
+void synthSave(UNICHAR *fileName)
+{
+	FILE* file = UNICHAR_FOPEN(fileName, "wb");
+	if (file == NULL)
+	{
+		return;
+	}
+
+	fwrite(&synth, 1, sizeof(synth_t) - 2, file);
+	fclose(file);
 }
