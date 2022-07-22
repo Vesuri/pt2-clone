@@ -528,6 +528,7 @@ const guiButton_t bSampler[] =
 
 const guiButton_t bSynth[] =
 {
+	{ 144,255+0,271,255+9, PTB_SY_PERFORMANCE_NAME},
 	{  40,255+10, 55,255+19, PTB_SY_PART_1},
 	{  56,255+10, 71,255+19, PTB_SY_PART_2},
 	{  72,255+10, 87,255+19, PTB_SY_PART_3},

@@ -2273,6 +2273,19 @@ void updateRenderSizeVars(void)
 
 void updateSynth(void)
 {
+	if (ui.updatePerformanceName)
+	{
+		ui.updatePerformanceName = false;
+		for (int x = 0; x < 16; x++)
+		{
+			char tempChar = synth.performances[editor.currSample].name[x];
+			if (tempChar == '\0')
+				tempChar = '_';
+
+			charOutBg(144 + (x * FONT_CHAR_W), 255 + 2, tempChar, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		}
+	}
+
 	if (ui.updatePartProgramText)
 	{
 		ui.updatePartProgramText = false;
@@ -2813,6 +2826,7 @@ void renderSynthScreen(void)
 {
 	blit32(0, 255, 320, 256, synthBMP);
 
+	ui.updatePerformanceName = true;
 	ui.updatePartProgramText = true;
 	ui.updatePartVolumeText = true;
 	ui.updatePartOffsetText = true;

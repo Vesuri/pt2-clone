@@ -92,6 +92,7 @@ void updateTextObject(int16_t editObject)
 		case PTB_SA_VOL_TO_NUM: ui.updateVolToText = true; break;
 		case PTB_SA_FIL_LP_CUTOFF: ui.updateLPText = true; break;
 		case PTB_SA_FIL_HP_CUTOFF: ui.updateHPText = true; break;
+		case PTB_SY_PERFORMANCE_NAME: ui.updatePerformanceName = true; break;
 		case PTB_SY_PART_PROGRAM: ui.updatePartProgramText = true; break;
 		case PTB_SY_PART_VOLUME: ui.updatePartVolumeText = true; break;
 		case PTB_SY_PART_OFFSET: ui.updatePartOffsetText = true; break;

@@ -4599,6 +4599,25 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_POSU: positionUpButton(); break;
 		case PTB_POSD: positionDownButton(); break;
 
+		case PTB_SY_PERFORMANCE_NAME:
+		{
+			if (mouse.rightButtonPressed)
+			{
+				memset(synth.performances[editor.currSample].name, 0, sizeof (synth.performances[editor.currSample].name));
+			}
+			else
+			{
+				ui.showTextPtr = synth.performances[editor.currSample].name;
+				ui.textEndPtr = synth.performances[editor.currSample].name + 15;
+				ui.textLength = 16;
+				ui.editTextPos = (255 + 3) * 40 + 18; // (y * 40) + x
+				ui.dstOffset = NULL;
+				ui.dstOffsetEnd = false;
+				getTextLine(PTB_SY_PERFORMANCE_NAME);
+			}
+			ui.updatePerformanceName = true;
+		}
+		break;
 		case PTB_SY_PART_1:
 		case PTB_SY_PART_2:
 		case PTB_SY_PART_3:

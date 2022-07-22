@@ -37,6 +37,7 @@ enum current_oscillator {
 
 typedef struct program_t
 {
+    char name[16];
     enum waveform_t oscillator_1_waveform;
     int16_t oscillator_1_mix;
     int16_t oscillator_1_mix_lfo_1;
@@ -152,6 +153,7 @@ typedef struct part_t
 
 typedef struct performance_t
 {
+    char name[16];
     part_t parts[8];
 } performance_t;
 
