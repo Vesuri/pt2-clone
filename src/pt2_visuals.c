@@ -963,6 +963,9 @@ void updateCurrSample(void)
 
 	sampler.tmpLoopStart = 0;
 	sampler.tmpLoopLength = 0;
+
+	ui.updatePerformanceName = true;
+	ui.updateSynth = true;
 }
 
 void updatePatternData(void)
@@ -2585,6 +2588,7 @@ void updateSynth(void)
 	textOutBg(274, 255 + 43, "NOISE", video.palette[synth.currOsc == OSCILLATOR_NOISE ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
 	textOut(273, 255 + 42, "NOISE", video.palette[synth.currOsc == OSCILLATOR_NOISE ? PAL_BORDER : PAL_GENBKG2]);
 
+	printThreeDecimalsBg(232, 255 + 12, synth.performances[editor.currSample].parts[synth.currPart].program, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printTwoHexBg(56, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].volume, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printFourHexBg(144, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].offset, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 
@@ -2827,9 +2831,6 @@ void renderSynthScreen(void)
 	blit32(0, 255, 320, 256, synthBMP);
 
 	ui.updatePerformanceName = true;
-	ui.updatePartProgramText = true;
-	ui.updatePartVolumeText = true;
-	ui.updatePartOffsetText = true;
 }
 
 void toggleFullScreen(void)
