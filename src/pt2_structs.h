@@ -157,16 +157,16 @@ typedef struct editor_t
 	volatile int32_t *samplePosDisp, *chordLengthDisp;
 	volatile uint8_t *currPartProgramDisp, *currPartVolumeDisp;
 	volatile uint16_t *currPartOffsetDisp;
-	volatile uint16_t *currMixLevelDisp, *currMixLFO1Disp, *currMixLFO2Disp, *currMixEnv2Disp, *currMixEnv3Disp;
-	volatile uint16_t *currPitchLevelDisp, *currPitchLFO1Disp, *currPitchLFO2Disp, *currPitchEnv2Disp, *currPitchEnv3Disp;
-	volatile uint16_t *currWidthLevelDisp, *currWidthLFO1Disp, *currWidthLFO2Disp, *currWidthEnv2Disp, *currWidthEnv3Disp;
-	volatile uint16_t *currSyncLevelDisp, *currSyncLFO1Disp, *currSyncLFO2Disp, *currSyncEnv2Disp, *currSyncEnv3Disp;
-	volatile uint16_t *currFrequencyLevelDisp, *currFrequencyLFO1Disp, *currFrequencyLFO2Disp, *currFrequencyEnv2Disp, *currFrequencyEnv3Disp;
-	volatile uint16_t *currResonanceLevelDisp, *currResonanceLFO1Disp, *currResonanceLFO2Disp, *currResonanceEnv2Disp, *currResonanceEnv3Disp;
-	volatile uint16_t *currEnv1AttackDisp, *currEnv1DecayDisp, *currEnv1SustainDisp;
-	volatile uint16_t *currEnv2AttackDisp, *currEnv2DecayDisp, *currEnv2SustainDisp;
-	volatile uint16_t *currEnv3AttackDisp, *currEnv3DecayDisp, *currEnv3SustainDisp;
-	volatile uint16_t *currLFO1SpeedDisp, *currLFO2SpeedDisp;
+	volatile int16_t *currMixLevelDisp, *currMixLFO1Disp, *currMixLFO2Disp, *currMixEnv2Disp, *currMixEnv3Disp;
+	volatile int16_t *currPitchLevelDisp, *currPitchLFO1Disp, *currPitchLFO2Disp, *currPitchEnv2Disp, *currPitchEnv3Disp;
+	volatile int16_t *currWidthLevelDisp, *currWidthLFO1Disp, *currWidthLFO2Disp, *currWidthEnv2Disp, *currWidthEnv3Disp;
+	volatile int16_t *currSyncLevelDisp, *currSyncLFO1Disp, *currSyncLFO2Disp, *currSyncEnv2Disp, *currSyncEnv3Disp;
+	volatile int16_t *currFrequencyLevelDisp, *currFrequencyLFO1Disp, *currFrequencyLFO2Disp, *currFrequencyEnv2Disp, *currFrequencyEnv3Disp;
+	volatile int16_t *currResonanceLevelDisp, *currResonanceLFO1Disp, *currResonanceLFO2Disp, *currResonanceEnv2Disp, *currResonanceEnv3Disp;
+	volatile int16_t *currEnv1AttackDisp, *currEnv1DecayDisp, *currEnv1SustainDisp;
+	volatile int16_t *currEnv2AttackDisp, *currEnv2DecayDisp, *currEnv2SustainDisp;
+	volatile int16_t *currEnv3AttackDisp, *currEnv3DecayDisp, *currEnv3SustainDisp;
+	volatile int16_t *currLFO1SpeedDisp, *currLFO2SpeedDisp;
 
 	char mixText[16];
 	char *entryNameTmp, *currPath, *dropTempFileName;

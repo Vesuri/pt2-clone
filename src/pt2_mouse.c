@@ -4760,7 +4760,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currMixLevelDisp = &ui.tmpDisp16;
+			editor.currMixLevelDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -4792,7 +4792,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currMixLFO1Disp = &ui.tmpDisp16;
+			editor.currMixLFO1Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -4824,7 +4824,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currMixLFO2Disp = &ui.tmpDisp16;
+			editor.currMixLFO2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -4856,7 +4856,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currMixEnv2Disp = &ui.tmpDisp16;
+			editor.currMixEnv2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -4888,7 +4888,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currMixEnv3Disp = &ui.tmpDisp16;
+			editor.currMixEnv3Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -4914,7 +4914,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currPitchLevelDisp = &ui.tmpDisp16;
+			editor.currPitchLevelDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -4940,7 +4940,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currPitchLFO1Disp = &ui.tmpDisp16;
+			editor.currPitchLFO1Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -4966,7 +4966,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currPitchLFO2Disp = &ui.tmpDisp16;
+			editor.currPitchLFO2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -4992,7 +4992,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currPitchEnv2Disp = &ui.tmpDisp16;
+			editor.currPitchEnv2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5018,7 +5018,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currPitchEnv3Disp = &ui.tmpDisp16;
+			editor.currPitchEnv3Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5044,7 +5044,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currWidthLevelDisp = &ui.tmpDisp16;
+			editor.currWidthLevelDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5070,7 +5070,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currWidthLFO1Disp = &ui.tmpDisp16;
+			editor.currWidthLFO1Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5096,7 +5096,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currWidthLFO2Disp = &ui.tmpDisp16;
+			editor.currWidthLFO2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5122,7 +5122,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currWidthEnv2Disp = &ui.tmpDisp16;
+			editor.currWidthEnv2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5148,7 +5148,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currWidthEnv3Disp = &ui.tmpDisp16;
+			editor.currWidthEnv3Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5174,7 +5174,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currSyncLevelDisp = &ui.tmpDisp16;
+			editor.currSyncLevelDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5200,7 +5200,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currSyncLFO1Disp = &ui.tmpDisp16;
+			editor.currSyncLFO1Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5226,7 +5226,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currSyncLFO2Disp = &ui.tmpDisp16;
+			editor.currSyncLFO2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5252,7 +5252,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currSyncEnv2Disp = &ui.tmpDisp16;
+			editor.currSyncEnv2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5278,7 +5278,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currSyncEnv3Disp = &ui.tmpDisp16;
+			editor.currSyncEnv3Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5289,7 +5289,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_FREQUENCY_LEVEL:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency;
-			editor.currFrequencyLevelDisp = &ui.tmpDisp16;
+			editor.currFrequencyLevelDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5300,7 +5300,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_FREQUENCY_LFO1:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1;
-			editor.currFrequencyLFO1Disp = &ui.tmpDisp16;
+			editor.currFrequencyLFO1Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5311,7 +5311,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_FREQUENCY_LFO2:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2;
-			editor.currFrequencyLFO2Disp = &ui.tmpDisp16;
+			editor.currFrequencyLFO2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5322,7 +5322,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_FREQUENCY_ENV2:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2;
-			editor.currFrequencyEnv2Disp = &ui.tmpDisp16;
+			editor.currFrequencyEnv2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5333,7 +5333,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_FREQUENCY_ENV3:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3;
-			editor.currFrequencyEnv3Disp = &ui.tmpDisp16;
+			editor.currFrequencyEnv3Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5344,7 +5344,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_RESONANCE_LEVEL:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance;
-			editor.currResonanceLevelDisp = &ui.tmpDisp16;
+			editor.currResonanceLevelDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5355,7 +5355,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_RESONANCE_LFO1:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1;
-			editor.currResonanceLFO1Disp = &ui.tmpDisp16;
+			editor.currResonanceLFO1Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5366,7 +5366,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_RESONANCE_LFO2:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2;
-			editor.currResonanceLFO2Disp = &ui.tmpDisp16;
+			editor.currResonanceLFO2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5377,7 +5377,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_RESONANCE_ENV2:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2;
-			editor.currResonanceEnv2Disp = &ui.tmpDisp16;
+			editor.currResonanceEnv2Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5388,7 +5388,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_RESONANCE_ENV3:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3;
-			editor.currResonanceEnv3Disp = &ui.tmpDisp16;
+			editor.currResonanceEnv3Disp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5399,7 +5399,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV1_ATTACK:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack;
-			editor.currEnv1AttackDisp = &ui.tmpDisp16;
+			editor.currEnv1AttackDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5410,7 +5410,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV1_DECAY:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay;
-			editor.currEnv1DecayDisp = &ui.tmpDisp16;
+			editor.currEnv1DecayDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5421,7 +5421,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV1_SUSTAIN:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain;
-			editor.currEnv1SustainDisp = &ui.tmpDisp16;
+			editor.currEnv1SustainDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5432,7 +5432,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV2_ATTACK:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack;
-			editor.currEnv2AttackDisp = &ui.tmpDisp16;
+			editor.currEnv2AttackDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5443,7 +5443,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV2_DECAY:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay;
-			editor.currEnv2DecayDisp = &ui.tmpDisp16;
+			editor.currEnv2DecayDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5454,7 +5454,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV2_SUSTAIN:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain;
-			editor.currEnv2SustainDisp = &ui.tmpDisp16;
+			editor.currEnv2SustainDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5465,7 +5465,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV3_ATTACK:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack;
-			editor.currEnv3AttackDisp = &ui.tmpDisp16;
+			editor.currEnv3AttackDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5476,7 +5476,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV3_DECAY:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay;
-			editor.currEnv3DecayDisp = &ui.tmpDisp16;
+			editor.currEnv3DecayDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5487,7 +5487,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV3_SUSTAIN:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain;
-			editor.currEnv3SustainDisp = &ui.tmpDisp16;
+			editor.currEnv3SustainDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5517,7 +5517,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_LFO1_SPEED:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed;
-			editor.currLFO1SpeedDisp = &ui.tmpDisp16;
+			editor.currLFO1SpeedDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
@@ -5547,7 +5547,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_LFO2_SPEED:
 		{
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed;
-			editor.currLFO2SpeedDisp = &ui.tmpDisp16;
+			editor.currLFO2SpeedDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
