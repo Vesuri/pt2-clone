@@ -94,6 +94,7 @@ void updateTextObject(int16_t editObject)
 		case PTB_SA_FIL_HP_CUTOFF: ui.updateHPText = true; break;
 		case PTB_SY_PART_PROGRAM: ui.updatePartProgramText = true; break;
 		case PTB_SY_PART_VOLUME: ui.updatePartVolumeText = true; break;
+		case PTB_SY_PART_OFFSET: ui.updatePartOffsetText = true; break;
 		case PTB_SY_MIX_LEVEL: ui.updateMixLevelText = true; break;
 		case PTB_SY_MIX_LFO1: ui.updateMixLFO1Text = true; break;
 		case PTB_SY_MIX_LFO2: ui.updateMixLFO2Text = true; break;
@@ -690,6 +691,20 @@ void exitGetTextLine(bool updateValue)
 					synth.performances[editor.currSample].parts[synth.currPart].volume = tmp8;
 
 					ui.updatePartVolumeText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PART_OFFSET:
+			{
+				editor.currPartOffsetDisp = &synth.performances[editor.currSample].parts[synth.currPart].offset;
+
+				if (updateValue)
+				{
+					synth.performances[editor.currSample].parts[synth.currPart].offset = ui.tmpDisp16;
+
+					ui.updatePartOffsetText = true;
 					ui.updateSynth = true;
 				}
 			}

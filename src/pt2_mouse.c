@@ -4633,6 +4633,17 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_PART_VOLUME);
 		}
 		break;
+		case PTB_SY_PART_OFFSET:
+		{
+			ui.tmpDisp16 = synth.performances[editor.currSample].parts[synth.currPart].offset;
+			editor.currPartOffsetDisp = &ui.tmpDisp16;
+			ui.numPtr16 = &ui.tmpDisp16;
+			ui.numLen = 4;
+			ui.numBits = 16;
+			ui.editTextPos = (255 + 23) * 40 + 18; // (y * 40) + x
+			getNumLine(TEXT_EDIT_HEX, PTB_SY_PART_OFFSET);
+		}
+		break;
 		case PTB_SY_OSC_1:
 		case PTB_SY_OSC_2:
 		case PTB_SY_OSC_3:

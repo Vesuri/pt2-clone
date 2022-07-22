@@ -405,12 +405,18 @@ void renderPart(part_t* part, bool add)
 	moduleSample_t* sample = &song->samples[editor.currSample];
 	int8_t* buffer_render = &song->sampleData[sample->offset];
 
+	if (!add) {
+		for (int buffer_position = 0; buffer_position < part->offset; buffer_position++) {
+			buffer_render[buffer_position] = 0;
+		}
+	}
+
 	int16_t b0 = 0;
 	int16_t b1 = 0;
 	int16_t b2 = 0;
 	int16_t b3 = 0;
 	int16_t b4 = 0;
-	for (int buffer_position = 0; buffer_position < song->samples[editor.currSample].length; buffer_position++) {
+	for (int buffer_position = part->offset; buffer_position < song->samples[editor.currSample].length; buffer_position++) {
 		// Only update envelopes every envelope_stretch samples due to resolution
 		if ((buffer_position & envelope_stretch) == 0) {
 			// Update envelope 1

@@ -156,6 +156,7 @@ typedef struct editor_t
 	volatile uint16_t *currPosEdPattDisp, *currLengthDisp, *lpCutOffDisp, *hpCutOffDisp;
 	volatile int32_t *samplePosDisp, *chordLengthDisp;
 	volatile uint8_t *currPartProgramDisp, *currPartVolumeDisp;
+	volatile uint16_t *currPartOffsetDisp;
 	volatile uint16_t *currMixLevelDisp, *currMixLFO1Disp, *currMixLFO2Disp, *currMixEnv2Disp, *currMixEnv3Disp;
 	volatile uint16_t *currPitchLevelDisp, *currPitchLFO1Disp, *currPitchLFO2Disp, *currPitchEnv2Disp, *currPitchEnv3Disp;
 	volatile uint16_t *currWidthLevelDisp, *currWidthLFO1Disp, *currWidthLFO2Disp, *currWidthEnv2Disp, *currWidthEnv3Disp;
@@ -267,7 +268,7 @@ typedef struct ui_t
 
 	// synth
 	bool updateSynth;
-	bool updatePartProgramText, updatePartVolumeText;
+	bool updatePartProgramText, updatePartVolumeText, updatePartOffsetText;
 	bool updateMixLevelText, updateMixLFO1Text, updateMixLFO2Text, updateMixEnv2Text, updateMixEnv3Text;
 	bool updatePitchLevelText, updatePitchLFO1Text, updatePitchLFO2Text, updatePitchEnv2Text, updatePitchEnv3Text;
 	bool updateWidthLevelText, updateWidthLFO1Text, updateWidthLFO2Text, updateWidthEnv2Text, updateWidthEnv3Text;
