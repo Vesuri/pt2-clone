@@ -4634,9 +4634,9 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		break;
 		case PTB_SY_PART_PROGRAM:
 		{
-			ui.tmpDisp16 = synth.performances[editor.currSample].parts[synth.currPart].program;
-			editor.currPartProgramDisp = &ui.tmpDisp16;
-			ui.numPtr16 = &ui.tmpDisp16;
+			ui.tmpDisp8 = synth.performances[editor.currSample].parts[synth.currPart].program;
+			editor.currPartProgramDisp = (uint8_t*)&ui.tmpDisp8;
+			ui.numPtr8 = &ui.tmpDisp8;
 			ui.numLen = 3;
 			ui.editTextPos = (255 + 13) * 40 + 29; // (y * 40) + x
 			getNumLine(TEXT_EDIT_DECIMAL, PTB_SY_PART_PROGRAM);
@@ -4645,7 +4645,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_PART_VOLUME:
 		{
 			ui.tmpDisp8 = synth.performances[editor.currSample].parts[synth.currPart].volume;
-			editor.currPartVolumeDisp = &ui.tmpDisp8;
+			editor.currPartVolumeDisp = (uint8_t*)&ui.tmpDisp8;
 			ui.numPtr8 = &ui.tmpDisp8;
 			ui.numLen = 2;
 			ui.numBits = 8;
