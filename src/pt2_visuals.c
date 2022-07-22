@@ -2574,7 +2574,15 @@ void updateSynth(void)
 
 	printTwoHexBg(56, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].volume, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printFourHexBg(144, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].offset, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	textOutBg(224, 255 + 22, "C-3", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+
+	int16_t period = (int16_t)((double)PAULA_PAL_CLK / ((double)synth.performances[editor.currSample].parts[synth.currPart].sampleRate - 0.5));
+	for (int note = 0; note < 36; note++) {
+		if (periodTable[note] <= period) {
+			const char *str = config.accidental ? noteNames2[2 + note] : noteNames1[2 + note];
+			textOutBg(224, 255 + 22, str, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+			break;
+		}
+	}
 
 	const char* oscillatorWaveform;
 	const char* oscillatorModulation;

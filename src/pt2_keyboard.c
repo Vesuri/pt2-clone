@@ -29,6 +29,7 @@
 #include "pt2_config.h"
 #include "pt2_sampling.h"
 #include "pt2_chordmaker.h"
+#include "pt2_synth.h"
 
 #if defined _WIN32 && !defined _DEBUG
 extern bool windowsKeyIsDown;
@@ -3966,6 +3967,37 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 			break;
 
 			default: break;
+		}
+
+		return false;
+	}
+
+	// SYNTH SCREEN
+	if (ui.changingSynthNote)
+	{
+		if (scancode == SDL_SCANCODE_ESCAPE)
+		{
+			ui.changingSynthNote = false;
+			setPrevStatusMessage();
+			pointerSetPreviousMode();
+			ui.updateSynth = true;
+		}
+
+		rawKey = keyToNote(scancode);
+		if (rawKey >= 0)
+		{
+			ui.changingSynthNote = false;
+
+			uint8_t note = rawKey > 35 ? 35 : rawKey;
+			int32_t period = periodTable[note];
+			if (period < 113) // also happens in our "set period" Paula function
+				period = 113;
+
+			synth.performances[editor.currSample].parts[synth.currPart].sampleRate = (uint16_t)(((double)PAULA_PAL_CLK / period) + 0.5);
+
+			setPrevStatusMessage();
+			pointerSetPreviousMode();
+			ui.updateSynth = true;
 		}
 
 		return false;

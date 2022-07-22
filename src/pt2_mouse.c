@@ -4644,6 +4644,14 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_PART_OFFSET);
 		}
 		break;
+		case PTB_SY_PART_NOTE:
+		{
+			ui.changingSynthNote = true;
+			textOutBg(224, 255 + 22, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+			setStatusMessage("SELECT NOTE", NO_CARRY);
+			pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
+		}
+		break;
 		case PTB_SY_OSC_1:
 		case PTB_SY_OSC_2:
 		case PTB_SY_OSC_3:

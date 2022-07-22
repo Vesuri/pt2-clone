@@ -279,6 +279,7 @@ typedef struct ui_t
 	bool updateEnv2AttackText, updateEnv2DecayText, updateEnv2SustainText;
 	bool updateEnv3AttackText, updateEnv3DecayText, updateEnv3SustainText;
 	bool updateLFO1SpeedText, updateLFO2SpeedText;
+	bool changingSynthNote;
 
 	int16_t lineCurX, lineCurY, editObject, sampleMarkingPos;
 	uint16_t *numPtr16, tmpDisp16, *dstOffset, dstPos, textLength, editTextPos;
