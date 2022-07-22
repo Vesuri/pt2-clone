@@ -965,6 +965,7 @@ void updateCurrSample(void)
 	sampler.tmpLoopLength = 0;
 
 	ui.updatePerformanceName = true;
+	ui.updateProgramName = true;
 	ui.updateSynth = true;
 }
 
@@ -2307,6 +2308,19 @@ void updateSynth(void)
 		printFourHexBg(144, 255 + 22, *editor.currPartOffsetDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updateProgramName)
+	{
+		ui.updateProgramName = false;
+		for (int x = 0; x < 16; x++)
+		{
+			char tempChar = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].name[x];
+			if (tempChar == '\0')
+				tempChar = '_';
+
+			charOutBg(112 + (x * FONT_CHAR_W), 255 + 32, tempChar, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		}
+	}
+
 	if (ui.updateMixLevelText)
 	{
 		ui.updateMixLevelText = false;
@@ -2831,6 +2845,7 @@ void renderSynthScreen(void)
 	blit32(0, 255, 320, 256, synthBMP);
 
 	ui.updatePerformanceName = true;
+	ui.updateProgramName = true;
 }
 
 void toggleFullScreen(void)

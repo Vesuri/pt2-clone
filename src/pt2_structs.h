@@ -270,6 +270,7 @@ typedef struct ui_t
 	bool updateSynth;
 	bool updatePerformanceName;
 	bool updatePartProgramText, updatePartVolumeText, updatePartOffsetText;
+	bool updateProgramName;
 	bool updateMixLevelText, updateMixLFO1Text, updateMixLFO2Text, updateMixEnv2Text, updateMixEnv3Text;
 	bool updatePitchLevelText, updatePitchLFO1Text, updatePitchLFO2Text, updatePitchEnv2Text, updatePitchEnv3Text;
 	bool updateWidthLevelText, updateWidthLFO1Text, updateWidthLFO2Text, updateWidthEnv2Text, updateWidthEnv3Text;

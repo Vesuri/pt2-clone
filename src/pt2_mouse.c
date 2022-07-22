@@ -4628,6 +4628,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_PART_8:
 		{
 			synth.currPart = button - PTB_SY_PART_1;
+			ui.updateProgramName = true;
 			ui.updateSynth = true;
 		}
 		break;
@@ -4669,6 +4670,25 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textOutBg(224, 255 + 22, "---", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 			setStatusMessage("SELECT NOTE", NO_CARRY);
 			pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
+		}
+		break;
+		case PTB_SY_PROGRAM_NAME:
+		{
+			if (mouse.rightButtonPressed)
+			{
+				memset(synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].name, 0, sizeof (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].name));
+			}
+			else
+			{
+				ui.showTextPtr = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].name;
+				ui.textEndPtr = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].name + 15;
+				ui.textLength = 16;
+				ui.editTextPos = (255 + 33) * 40 + 14; // (y * 40) + x
+				ui.dstOffset = NULL;
+				ui.dstOffsetEnd = false;
+				getTextLine(PTB_SY_PROGRAM_NAME);
+			}
+			ui.updateProgramName = true;
 		}
 		break;
 		case PTB_SY_OSC_1:
