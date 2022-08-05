@@ -2623,6 +2623,9 @@ void updateSynth(void)
 		case WAVEFORM_SAW:
 			oscillatorWaveform = "SAW   ";
 			break;
+		case WAVEFORM_SINUS:
+			oscillatorWaveform = "SINUS ";
+			break;
 		default:
 			oscillatorWaveform = "SQUARE";
 			break;
@@ -2654,6 +2657,9 @@ void updateSynth(void)
 		case WAVEFORM_SAW:
 			oscillatorWaveform = "SAW   ";
 			break;
+		case WAVEFORM_SINUS:
+			oscillatorWaveform = "SINUS ";
+			break;
 		default:
 			oscillatorWaveform = "SQUARE";
 			break;
@@ -2684,6 +2690,9 @@ void updateSynth(void)
 		switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_waveform) {
 		case WAVEFORM_SAW:
 			oscillatorWaveform = "SAW   ";
+			break;
+		case WAVEFORM_SINUS:
+			oscillatorWaveform = "SINUS ";
 			break;
 		default:
 			oscillatorWaveform = "SQUARE";
