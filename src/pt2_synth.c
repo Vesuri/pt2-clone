@@ -251,7 +251,7 @@ void waveform_noise_create()
 void waveform_sinus_create()
 {
 	for (int offset = 0; offset < 256; offset++) {
-		waveform_sinus[offset] = sinus[offset << 3];
+		waveform_sinus[offset] = sinus[offset << 2] >> 8;
 	}
 }
 
@@ -292,6 +292,7 @@ void initSynth(void)
 	for (int i = 0; i < MOD_SAMPLES; i++) {
 		memset(&synth.performances[i], 0, sizeof(performance_t));
 
+		synth.performances[i].parts[0].volume = 64;
 		for (int j = 0; j < 8; j++) {
 			synth.performances[i].parts[j].sampleRate = 22050;
 		}
@@ -318,7 +319,7 @@ void initSynth(void)
 		synth.programs[i].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
 	}
 
-	synth.performances[0].parts[0].volume = 64;
+	strncpy(synth.programs[0].name, "Dopplereffekt 2", sizeof(((program_t*)0)->name));
 	synth.programs[0].oscillator_1_waveform = WAVEFORM_SQUARE_1;
 	synth.programs[0].oscillator_1_pitch = 88;
 	synth.programs[0].oscillator_1_width = 0x800;
@@ -341,8 +342,349 @@ void initSynth(void)
 	synth.programs[0].envelope_3_sustain = 0;
 	synth.programs[0].lfo_1_speed = 1000;
 	synth.programs[0].lfo_1_waveform = WAVEFORM_LFO_SAW;
-	synth.programs[0].lfo_2_speed = 1000;
-	synth.programs[0].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
+
+	strncpy(synth.programs[1].name, "808 Kick Loong", sizeof(((program_t*)0)->name));
+	synth.programs[1].oscillator_1_waveform = WAVEFORM_SINUS;
+	synth.programs[1].oscillator_1_mix = 0xfff;
+	synth.programs[1].oscillator_1_pitch = 55;
+	synth.programs[1].oscillator_1_pitch_lfo_1 = -40;
+	synth.programs[1].oscillator_1_pitch_env_3 = 0x30;
+	synth.programs[1].oscillator_2_waveform = WAVEFORM_SINUS;
+	synth.programs[1].oscillator_2_mix_env_2 = 0xfff;
+	synth.programs[1].oscillator_2_pitch = 55;
+	synth.programs[1].oscillator_2_pitch_env_3 = 0x30;
+	synth.programs[1].oscillator_3_mix = 0;
+	synth.programs[1].filter_frequency = 0xfff;
+	synth.programs[1].envelope_1_decay = 0x800;
+	synth.programs[1].envelope_1_sustain = 0;
+	synth.programs[1].envelope_2_decay = 0x100;
+	synth.programs[1].envelope_3_decay = 0x40;
+	synth.programs[1].lfo_1_speed = 200;
+	synth.programs[1].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+
+	strncpy(synth.programs[2].name, "808 Snare 2", sizeof(((program_t*)0)->name));
+	synth.programs[2].oscillator_1_waveform = WAVEFORM_SINUS;
+	synth.programs[2].oscillator_1_mix_env_2 = 0xb00;
+	synth.programs[2].oscillator_1_pitch = 275;
+	synth.programs[2].oscillator_1_pitch_env_3 = 15;
+	synth.programs[2].oscillator_3_mix = 0;
+	synth.programs[2].oscillator_noise_mix_env_3 = 0xfff;
+	synth.programs[2].filter_frequency = 0xfff;
+	synth.programs[2].filter_resonance = 0x600;
+	synth.programs[2].envelope_1_decay = 0x120;
+	synth.programs[2].envelope_1_sustain = 0;
+	synth.programs[2].envelope_2_decay = 0x100;
+	synth.programs[2].envelope_3_decay = 0x140;
+
+	strncpy(synth.programs[3].name, "ItsKindaPhasedWh", sizeof(((program_t*)0)->name));
+	synth.programs[3].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[3].oscillator_1_mix = 0xfff;
+	synth.programs[3].oscillator_1_pitch = 175;
+	synth.programs[3].oscillator_2_waveform = WAVEFORM_SAW;
+	synth.programs[3].oscillator_2_mix = 0xfff;
+	synth.programs[3].oscillator_2_pitch = 264;
+	synth.programs[3].oscillator_3_waveform = WAVEFORM_SAW;
+	synth.programs[3].oscillator_3_mix = 0xfff;
+	synth.programs[3].oscillator_3_pitch = 176;
+	synth.programs[3].filter_frequency = 0x180;
+	synth.programs[3].filter_frequency_env_3 = 0x800;
+	synth.programs[3].filter_resonance = 0x700;
+	synth.programs[3].filter_resonance_env_3 = 0x200;
+	synth.programs[3].envelope_1_sustain = 0xfff;
+	synth.programs[3].envelope_2_sustain = 0xfff;
+	synth.programs[3].envelope_3_attack = 0x800;
+	synth.programs[3].envelope_3_decay = 0xe00;
+	synth.programs[3].envelope_3_sustain = 0x80;
+
+	strncpy(synth.programs[4].name, "Jan Hammer", sizeof(((program_t*)0)->name));
+	synth.programs[4].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[4].oscillator_1_mix_env_2 = 0xfff;
+	synth.programs[4].oscillator_1_pitch = 175;
+	synth.programs[4].oscillator_2_waveform = WAVEFORM_SAW;
+	synth.programs[4].oscillator_2_mix_env_2 = 0xfff;
+	synth.programs[4].oscillator_2_pitch = 353;
+	synth.programs[4].oscillator_3_waveform = WAVEFORM_SQUARE_3;
+	synth.programs[4].oscillator_3_mix_env_3 = 0xfff;
+	synth.programs[4].oscillator_3_pitch = 704;
+	synth.programs[4].oscillator_3_width = 0x800;
+	synth.programs[4].oscillator_3_width_lfo_1 = 0x7ff;
+	synth.programs[4].oscillator_13_mix_env_2 = 0x400;
+	synth.programs[4].oscillator_13_mix_env_3 = 0x600;
+	synth.programs[4].filter_frequency = 0x280;
+	synth.programs[4].filter_frequency_env_3 = 0x900;
+	synth.programs[4].filter_resonance = 0x800;
+	synth.programs[4].filter_resonance_env_3 = 0x200;
+	synth.programs[4].envelope_1_decay = 0x200;
+	synth.programs[4].envelope_1_sustain = 0;
+	synth.programs[4].envelope_2_attack = 0x180;
+	synth.programs[4].envelope_2_sustain = 0xfff;
+	synth.programs[4].envelope_3_decay = 0x1c0;
+	synth.programs[4].lfo_1_speed = 0xc00;
+	synth.programs[4].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+
+	strncpy(synth.programs[5].name, "Sollie strings 1", sizeof(((program_t*)0)->name));
+	synth.programs[5].oscillator_1_waveform = WAVEFORM_SQUARE_1;
+	synth.programs[5].oscillator_1_mix = 0x800;
+	synth.programs[5].oscillator_1_pitch = 351;
+	synth.programs[5].oscillator_1_pitch_lfo_1 = -6;
+	synth.programs[5].oscillator_1_width = 0xa00;
+	synth.programs[5].oscillator_1_width_lfo_2 = 0x280;
+	synth.programs[5].oscillator_2_waveform = WAVEFORM_SQUARE_2;
+	synth.programs[5].oscillator_2_mix = 0x800;
+	synth.programs[5].oscillator_2_pitch = 704;
+	synth.programs[5].oscillator_2_pitch_lfo_1 = -7;
+	synth.programs[5].oscillator_2_width = 0x800;
+	synth.programs[5].oscillator_2_width_lfo_2 = 0x280;
+	synth.programs[5].oscillator_3_waveform = WAVEFORM_SINUS;
+	synth.programs[5].oscillator_3_mix = 0x400;
+	synth.programs[5].oscillator_3_pitch = 353;
+	synth.programs[5].oscillator_3_width = 0x800;
+	synth.programs[5].oscillator_3_width_lfo_2 = 0x300;
+	synth.programs[5].filter_frequency = 0x80;
+	synth.programs[5].filter_frequency_env_2 = 0xe00;
+	synth.programs[5].envelope_1_sustain = 0xfff;
+	synth.programs[5].envelope_2_decay = 0x800;
+	synth.programs[5].envelope_2_sustain = 0xa00;
+	synth.programs[5].lfo_1_speed = 0x1000;
+	synth.programs[5].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+	synth.programs[5].lfo_2_speed = 0xe00;
+	synth.programs[5].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
+
+	strncpy(synth.programs[6].name, "Huhhuh!", sizeof(((program_t*)0)->name));
+	synth.programs[6].oscillator_1_waveform = WAVEFORM_SQUARE_1;
+	synth.programs[6].oscillator_1_pitch = 66;
+	synth.programs[6].oscillator_1_pitch_lfo_1 = 50;
+	synth.programs[6].oscillator_1_pitch_env_2 = 500;
+	synth.programs[6].oscillator_1_width = 0x800;
+	synth.programs[6].oscillator_1_width_env_2 = 0x600;
+	synth.programs[6].oscillator_3_waveform = WAVEFORM_SQUARE_3;
+	synth.programs[6].oscillator_3_mix = 0;
+	synth.programs[6].oscillator_3_pitch = 44;
+	synth.programs[6].oscillator_3_pitch_lfo_2 = 100;
+	synth.programs[6].oscillator_3_pitch_env_3 = 0x200;
+	synth.programs[6].oscillator_3_width = 0x800;
+	synth.programs[6].oscillator_13_mix = 0xfff;
+	synth.programs[6].filter_frequency = 0x580;
+	synth.programs[6].filter_frequency_lfo_1 = 0x300;
+	synth.programs[6].filter_resonance = 0x400;
+	synth.programs[6].filter_resonance_lfo_1 = 0x300;
+	synth.programs[6].envelope_1_sustain = 0xfff;
+	synth.programs[6].envelope_2_attack = 0x800;
+	synth.programs[6].envelope_2_decay = 0x300;
+	synth.programs[6].envelope_3_attack = 0x300;
+	synth.programs[6].envelope_3_decay = 0x680;
+	synth.programs[6].lfo_1_speed = 0x180;
+	synth.programs[6].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+	synth.programs[6].lfo_2_speed = 0x880;
+	synth.programs[6].lfo_2_waveform = WAVEFORM_LFO_SQUARE;
+
+	strncpy(synth.programs[7].name, "Hihat Closed", sizeof(((program_t*)0)->name));
+	synth.programs[7].oscillator_3_mix = 0;
+	synth.programs[7].oscillator_noise_mix = 0xfff;
+	synth.programs[7].filter_frequency = 0xe00;
+	synth.programs[7].filter_resonance = 0xa00;
+	synth.programs[7].envelope_1_decay = 0x40;
+	synth.programs[7].envelope_1_sustain = 0;
+
+	strncpy(synth.programs[8].name, "Hihat Open", sizeof(((program_t*)0)->name));
+	synth.programs[8].oscillator_3_mix = 0;
+	synth.programs[8].oscillator_noise_mix = 0xfff;
+	synth.programs[8].filter_frequency = 0xe00;
+	synth.programs[8].filter_resonance = 0xa00;
+	synth.programs[8].envelope_1_decay = 0x300;
+	synth.programs[8].envelope_1_sustain = 0;
+
+	strncpy(synth.programs[9].name, "Acid 1", sizeof(((program_t*)0)->name));
+	synth.programs[9].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[9].oscillator_1_mix = 0xfff;
+	synth.programs[9].oscillator_1_pitch = 44;		// 44, 88
+	synth.programs[9].oscillator_3_mix = 0;
+	synth.programs[9].filter_frequency_env_3 = 0xc00;
+	synth.programs[9].envelope_1_sustain = 0xfff;
+	synth.programs[9].envelope_3_decay = 0xc0;		// 0xc0, 0x300
+	synth.programs[9].envelope_3_sustain = 0x60;
+
+	strncpy(synth.programs[10].name, "Acid 2", sizeof(((program_t*)0)->name));
+	synth.programs[10].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[10].oscillator_1_mix = 0xfff;
+	synth.programs[10].oscillator_1_pitch = 88;		// 44, 88
+	synth.programs[10].oscillator_3_mix = 0;
+	synth.programs[10].filter_frequency_env_3 = 0xc00;
+	synth.programs[10].envelope_1_sustain = 0xfff;
+	synth.programs[10].envelope_3_decay = 0x300;		// 0xc0, 0x300
+	synth.programs[10].envelope_3_sustain = 0x60;
+
+	strncpy(synth.programs[11].name, "Acid 3", sizeof(((program_t*)0)->name));
+	synth.programs[11].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[11].oscillator_1_mix = 0xfff;
+	synth.programs[11].oscillator_1_pitch = 44;		// 44, 88
+	synth.programs[11].oscillator_3_mix = 0;
+	synth.programs[11].filter_frequency_env_3 = 0xc00;
+	synth.programs[11].filter_resonance = 0x500;		// 0, 0x500, 0xa00, 0xd00
+	synth.programs[11].envelope_1_sustain = 0xfff;
+	synth.programs[11].envelope_3_decay = 0xc0;		// 0xc0, 0x300
+	synth.programs[11].envelope_3_sustain = 0x60;
+
+	strncpy(synth.programs[12].name, "Acid 4", sizeof(((program_t*)0)->name));
+	synth.programs[12].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[12].oscillator_1_mix = 0xfff;
+	synth.programs[12].oscillator_1_pitch = 88;		// 44, 88
+	synth.programs[12].oscillator_1_width = 0x800;
+	synth.programs[12].oscillator_3_mix = 0;
+	synth.programs[12].filter_frequency_env_3 = 0xc00;
+	synth.programs[12].filter_resonance = 0x500;		// 0, 0x500, 0xa00, 0xd00
+	synth.programs[12].envelope_1_sustain = 0xfff;
+	synth.programs[12].envelope_3_decay = 0x300;		// 0xc0, 0x300
+	synth.programs[12].envelope_3_sustain = 0x60;
+
+	strncpy(synth.programs[13].name, "Acid 5", sizeof(((program_t*)0)->name));
+	synth.programs[13].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[13].oscillator_1_mix = 0xfff;
+	synth.programs[13].oscillator_1_pitch = 44;		// 44, 88
+	synth.programs[13].oscillator_3_mix = 0;
+	synth.programs[13].filter_frequency_env_3 = 0xc00;
+	synth.programs[13].filter_resonance = 0xa00;		// 0, 0x500, 0xa00, 0xd00
+	synth.programs[13].envelope_1_sustain = 0xfff;
+	synth.programs[13].envelope_3_decay = 0xc0;		// 0xc0, 0x300
+	synth.programs[13].envelope_3_sustain = 0x60;
+
+	strncpy(synth.programs[14].name, "Acid 6", sizeof(((program_t*)0)->name));
+	synth.programs[14].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[14].oscillator_1_mix = 0xfff;
+	synth.programs[14].oscillator_1_pitch = 88;		// 44, 88
+	synth.programs[14].oscillator_3_mix = 0;
+	synth.programs[14].filter_frequency_env_3 = 0xc00;
+	synth.programs[14].filter_resonance = 0xa00;		// 0, 0x500, 0xa00, 0xd00
+	synth.programs[14].envelope_1_sustain = 0xfff;
+	synth.programs[14].envelope_3_decay = 0x300;		// 0xc0, 0x300
+	synth.programs[14].envelope_3_sustain = 0x60;
+
+	strncpy(synth.programs[15].name, "Acid 7", sizeof(((program_t*)0)->name));
+	synth.programs[15].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[15].oscillator_1_mix = 0xfff;
+	synth.programs[15].oscillator_1_pitch = 44;		// 44, 88
+	synth.programs[15].oscillator_3_mix = 0;
+	synth.programs[15].filter_frequency_env_3 = 0xc00;
+	synth.programs[15].filter_resonance = 0xd00;		// 0, 0x500, 0xa00, 0xd00
+	synth.programs[15].envelope_1_sustain = 0xfff;
+	synth.programs[15].envelope_3_decay = 0xc0;		// 0xc0, 0x300
+	synth.programs[15].envelope_3_sustain = 0x60;
+
+	strncpy(synth.programs[16].name, "Acid 8", sizeof(((program_t*)0)->name));
+	synth.programs[16].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[16].oscillator_1_mix = 0xfff;
+	synth.programs[16].oscillator_1_pitch = 88;		// 44, 88
+	synth.programs[16].oscillator_3_mix = 0;
+	synth.programs[16].filter_frequency_env_3 = 0xc00;
+	synth.programs[16].filter_resonance = 0xd00;		// 0, 0x500, 0xa00, 0xd00
+	synth.programs[16].envelope_1_sustain = 0xfff;
+	synth.programs[16].envelope_3_decay = 0x300;		// 0xc0, 0x300
+	synth.programs[16].envelope_3_sustain = 0x60;
+
+	strncpy(synth.programs[17].name, "Clap", sizeof(((program_t*)0)->name));
+	synth.programs[17].oscillator_3_mix = 0;
+	synth.programs[17].oscillator_noise_mix_lfo_1 = 0x800;
+	synth.programs[17].oscillator_noise_mix_lfo_2 = 0x800;
+	synth.programs[17].filter_frequency_env_3 = 0x480;
+	synth.programs[17].filter_resonance = 0x200;
+	synth.programs[17].envelope_1_decay = 0x280;
+	synth.programs[17].envelope_1_sustain = 0;
+	synth.programs[17].envelope_3_decay = 0x380;
+	synth.programs[17].lfo_1_speed = 0x2b00;
+	synth.programs[17].lfo_1_waveform = WAVEFORM_LFO_SQUARE;
+	synth.programs[17].lfo_2_speed = 0x1e00;
+	synth.programs[17].lfo_2_waveform = WAVEFORM_LFO_SQUARE;
+
+	strncpy(synth.programs[18].name, "Arp", sizeof(((program_t*)0)->name));
+	synth.programs[18].oscillator_1_waveform = WAVEFORM_SQUARE_1;
+	synth.programs[18].oscillator_1_mix = 0xfff;
+	synth.programs[18].oscillator_1_pitch = 704;
+	synth.programs[18].oscillator_1_width = 0x800;
+	synth.programs[18].oscillator_1_width_lfo_1 = 0x800;
+	synth.programs[18].oscillator_3_mix = 0;
+	synth.programs[18].filter_frequency = 0x400;
+	synth.programs[18].filter_frequency_env_3 = 0x400;
+	synth.programs[18].filter_resonance = 0x800;
+	synth.programs[18].envelope_1_sustain = 0xfff;
+	synth.programs[18].envelope_3_attack = 0x40;
+	synth.programs[18].envelope_3_decay = 0x40;
+	synth.programs[18].lfo_1_speed = 0x2800;
+	synth.programs[18].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+
+	strncpy(synth.programs[19].name, "FM 1", sizeof(((program_t*)0)->name));
+	synth.programs[19].oscillator_1_waveform = WAVEFORM_SINUS;
+	synth.programs[19].oscillator_1_pitch = 352;
+	synth.programs[19].oscillator_1_pitch_lfo_1 = 30;
+	synth.programs[19].oscillator_1_pitch_env_3 = 420;
+	synth.programs[19].oscillator_2_waveform = WAVEFORM_SINUS;
+	synth.programs[19].oscillator_2_pitch = 370;
+	synth.programs[19].oscillator_2_pitch_lfo_2 = 70;
+	synth.programs[19].oscillator_3_waveform = WAVEFORM_SINUS;
+	synth.programs[19].oscillator_3_mix = 0xfff;
+	synth.programs[19].oscillator_3_pitch = 130;
+	synth.programs[19].oscillator_13_mix_env_2 = 0x700;
+	synth.programs[19].oscillator_13_fm = 1;
+	synth.programs[19].oscillator_23_mix = 0xfff;
+	synth.programs[19].oscillator_23_fm = 0;
+	synth.programs[19].filter_frequency = 0xfff;
+	synth.programs[19].envelope_1_sustain = 0xfff;
+	synth.programs[19].envelope_2_decay = 0x800;
+	synth.programs[19].envelope_3_attack = 0x300;
+	synth.programs[19].envelope_3_sustain = 0xfff;
+	synth.programs[19].lfo_1_speed = 0x1e00;
+	synth.programs[19].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+	synth.programs[19].lfo_2_speed = 0x1e00;
+	synth.programs[19].lfo_2_waveform = WAVEFORM_LFO_SQUARE;
+
+	strncpy(synth.programs[20].name, "FM 2", sizeof(((program_t*)0)->name));
+	synth.programs[20].oscillator_1_waveform = WAVEFORM_SINUS;
+	synth.programs[20].oscillator_1_pitch = 352;
+	synth.programs[20].oscillator_1_pitch_lfo_1 = 30;
+	synth.programs[20].oscillator_1_pitch_env_3 = 420;
+	synth.programs[20].oscillator_2_waveform = WAVEFORM_SINUS;
+	synth.programs[20].oscillator_2_pitch = 200;
+	synth.programs[20].oscillator_3_waveform = WAVEFORM_SINUS;
+	synth.programs[20].oscillator_3_mix = 0xfff;
+	synth.programs[20].oscillator_3_pitch = 130;
+	synth.programs[20].oscillator_13_mix_env_2 = 0x700;
+	synth.programs[20].oscillator_13_fm = 1;
+	synth.programs[20].oscillator_23_mix = 0xfff;
+	synth.programs[20].filter_frequency = 0xfff;
+	synth.programs[20].envelope_1_sustain = 0xfff;
+	synth.programs[20].envelope_2_decay = 0x800;
+	synth.programs[20].envelope_3_attack = 0x20; //0x300
+	synth.programs[20].envelope_3_decay = 0x100; //0
+	synth.programs[20].lfo_1_speed = 0x1e00;
+	synth.programs[20].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+	synth.programs[20].lfo_2_speed = 0x1e00;
+	synth.programs[20].lfo_2_waveform = WAVEFORM_LFO_SQUARE;
+
+	strncpy(synth.programs[21].name, "Sync", sizeof(((program_t*)0)->name));
+	synth.programs[21].oscillator_1_waveform = WAVEFORM_SAW;
+	synth.programs[21].oscillator_1_mix = 0xfff;
+	synth.programs[21].oscillator_1_pitch = 88;
+	synth.programs[21].oscillator_1_sync = 0x200;
+	synth.programs[21].oscillator_1_sync_lfo_1 = 80;
+	synth.programs[21].oscillator_2_waveform = WAVEFORM_SQUARE_2;
+	synth.programs[21].oscillator_2_mix = 0xfff;
+	synth.programs[21].oscillator_2_pitch = 44;
+	synth.programs[21].oscillator_2_width = 0x800;
+	synth.programs[21].oscillator_2_sync = 0x80;
+	synth.programs[21].oscillator_2_sync_lfo_1 = 0x30;
+	synth.programs[21].oscillator_3_mix = 0;
+	synth.programs[21].filter_frequency = 0x260;
+	synth.programs[21].filter_frequency_lfo_2 = 0x80;
+	synth.programs[21].filter_resonance = 0x800;
+	synth.programs[21].envelope_1_sustain = 0xfff;
+	synth.programs[21].lfo_1_speed = 0x490;
+	synth.programs[21].lfo_1_waveform = WAVEFORM_LFO_TRIANGLE;
+	synth.programs[21].lfo_2_speed = 0x920;
+	synth.programs[21].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
+
+	for (int i = 0; i < 22; i++) {
+		strncpy(synth.performances[i].name, synth.programs[i].name, sizeof(((program_t*)0)->name));
+		synth.performances[i].parts[0].program = i;
+	}
 
 	synthLoad("protracker.jrm");
 }
