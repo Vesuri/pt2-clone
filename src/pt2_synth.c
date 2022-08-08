@@ -298,9 +298,10 @@ void initSynth(void)
 		}
 	}
 
-	for (int i = 0; i < 256; i++) {
+	for (int i = 0; i < 128; i++) {
 		memset(&synth.programs[i], 0, sizeof(program_t));
 
+		strncpy(synth.programs[i].name, "Init program", sizeof(((program_t*)0)->name));
 		synth.programs[i].oscillator_1_waveform = WAVEFORM_SAW;
 		synth.programs[i].oscillator_1_pitch = 44;
 		synth.programs[i].oscillator_1_width = 0x800;
@@ -318,30 +319,6 @@ void initSynth(void)
 		synth.programs[i].lfo_2_speed = 1000;
 		synth.programs[i].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
 	}
-
-	strncpy(synth.programs[0].name, "Dopplereffekt 2", sizeof(((program_t*)0)->name));
-	synth.programs[0].oscillator_1_waveform = WAVEFORM_SQUARE_1;
-	synth.programs[0].oscillator_1_pitch = 88;
-	synth.programs[0].oscillator_1_width = 0x800;
-	synth.programs[0].oscillator_2_waveform = WAVEFORM_SQUARE_2;
-	synth.programs[0].oscillator_2_mix = 0x8c0;
-	synth.programs[0].oscillator_2_pitch = 88;
-	synth.programs[0].oscillator_2_width = 0x800;
-	synth.programs[0].oscillator_3_waveform = WAVEFORM_SQUARE_3;
-	synth.programs[0].oscillator_3_mix = 0xfff;
-	synth.programs[0].oscillator_3_pitch = 44;
-	synth.programs[0].oscillator_3_width = 0x800;
-	synth.programs[0].oscillator_3_width_lfo_1 = 0x7ff;
-	synth.programs[0].oscillator_noise_mix_env_2 = 0xfff;
-	synth.programs[0].filter_frequency = 0x100;
-	synth.programs[0].filter_frequency_env_3 = 0xfff;
-	synth.programs[0].envelope_1_sustain = 0xfff;
-	synth.programs[0].envelope_2_decay = 0x80;
-	synth.programs[0].envelope_2_sustain = 0x500;
-	synth.programs[0].envelope_3_decay = 0x180;
-	synth.programs[0].envelope_3_sustain = 0;
-	synth.programs[0].lfo_1_speed = 1000;
-	synth.programs[0].lfo_1_waveform = WAVEFORM_LFO_SAW;
 
 	strncpy(synth.programs[1].name, "808 Kick Loong", sizeof(((program_t*)0)->name));
 	synth.programs[1].oscillator_1_waveform = WAVEFORM_SINUS;
@@ -681,7 +658,31 @@ void initSynth(void)
 	synth.programs[21].lfo_2_speed = 0x920;
 	synth.programs[21].lfo_2_waveform = WAVEFORM_LFO_TRIANGLE;
 
-	for (int i = 0; i < 22; i++) {
+	strncpy(synth.programs[22].name, "Dopplereffekt 2", sizeof(((program_t*)0)->name));
+	synth.programs[22].oscillator_1_waveform = WAVEFORM_SQUARE_1;
+	synth.programs[22].oscillator_1_pitch = 88;
+	synth.programs[22].oscillator_1_width = 0x800;
+	synth.programs[22].oscillator_2_waveform = WAVEFORM_SQUARE_2;
+	synth.programs[22].oscillator_2_mix = 0x8c0;
+	synth.programs[22].oscillator_2_pitch = 88;
+	synth.programs[22].oscillator_2_width = 0x800;
+	synth.programs[22].oscillator_3_waveform = WAVEFORM_SQUARE_3;
+	synth.programs[22].oscillator_3_mix = 0xfff;
+	synth.programs[22].oscillator_3_pitch = 44;
+	synth.programs[22].oscillator_3_width = 0x800;
+	synth.programs[22].oscillator_3_width_lfo_1 = 0x7ff;
+	synth.programs[22].oscillator_noise_mix_env_2 = 0xfff;
+	synth.programs[22].filter_frequency = 0x100;
+	synth.programs[22].filter_frequency_env_3 = 0xfff;
+	synth.programs[22].envelope_1_sustain = 0xfff;
+	synth.programs[22].envelope_2_decay = 0x80;
+	synth.programs[22].envelope_2_sustain = 0x500;
+	synth.programs[22].envelope_3_decay = 0x180;
+	synth.programs[22].envelope_3_sustain = 0;
+	synth.programs[22].lfo_1_speed = 1000;
+	synth.programs[22].lfo_1_waveform = WAVEFORM_LFO_SAW;
+
+	for (int i = 0; i < 23; i++) {
 		strncpy(synth.performances[i].name, synth.programs[i].name, sizeof(((program_t*)0)->name));
 		synth.performances[i].parts[0].program = i;
 	}
@@ -704,7 +705,7 @@ void renderPart(part_t* part, bool add)
 	}
 
 	program_t* program = &synth.programs[part->program];
-	uint32_t SAMPLERATE = part->sampleRate;
+	uint16_t SAMPLERATE = part->sampleRate;
 
 	int32_t oscillator_1_position = 0;
 	int32_t oscillator_1_delta = 0;
@@ -889,7 +890,7 @@ void renderPart(part_t* part, bool add)
 			waveform_square_create();
 
 			// Update oscillator 1 pitch
-			uint16_t oscillator_1_pitch_current = program->oscillator_1_pitch;
+			int16_t oscillator_1_pitch_current = program->oscillator_1_pitch;
 			if (program->oscillator_1_pitch_lfo_1 != 0) {
 				oscillator_1_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_1_pitch_lfo_1) >> 12;
 			}
@@ -902,10 +903,10 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_1_pitch_env_3 != 0) {
 				oscillator_1_pitch_current += ((envelope_3_current >> 4) * program->oscillator_1_pitch_env_3) >> 11;
 			}
-			oscillator_1_delta = ((oscillator_1_pitch_current << 16) / SAMPLERATE) << 8;
+			oscillator_1_delta = (oscillator_1_pitch_current < SAMPLERATE ? ((oscillator_1_pitch_current << 16) / SAMPLERATE) : 0xffff) << 8;
 
 			// Update oscillator 2 pitch
-			uint16_t oscillator_2_pitch_current = program->oscillator_2_pitch;
+			int16_t oscillator_2_pitch_current = program->oscillator_2_pitch;
 			if (program->oscillator_2_pitch_lfo_1 != 0) {
 				oscillator_2_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_2_pitch_lfo_1) >> 12;
 			}
@@ -918,10 +919,10 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_2_pitch_env_3 != 0) {
 				oscillator_2_pitch_current += ((envelope_3_current >> 4) * program->oscillator_2_pitch_env_3) >> 11;
 			}
-			oscillator_2_delta = ((oscillator_2_pitch_current << 16) / SAMPLERATE) << 8;
+			oscillator_2_delta = (oscillator_2_pitch_current < SAMPLERATE ? ((oscillator_2_pitch_current << 16) / SAMPLERATE) : 0xffff) << 8;
 
 			// Update oscillator 3 pitch
-			uint16_t oscillator_3_pitch_current = program->oscillator_3_pitch;
+			int16_t oscillator_3_pitch_current = program->oscillator_3_pitch;
 			if (program->oscillator_3_pitch_lfo_1 != 0) {
 				oscillator_3_pitch_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_3_pitch_lfo_1) >> 12;
 			}
@@ -934,10 +935,10 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_3_pitch_env_3 != 0) {
 				oscillator_3_pitch_current += ((envelope_3_current >> 4) * program->oscillator_3_pitch_env_3) >> 11;
 			}
-			oscillator_3_delta = ((oscillator_3_pitch_current << 16) / SAMPLERATE) << 8;
+			oscillator_3_delta = (oscillator_3_pitch_current < SAMPLERATE ? ((oscillator_3_pitch_current << 16) / SAMPLERATE) : 0xffff) << 8;
 
 			// Update oscillator 1 sync
-			uint16_t oscillator_1_sync_current = program->oscillator_1_sync;
+			int16_t oscillator_1_sync_current = program->oscillator_1_sync;
 			if (program->oscillator_1_sync_lfo_1 != 0) {
 				oscillator_1_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_1_sync_lfo_1) >> 12;
 			}
@@ -950,10 +951,10 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_1_sync_env_3 != 0) {
 				oscillator_1_sync_current += ((envelope_3_current >> 4) * program->oscillator_1_sync_env_3) >> 11;
 			}
-			oscillator_1_sync_delta = ((oscillator_1_sync_current << 16) / SAMPLERATE) << 8;
+			oscillator_1_sync_delta = (oscillator_1_sync_current < SAMPLERATE ? ((oscillator_1_sync_current << 16) / SAMPLERATE) : 0xffff) << 8;
 
 			// Update oscillator 2 sync
-			uint16_t oscillator_2_sync_current = program->oscillator_2_sync;
+			int16_t oscillator_2_sync_current = program->oscillator_2_sync;
 			if (program->oscillator_2_sync_lfo_1 != 0) {
 				oscillator_2_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_2_sync_lfo_1) >> 12;
 			}
@@ -966,10 +967,10 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_2_sync_env_3 != 0) {
 				oscillator_2_sync_current += ((envelope_3_current >> 4) * program->oscillator_2_sync_env_3) >> 11;
 			}
-			oscillator_2_sync_delta = ((oscillator_2_sync_current << 16) / SAMPLERATE) << 8;
+			oscillator_2_sync_delta = (oscillator_2_sync_current < SAMPLERATE ? ((oscillator_2_sync_current << 16) / SAMPLERATE) : 0xffff) << 8;
 
 			// Update oscillator 3 sync
-			uint16_t oscillator_3_sync_current = program->oscillator_3_sync;
+			int16_t oscillator_3_sync_current = program->oscillator_3_sync;
 			if (program->oscillator_3_sync_lfo_1 != 0) {
 				oscillator_3_sync_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_3_sync_lfo_1) >> 12;
 			}
@@ -982,7 +983,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_3_sync_env_3 != 0) {
 				oscillator_3_sync_current += ((envelope_3_current >> 4) * program->oscillator_3_sync_env_3) >> 11;
 			}
-			oscillator_3_sync_delta = ((oscillator_3_sync_current << 16) / SAMPLERATE) << 8;
+			oscillator_3_sync_delta = (oscillator_3_sync_current < SAMPLERATE ? ((oscillator_3_sync_current << 16) / SAMPLERATE) : 0xffff) << 8;
 		}
 
 		// Sum oscillators
@@ -990,7 +991,7 @@ void renderPart(part_t* part, bool add)
 
 		// Sum oscillator 1
 		oscillator_1_current = (waveform_saw[(oscillator_1_position >> 16) + program->oscillator_1_waveform] + waveform_saw[(oscillator_1_sync_position >> 16) + program->oscillator_1_waveform]) >> 1;
-		uint16_t oscillator_1_mix_current = program->oscillator_1_mix;
+		int16_t oscillator_1_mix_current = program->oscillator_1_mix;
 		if (program->oscillator_1_mix_lfo_1 != 0) {
 			oscillator_1_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_1_mix_lfo_1) >> 12;
 		}
@@ -1007,7 +1008,7 @@ void renderPart(part_t* part, bool add)
 
 		// Sum oscillator 2
 		oscillator_2_current = (waveform_saw[(oscillator_2_position >> 16) + program->oscillator_2_waveform] + waveform_saw[(oscillator_2_sync_position >> 16) + program->oscillator_2_waveform]) >> 1;
-		uint16_t oscillator_2_mix_current = program->oscillator_2_mix;
+		int16_t oscillator_2_mix_current = program->oscillator_2_mix;
 		if (program->oscillator_2_mix_lfo_1 != 0) {
 			oscillator_2_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_2_mix_lfo_1) >> 12;
 		}
@@ -1024,7 +1025,7 @@ void renderPart(part_t* part, bool add)
 
 		// Sum oscillator 3
 		oscillator_3_current = (waveform_saw[(oscillator_3_position >> 16) + program->oscillator_3_waveform] + waveform_saw[(oscillator_3_sync_position >> 16) + program->oscillator_3_waveform]) >> 1;
-		uint16_t oscillator_3_mix_current = program->oscillator_3_mix;
+		int16_t oscillator_3_mix_current = program->oscillator_3_mix;
 		if (program->oscillator_3_mix_lfo_1 != 0) {
 			oscillator_3_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_3_mix_lfo_1) >> 12;
 		}
@@ -1042,7 +1043,7 @@ void renderPart(part_t* part, bool add)
 		// Sum oscillator 1*3
 		if (program->oscillator_13_fm == 0) {
 			int16_t oscillator_13_current = (oscillator_1_current * oscillator_3_current) >> 7;
-			uint16_t oscillator_13_mix_current = program->oscillator_13_mix;
+			int16_t oscillator_13_mix_current = program->oscillator_13_mix;
 			if (program->oscillator_13_mix_lfo_1 != 0) {
 				oscillator_13_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_13_mix_lfo_1) >> 12;
 			}
@@ -1061,7 +1062,7 @@ void renderPart(part_t* part, bool add)
 		// Sum oscillator 2*3
 		if (program->oscillator_23_fm == 0) {
 			int16_t oscillator_23_current = (oscillator_2_current * oscillator_3_current) >> 7;
-			uint16_t oscillator_23_mix_current = program->oscillator_23_mix;
+			int16_t oscillator_23_mix_current = program->oscillator_23_mix;
 			if (program->oscillator_23_mix_lfo_1 != 0) {
 				oscillator_23_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_23_mix_lfo_1) >> 12;
 			}
@@ -1079,7 +1080,7 @@ void renderPart(part_t* part, bool add)
 
 		// Sum noise oscillator
 		int16_t oscillator_noise_current = waveform_saw[(oscillator_noise_position >> 16) + WAVEFORM_NOISE];
-		uint16_t oscillator_noise_mix_current = program->oscillator_noise_mix;
+		int16_t oscillator_noise_mix_current = program->oscillator_noise_mix;
 		if (program->oscillator_noise_mix_lfo_1 != 0) {
 			oscillator_noise_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_noise_mix_lfo_1) >> 12;
 		}
@@ -1131,7 +1132,7 @@ void renderPart(part_t* part, bool add)
 
 		// Oscillator 1 -> oscillator 3 frequency modulation
 		if (program->oscillator_13_fm != 0) {
-			uint16_t oscillator_13_mix_current = program->oscillator_13_mix;
+			int16_t oscillator_13_mix_current = program->oscillator_13_mix;
 			if (program->oscillator_13_mix_lfo_1 != 0) {
 				oscillator_13_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_13_mix_lfo_1) >> 12;
 			}
@@ -1152,7 +1153,7 @@ void renderPart(part_t* part, bool add)
 
 		// Oscillator 2 -> oscillator 3 frequency modulation
 		if (program->oscillator_23_fm != 0) {
-			uint16_t oscillator_23_mix_current = program->oscillator_23_mix;
+			int16_t oscillator_23_mix_current = program->oscillator_23_mix;
 			if (program->oscillator_23_mix_lfo_1 != 0) {
 				oscillator_23_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_23_mix_lfo_1) >> 12;
 			}
