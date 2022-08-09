@@ -903,7 +903,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_1_pitch_env_3 != 0) {
 				oscillator_1_pitch_current += ((envelope_3_current >> 4) * program->oscillator_1_pitch_env_3) >> 11;
 			}
-			oscillator_1_delta = (oscillator_1_pitch_current < SAMPLERATE ? ((oscillator_1_pitch_current << 16) / SAMPLERATE) : 0xffff) << 8;
+			oscillator_1_delta = ((oscillator_1_pitch_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 2 pitch
 			int16_t oscillator_2_pitch_current = program->oscillator_2_pitch;
@@ -919,7 +919,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_2_pitch_env_3 != 0) {
 				oscillator_2_pitch_current += ((envelope_3_current >> 4) * program->oscillator_2_pitch_env_3) >> 11;
 			}
-			oscillator_2_delta = (oscillator_2_pitch_current < SAMPLERATE ? ((oscillator_2_pitch_current << 16) / SAMPLERATE) : 0xffff) << 8;
+			oscillator_2_delta = ((oscillator_2_pitch_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 3 pitch
 			int16_t oscillator_3_pitch_current = program->oscillator_3_pitch;
@@ -935,7 +935,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_3_pitch_env_3 != 0) {
 				oscillator_3_pitch_current += ((envelope_3_current >> 4) * program->oscillator_3_pitch_env_3) >> 11;
 			}
-			oscillator_3_delta = (oscillator_3_pitch_current < SAMPLERATE ? ((oscillator_3_pitch_current << 16) / SAMPLERATE) : 0xffff) << 8;
+			oscillator_3_delta = ((oscillator_3_pitch_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 1 sync
 			int16_t oscillator_1_sync_current = program->oscillator_1_sync;
@@ -951,7 +951,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_1_sync_env_3 != 0) {
 				oscillator_1_sync_current += ((envelope_3_current >> 4) * program->oscillator_1_sync_env_3) >> 11;
 			}
-			oscillator_1_sync_delta = (oscillator_1_sync_current < SAMPLERATE ? ((oscillator_1_sync_current << 16) / SAMPLERATE) : 0xffff) << 8;
+			oscillator_1_sync_delta = ((oscillator_1_sync_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 2 sync
 			int16_t oscillator_2_sync_current = program->oscillator_2_sync;
@@ -967,7 +967,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_2_sync_env_3 != 0) {
 				oscillator_2_sync_current += ((envelope_3_current >> 4) * program->oscillator_2_sync_env_3) >> 11;
 			}
-			oscillator_2_sync_delta = (oscillator_2_sync_current < SAMPLERATE ? ((oscillator_2_sync_current << 16) / SAMPLERATE) : 0xffff) << 8;
+			oscillator_2_sync_delta = ((oscillator_2_sync_current << 16) / SAMPLERATE) << 8;
 
 			// Update oscillator 3 sync
 			int16_t oscillator_3_sync_current = program->oscillator_3_sync;
@@ -983,7 +983,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_3_sync_env_3 != 0) {
 				oscillator_3_sync_current += ((envelope_3_current >> 4) * program->oscillator_3_sync_env_3) >> 11;
 			}
-			oscillator_3_sync_delta = (oscillator_3_sync_current < SAMPLERATE ? ((oscillator_3_sync_current << 16) / SAMPLERATE) : 0xffff) << 8;
+			oscillator_3_sync_delta = ((oscillator_3_sync_current << 16) / SAMPLERATE)<< 8;
 		}
 
 		// Sum oscillators
