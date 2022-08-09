@@ -1,4 +1,6 @@
+// TODO
 // Envelope decays may go negative and thus become high values
+// Something wrong with FM 2
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
