@@ -1,4 +1,4 @@
-// for finding memory leaks in debug mode with Visual Studio 
+// Envelope decays may go negative and thus become high values
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -722,11 +722,11 @@ void renderPart(part_t* part, bool add)
 	int32_t oscillator_3_sync_delta = 0;
 	uint32_t lfo_1_position = 0;
 	uint32_t lfo_2_position = 0;
-	int32_t envelope_1_current = 0;
+	uint16_t envelope_1_current = 0;
 	int32_t envelope_1_delta = 0;
-	int32_t envelope_2_current = 0;
+	uint16_t envelope_2_current = 0;
 	int32_t envelope_2_delta = 0;
-	int32_t envelope_3_current = 0;
+	uint16_t envelope_3_current = 0;
 	int32_t envelope_3_delta = 0;
 	int32_t envelope_stretch = 7;
 	int16_t oscillator_1_current = 0;
