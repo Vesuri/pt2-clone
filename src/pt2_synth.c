@@ -478,6 +478,7 @@ void initSynth(void)
 	synth.programs[9].oscillator_1_mix = 0xfff;
 	synth.programs[9].oscillator_1_pitch = 44;		// 44, 88
 	synth.programs[9].oscillator_3_mix = 0;
+	synth.programs[9].filter_frequency = 0;
 	synth.programs[9].filter_frequency_env_3 = 0xc00;
 	synth.programs[9].envelope_1_sustain = 0xfff;
 	synth.programs[9].envelope_3_decay = 0xc0;		// 0xc0, 0x300
@@ -488,6 +489,7 @@ void initSynth(void)
 	synth.programs[10].oscillator_1_mix = 0xfff;
 	synth.programs[10].oscillator_1_pitch = 88;		// 44, 88
 	synth.programs[10].oscillator_3_mix = 0;
+	synth.programs[10].filter_frequency = 0;
 	synth.programs[10].filter_frequency_env_3 = 0xc00;
 	synth.programs[10].envelope_1_sustain = 0xfff;
 	synth.programs[10].envelope_3_decay = 0x300;		// 0xc0, 0x300
@@ -498,6 +500,7 @@ void initSynth(void)
 	synth.programs[11].oscillator_1_mix = 0xfff;
 	synth.programs[11].oscillator_1_pitch = 44;		// 44, 88
 	synth.programs[11].oscillator_3_mix = 0;
+	synth.programs[11].filter_frequency = 0;
 	synth.programs[11].filter_frequency_env_3 = 0xc00;
 	synth.programs[11].filter_resonance = 0x500;		// 0, 0x500, 0xa00, 0xd00
 	synth.programs[11].envelope_1_sustain = 0xfff;
@@ -510,6 +513,7 @@ void initSynth(void)
 	synth.programs[12].oscillator_1_pitch = 88;		// 44, 88
 	synth.programs[12].oscillator_1_width = 0x800;
 	synth.programs[12].oscillator_3_mix = 0;
+	synth.programs[12].filter_frequency = 0;
 	synth.programs[12].filter_frequency_env_3 = 0xc00;
 	synth.programs[12].filter_resonance = 0x500;		// 0, 0x500, 0xa00, 0xd00
 	synth.programs[12].envelope_1_sustain = 0xfff;
@@ -521,6 +525,7 @@ void initSynth(void)
 	synth.programs[13].oscillator_1_mix = 0xfff;
 	synth.programs[13].oscillator_1_pitch = 44;		// 44, 88
 	synth.programs[13].oscillator_3_mix = 0;
+	synth.programs[13].filter_frequency = 0;
 	synth.programs[13].filter_frequency_env_3 = 0xc00;
 	synth.programs[13].filter_resonance = 0xa00;		// 0, 0x500, 0xa00, 0xd00
 	synth.programs[13].envelope_1_sustain = 0xfff;
@@ -532,6 +537,7 @@ void initSynth(void)
 	synth.programs[14].oscillator_1_mix = 0xfff;
 	synth.programs[14].oscillator_1_pitch = 88;		// 44, 88
 	synth.programs[14].oscillator_3_mix = 0;
+	synth.programs[14].filter_frequency = 0;
 	synth.programs[14].filter_frequency_env_3 = 0xc00;
 	synth.programs[14].filter_resonance = 0xa00;		// 0, 0x500, 0xa00, 0xd00
 	synth.programs[14].envelope_1_sustain = 0xfff;
@@ -543,6 +549,7 @@ void initSynth(void)
 	synth.programs[15].oscillator_1_mix = 0xfff;
 	synth.programs[15].oscillator_1_pitch = 44;		// 44, 88
 	synth.programs[15].oscillator_3_mix = 0;
+	synth.programs[15].filter_frequency = 0;
 	synth.programs[15].filter_frequency_env_3 = 0xc00;
 	synth.programs[15].filter_resonance = 0xd00;		// 0, 0x500, 0xa00, 0xd00
 	synth.programs[15].envelope_1_sustain = 0xfff;
@@ -554,6 +561,7 @@ void initSynth(void)
 	synth.programs[16].oscillator_1_mix = 0xfff;
 	synth.programs[16].oscillator_1_pitch = 88;		// 44, 88
 	synth.programs[16].oscillator_3_mix = 0;
+	synth.programs[16].filter_frequency = 0;
 	synth.programs[16].filter_frequency_env_3 = 0xc00;
 	synth.programs[16].filter_resonance = 0xd00;		// 0, 0x500, 0xa00, 0xd00
 	synth.programs[16].envelope_1_sustain = 0xfff;
@@ -564,6 +572,7 @@ void initSynth(void)
 	synth.programs[17].oscillator_3_mix = 0;
 	synth.programs[17].oscillator_noise_mix_lfo_1 = 0x800;
 	synth.programs[17].oscillator_noise_mix_lfo_2 = 0x800;
+	synth.programs[17].filter_frequency = 0;
 	synth.programs[17].filter_frequency_env_3 = 0x480;
 	synth.programs[17].filter_resonance = 0x200;
 	synth.programs[17].envelope_1_decay = 0x280;
