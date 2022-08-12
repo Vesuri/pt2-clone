@@ -450,6 +450,7 @@ void initSynth(void)
 	synth.programs[6].envelope_1_sustain = 0xfff;
 	synth.programs[6].envelope_2_attack = 0x800;
 	synth.programs[6].envelope_2_decay = 0x300;
+	synth.programs[6].envelope_2_sustain = 0xfff;
 	synth.programs[6].envelope_3_attack = 0x300;
 	synth.programs[6].envelope_3_decay = 0x680;
 	synth.programs[6].lfo_1_speed = 0x180;
@@ -733,11 +734,11 @@ void renderPart(part_t* part, bool add)
 	int32_t oscillator_3_sync_delta = 0;
 	uint32_t lfo_1_position = 0;
 	uint32_t lfo_2_position = 0;
-	uint16_t envelope_1_current = 0;
+	int32_t envelope_1_current = 0;
 	int32_t envelope_1_delta = 0;
-	uint16_t envelope_2_current = 0;
+	int32_t envelope_2_current = 0;
 	int32_t envelope_2_delta = 0;
-	uint16_t envelope_3_current = 0;
+	int32_t envelope_3_current = 0;
 	int32_t envelope_3_delta = 0;
 	int32_t envelope_stretch = 7;
 	int16_t oscillator_1_current = 0;
@@ -777,6 +778,9 @@ void renderPart(part_t* part, bool add)
 		if ((buffer_position & envelope_stretch) == 0) {
 			// Update envelope 1
 			envelope_1_current += envelope_1_delta;
+			if (envelope_1_current < 0) {
+				envelope_1_current = 0;
+			}
 			envelope_1_counter--;
 			if (envelope_1_counter < 0) {
 				envelope_1_mode++;
@@ -798,6 +802,9 @@ void renderPart(part_t* part, bool add)
 
 			// Update envelope 2
 			envelope_2_current += envelope_2_delta;
+			if (envelope_2_current < 0) {
+				envelope_2_current = 0;
+			}
 			envelope_2_counter--;
 			if (envelope_2_counter < 0) {
 				envelope_2_mode++;
@@ -819,6 +826,9 @@ void renderPart(part_t* part, bool add)
 
 			// Update envelope 3
 			envelope_3_current += envelope_3_delta;
+			if (envelope_3_current < 0) {
+				envelope_3_current = 0;
+			}
 			envelope_3_counter--;
 			if (envelope_3_counter < 0) {
 				envelope_3_mode++;
