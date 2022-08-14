@@ -1166,7 +1166,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_13_mix_env_3 != 0) {
 				oscillator_13_mix_current += ((envelope_3_current >> 4) * program->oscillator_13_mix_env_3) >> 12;
 			}
-			int32_t delta = ((((oscillator_1_current * oscillator_13_mix_current) >> 16) << 20) / SAMPLERATE) << 13;
+			int32_t delta = (((oscillator_1_current * oscillator_13_mix_current) << 4) / SAMPLERATE) << 13;
 			oscillator_3_position += delta;
 			oscillator_3_sync_position += delta;
 			oscillator_3_sync_position &= 0xffffff;
@@ -1187,7 +1187,7 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_23_mix_env_3 != 0) {
 				oscillator_23_mix_current += ((envelope_3_current >> 4) * program->oscillator_23_mix_env_3) >> 12;
 			}
-			int32_t delta = ((((oscillator_2_current * oscillator_23_mix_current) >> 16) << 20) / SAMPLERATE) << 13;
+			int32_t delta = (((oscillator_2_current * oscillator_23_mix_current) << 4) / SAMPLERATE) << 13;
 			oscillator_3_position += delta;
 			oscillator_3_sync_position += delta;
 			oscillator_3_sync_position &= 0xffffff;
