@@ -294,7 +294,6 @@ void initSynth(void)
 	for (int i = 0; i < MOD_SAMPLES; i++) {
 		memset(&synth.performances[i], 0, sizeof(performance_t));
 
-		synth.performances[i].parts[0].volume = 64;
 		for (int j = 0; j < 8; j++) {
 			synth.performances[i].parts[j].sampleRate = 22050;
 		}
@@ -697,6 +696,7 @@ void initSynth(void)
 	for (int i = 0; i < 23; i++) {
 		strncpy(synth.performances[i].name, synth.programs[i].name, sizeof(((program_t*)0)->name));
 		synth.performances[i].parts[0].program = i;
+		synth.performances[i].parts[0].volume = 64;
 	}
 
 	synthLoad("protracker.jrm");
