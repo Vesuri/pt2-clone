@@ -304,14 +304,14 @@ void initSynth(void)
 
 		strncpy(synth.programs[i].name, "Init program", sizeof(((program_t*)0)->name));
 		synth.programs[i].oscillator_1_waveform = WAVEFORM_SAW;
-		synth.programs[i].oscillator_1_pitch = 44;
+		synth.programs[i].oscillator_1_pitch = 0x57;
 		synth.programs[i].oscillator_1_width = 0x800;
 		synth.programs[i].oscillator_2_waveform = WAVEFORM_SAW;
-		synth.programs[i].oscillator_2_pitch = 44;
+		synth.programs[i].oscillator_2_pitch = 0xae;
 		synth.programs[i].oscillator_2_width = 0x800;
 		synth.programs[i].oscillator_3_waveform = WAVEFORM_SAW;
 		synth.programs[i].oscillator_3_mix = 0xfff;
-		synth.programs[i].oscillator_3_pitch = 44;
+		synth.programs[i].oscillator_3_pitch = 0x15c;
 		synth.programs[i].oscillator_3_width = 0x800;
 		synth.programs[i].filter_frequency = 0xfff;
 		synth.programs[i].envelope_1_sustain = 0xfff;
