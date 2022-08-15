@@ -2558,13 +2558,13 @@ void updateSynth(void)
 	if (ui.updateLFO1SpeedText)
 	{
 		ui.updateLFO1SpeedText = false;
-		printThreeHexBg(72, 255 + 242, *editor.currLFO1SpeedDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printFourHexBg(72, 255 + 242, *editor.currLFO1SpeedDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
 	if (ui.updateLFO2SpeedText)
 	{
 		ui.updateLFO2SpeedText = false;
-		printThreeHexBg(216, 255 + 242, *editor.currLFO2SpeedDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printFourHexBg(216, 255 + 242, *editor.currLFO2SpeedDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
 	if (!ui.updateSynth)
@@ -2842,8 +2842,8 @@ void updateSynth(void)
 	}
 	textOutBg(72, 255 + 232, lfo1Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	textOutBg(216, 255 + 232, lfo2Waveform, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(72, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printThreeHexBg(216, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printFourHexBg(72, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printFourHexBg(216, 255 + 242, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 
 	synthRender();
 	displaySample();

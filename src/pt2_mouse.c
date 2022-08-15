@@ -5554,8 +5554,8 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed;
 			editor.currLFO1SpeedDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
-			ui.numLen = 3;
-			ui.numBits = 12;
+			ui.numLen = 4;
+			ui.numBits = 16;
 			ui.editTextPos = (255 + 243) * 40 + 9; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_LFO1_SPEED);
 		}
@@ -5584,8 +5584,8 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed;
 			editor.currLFO2SpeedDisp = (int16_t*)&ui.tmpDisp16;
 			ui.numPtr16 = &ui.tmpDisp16;
-			ui.numLen = 3;
-			ui.numBits = 12;
+			ui.numLen = 4;
+			ui.numBits = 16;
 			ui.editTextPos = (255 + 243) * 40 + 27; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_LFO2_SPEED);
 		}

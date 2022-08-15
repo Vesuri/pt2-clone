@@ -1913,7 +1913,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0x7fff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed = tmp16;
 
@@ -1929,7 +1929,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP(ui.tmpDisp16, 0, 0x7fff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed = tmp16;
 
