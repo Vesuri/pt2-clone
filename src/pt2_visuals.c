@@ -2299,7 +2299,7 @@ void updateSynth(void)
 	if (ui.updatePartVolumeText)
 	{
 		ui.updatePartVolumeText = false;
-		printTwoHexBg(56, 255 + 22, *editor.currPartVolumeDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+		printThreeHexBg(56, 255 + 22, *editor.currPartVolumeDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
 	if (ui.updatePartOffsetText)
@@ -2605,7 +2605,7 @@ void updateSynth(void)
 	textOut(273, 255 + 42, "NOISE", video.palette[synth.currOsc == OSCILLATOR_NOISE ? PAL_BORDER : PAL_GENBKG2]);
 
 	printThreeDecimalsBg(232, 255 + 12, synth.performances[editor.currSample].parts[synth.currPart].program, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
-	printTwoHexBg(56, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].volume, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	printThreeHexBg(56, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].volume, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printFourHexBg(144, 255 + 22, synth.performances[editor.currSample].parts[synth.currPart].offset, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 
 	int16_t period = (int16_t)((double)PAULA_PAL_CLK / ((double)synth.performances[editor.currSample].parts[synth.currPart].sampleRate - 0.5));

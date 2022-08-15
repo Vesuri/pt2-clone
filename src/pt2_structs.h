@@ -155,8 +155,8 @@ typedef struct editor_t
 	volatile uint16_t *vol1Disp, *vol2Disp, *currEditPatternDisp, *currPosDisp, *currPatternDisp;
 	volatile uint16_t *currPosEdPattDisp, *currLengthDisp, *lpCutOffDisp, *hpCutOffDisp;
 	volatile int32_t *samplePosDisp, *chordLengthDisp;
-	volatile uint8_t *currPartProgramDisp, *currPartVolumeDisp;
-	volatile uint16_t *currPartOffsetDisp;
+	volatile uint8_t *currPartProgramDisp;
+	volatile uint16_t *currPartVolumeDisp, *currPartOffsetDisp;
 	volatile int16_t *currMixLevelDisp, *currMixLFO1Disp, *currMixLFO2Disp, *currMixEnv2Disp, *currMixEnv3Disp;
 	volatile int16_t *currPitchLevelDisp, *currPitchLFO1Disp, *currPitchLFO2Disp, *currPitchEnv2Disp, *currPitchEnv3Disp;
 	volatile int16_t *currWidthLevelDisp, *currWidthLFO1Disp, *currWidthLFO2Disp, *currWidthEnv2Disp, *currWidthEnv3Disp;

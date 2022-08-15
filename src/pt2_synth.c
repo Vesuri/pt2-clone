@@ -1280,11 +1280,11 @@ void renderPart(part_t* part, bool add)
 		int16_t output = (b4 * part->volume) >> 11;
 		if (add) {
 			output += buffer_render[buffer_position];
-			if (output < -128) {
-				output = -128;
-			} else if (output > 127) {
-				output = 127;
-			}
+		}
+		if (output < -128) {
+			output = -128;
+		} else if (output > 127) {
+			output = 127;
 		}
 		buffer_render[buffer_position] = output;
 	}

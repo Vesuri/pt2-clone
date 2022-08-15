@@ -689,9 +689,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp8 = CLAMP(ui.tmpDisp8, 0, 0x40);
-
-					synth.performances[editor.currSample].parts[synth.currPart].volume = tmp8;
+					synth.performances[editor.currSample].parts[synth.currPart].volume = ui.tmpDisp16;
 
 					ui.updatePartVolumeText = true;
 					ui.updateSynth = true;
