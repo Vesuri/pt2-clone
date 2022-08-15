@@ -2572,6 +2572,8 @@ void updateSynth(void)
 
 	ui.updateSynth = false;
 
+	textOutBg(288, 255 + 2, synth.performanceEnabled[editor.currSample] ? "ON " : "OFF", video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+
 	textOutBg(42, 255 + 13, "1", video.palette[synth.currPart == 0 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);
 	textOut(41, 255 + 12, "1", video.palette[synth.currPart == 0 ? PAL_BORDER : PAL_GENBKG2]);
 	textOutBg(58, 255 + 13, "2", video.palette[synth.currPart == 1 ? PAL_GENBKG2 : PAL_GENBKG], video.palette[PAL_GENBKG]);

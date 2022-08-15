@@ -4618,6 +4618,12 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.updatePerformanceName = true;
 		}
 		break;
+		case PTB_SY_PERFORMANCE_ENABLED:
+		{
+			synth.performanceEnabled[editor.currSample] = !synth.performanceEnabled[editor.currSample];
+			ui.updateSynth = true;
+		}
+		break;
 		case PTB_SY_PART_1:
 		case PTB_SY_PART_2:
 		case PTB_SY_PART_3:

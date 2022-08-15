@@ -161,6 +161,7 @@ typedef struct synth_t
 {
     performance_t performances[MOD_SAMPLES];
     program_t programs[128];
+    bool performanceEnabled[MOD_SAMPLES];
 
     uint8_t currPart;
     enum current_oscillator currOsc;

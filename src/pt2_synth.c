@@ -297,6 +297,8 @@ void initSynth(void)
 		for (int j = 0; j < 8; j++) {
 			synth.performances[i].parts[j].sampleRate = 22050;
 		}
+
+		synth.performanceEnabled[i] = false;
 	}
 
 	for (int i = 0; i < 128; i++) {
@@ -704,9 +706,11 @@ void initSynth(void)
 
 void synthRender(void)
 {
-	performance_t* performance = &synth.performances[editor.currSample];
-	for (int part = 0; part < 8; part++) {
-		renderPart(&performance->parts[part], part > 0);
+	if (synth.performanceEnabled[editor.currSample]) {
+		performance_t* performance = &synth.performances[editor.currSample];
+		for (int part = 0; part < 8; part++) {
+			renderPart(&performance->parts[part], part > 0);
+		}
 	}
 }
 
