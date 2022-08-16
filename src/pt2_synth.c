@@ -1294,6 +1294,31 @@ void renderPart(part_t* part, bool add)
 	}
 }
 
+uint32_t getLong(FILE* file)
+{
+	return ((uint8_t)fgetc(file) << 24) | ((uint8_t)fgetc(file) << 16) |
+		   ((uint8_t)fgetc(file) << 8) | (uint8_t)fgetc(file);
+}
+
+uint16_t getWord(FILE* file)
+{
+	return ((uint8_t)fgetc(file) << 8) | (uint8_t)fgetc(file);
+}
+
+void putLong(uint32_t data, FILE* file)
+{
+	fputc(data >> 24, file);
+	fputc(data >> 16, file);
+	fputc(data >> 8, file);
+	fputc(data, file);
+}
+
+void putWord(uint32_t data, FILE* file)
+{
+	fputc(data >> 8, file);
+	fputc(data, file);
+}
+
 void synthLoad(UNICHAR *fileName, bool allPerformances)
 {
 	FILE* file = UNICHAR_FOPEN(fileName, "rb");
@@ -1309,12 +1334,12 @@ void synthLoad(UNICHAR *fileName, bool allPerformances)
 	uint32_t enabledPerformances;
 	uint32_t enabledPrograms[4];
 	if (availableBytes >= 4) {
-		enabledPerformances = (fgetc(file) << 24) | (fgetc(file) << 16) | (fgetc(file) << 8) | fgetc(file);
+		enabledPerformances = getLong(file);
 		availableBytes -= 4;
 
 		if (enabledPerformances != 0 && availableBytes >= 16) {
 			for (int programLong = 0; programLong < 4; programLong++) {
-				enabledPrograms[programLong] = (fgetc(file) << 24) | (fgetc(file) << 16) | (fgetc(file) << 8) | fgetc(file);
+				enabledPrograms[programLong] = getLong(file);
 			}
 			availableBytes -= 16;
 
@@ -1383,16 +1408,10 @@ void synthSave(UNICHAR *fileName, bool allPerformances)
 	}
 
 	if (enabledPerformances != 0) {
-		fputc(enabledPerformances >> 24, file);
-		fputc(enabledPerformances >> 16, file);
-		fputc(enabledPerformances >> 8, file);
-		fputc(enabledPerformances, file);
+		putLong(enabledPerformances, file);
 
 		for (int programLong = 0; programLong < 4; programLong++) {
-			fputc(enabledPrograms[programLong] >> 24, file);
-			fputc(enabledPrograms[programLong] >> 16, file);
-			fputc(enabledPrograms[programLong] >> 8, file);
-			fputc(enabledPrograms[programLong], file);
+			putLong(enabledPrograms[programLong], file);
 		}
 
 		for (int performance = 0; performance < MOD_SAMPLES; performance++) {
