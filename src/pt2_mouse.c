@@ -4699,7 +4699,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		break;
 		case PTB_SY_PROGRAM_WRITE:
 		{
-			synthSave("protracker.jrm");
+			synthSave("protracker.jrm", true);
 		}
 		break;
 		case PTB_SY_OSC_1:

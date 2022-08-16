@@ -705,7 +705,7 @@ void initSynth(void)
 		synth.performances[i].parts[0].volume = 64;
 	}
 
-	synthLoad("protracker.jrm");
+	synthLoad("protracker.jrm", true);
 }
 
 void synthRender(void)
@@ -1294,7 +1294,7 @@ void renderPart(part_t* part, bool add)
 	}
 }
 
-void synthLoad(UNICHAR *fileName)
+void synthLoad(UNICHAR *fileName, bool allPerformances)
 {
 	FILE* file = UNICHAR_FOPEN(fileName, "rb");
 	if (file == NULL)
@@ -1303,17 +1303,48 @@ void synthLoad(UNICHAR *fileName)
 	}
 
 	fseek(file, 0, SEEK_END);
-	uint32_t size = ftell(file);
+	uint32_t availableBytes = ftell(file);
 	rewind(file);
 
-	if (size == (sizeof(synth_t) - 2)) {
-		fread(&synth, 1, size, file);
+	uint32_t enabledPerformances;
+	uint32_t enabledPrograms[4];
+	if (availableBytes >= 4) {
+		enabledPerformances = (fgetc(file) << 24) | (fgetc(file) << 16) | (fgetc(file) << 8) | fgetc(file);
+		availableBytes -= 4;
+
+		if (enabledPerformances != 0 && availableBytes >= 16) {
+			for (int programLong = 0; programLong < 4; programLong++) {
+				enabledPrograms[programLong] = (fgetc(file) << 24) | (fgetc(file) << 16) | (fgetc(file) << 8) | fgetc(file);
+			}
+			availableBytes -= 16;
+
+			for (int performance = 0; performance < MOD_SAMPLES; performance++) {
+				if ((enabledPerformances & (1 << performance)) && availableBytes >= sizeof(performance_t)) {
+					if (!allPerformances) {
+						synth.performanceEnabled[performance] = true;
+					}
+
+					fread(&synth.performances[performance], 1, sizeof(performance_t), file);
+					availableBytes -= sizeof(performance_t);
+				}
+			}
+
+			for (int programLong = 0; programLong < 4; programLong++) {
+				for (int programBit = 0; programBit < 32; programBit++) {
+					if ((enabledPrograms[programLong] & 1) && availableBytes >= sizeof(program_t)) {
+						fread(&synth.programs[(programLong << 5) + programBit], 1, sizeof(program_t), file);
+						availableBytes -= sizeof(program_t);
+					}
+					enabledPrograms[programLong] >>= 1;
+				}
+			}
+		}
 	}
 
 	fclose(file);
 }
 
-void synthSave(UNICHAR *fileName)
+void synthSave(UNICHAR *fileName, bool allPerformances)
 {
 	FILE* file = UNICHAR_FOPEN(fileName, "wb");
 	if (file == NULL)
@@ -1321,6 +1352,64 @@ void synthSave(UNICHAR *fileName)
 		return;
 	}
 
-	fwrite(&synth, 1, sizeof(synth_t) - 2, file);
+	uint32_t enabledPerformances;
+	uint32_t enabledPrograms[4];
+	if (allPerformances) {
+		enabledPerformances = 0x7fffffff;
+		for (int programLong = 0; programLong < 4; programLong++) {
+			enabledPrograms[programLong] = 0xffffffff;
+		}
+	} else {
+		enabledPerformances = 0;
+		for (int programLong = 0; programLong < 4; programLong++) {
+			enabledPrograms[programLong] = 0;
+		}
+
+		for (int performance = MOD_SAMPLES; performance >= 0; performance--) {
+			enabledPerformances <<= 1;
+
+			if (synth.performanceEnabled[performance]) {
+				enabledPerformances |= 1;
+
+				for (int part = 0; part < 8; part++) {
+					if (synth.performances[performance].parts[part].volume > 0) {
+						uint32_t programLong = synth.performances[performance].parts[part].program >> 5;
+						uint32_t programBit = synth.performances[performance].parts[part].program & 31;
+						enabledPrograms[programLong] |= 1 << programBit;
+					}
+				}
+			}
+		}
+	}
+
+	if (enabledPerformances != 0) {
+		fputc(enabledPerformances >> 24, file);
+		fputc(enabledPerformances >> 16, file);
+		fputc(enabledPerformances >> 8, file);
+		fputc(enabledPerformances, file);
+
+		for (int programLong = 0; programLong < 4; programLong++) {
+			fputc(enabledPrograms[programLong] >> 24, file);
+			fputc(enabledPrograms[programLong] >> 16, file);
+			fputc(enabledPrograms[programLong] >> 8, file);
+			fputc(enabledPrograms[programLong], file);
+		}
+
+		for (int performance = 0; performance < MOD_SAMPLES; performance++) {
+			if (enabledPerformances & (1 << performance)) {
+				fwrite(&synth.performances[performance], 1, sizeof(performance_t), file);
+			}
+		}
+
+		for (int programLong = 0; programLong < 4; programLong++) {
+			for (int programBit = 0; programBit < 32; programBit++) {
+				if (enabledPrograms[programLong] & 1) {
+					fwrite(&synth.programs[(programLong << 5) + programBit], 1, sizeof(program_t), file);
+				}
+				enabledPrograms[programLong] >>= 1;
+			}
+		}
+	}
+
 	fclose(file);
 }

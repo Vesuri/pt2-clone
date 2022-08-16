@@ -15,6 +15,7 @@
 #include "pt2_visuals.h"
 #include "pt2_sampler.h"
 #include "pt2_config.h"
+#include "pt2_synth.h"
 
 bool modSave(char *fileName)
 {
@@ -112,6 +113,9 @@ bool modSave(char *fileName)
 	}
 
 	fclose(f);
+
+	strcat(fileName, ".jrm");
+	synthSave(fileName, false);
 
 	displayMsg("MODULE SAVED !");
 	setMsgPointer();

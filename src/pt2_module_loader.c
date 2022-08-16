@@ -29,6 +29,7 @@
 #include "pt2_config.h"
 #include "pt2_sampling.h"
 #include "pt2_xpk.h"
+#include "pt2_synth.h"
 
 typedef struct mem_t
 {
@@ -683,6 +684,9 @@ module_t *modLoad(UNICHAR *fileName)
 	for (i = 0; i < AMIGA_VOICES; i++)
 		newMod->channels[i].n_chanindex = (int8_t)i;
 
+	strcat(fileName, ".jrm");
+	synthLoad(fileName, false);
+
 	return newMod;
 
 modLoadError:
@@ -976,6 +980,8 @@ void setupLoadedMod(void)
 	updateCurrSample();
 	editor.samplePos = 0;
 	updateSamplePos();
+
+	synthRender();
 }
 
 void loadModFromArg(char *arg)
