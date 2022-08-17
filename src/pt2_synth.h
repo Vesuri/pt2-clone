@@ -146,6 +146,7 @@ typedef struct program_t
 typedef struct part_t
 {
     uint8_t program;
+    uint8_t padding;
     uint16_t volume;
     uint16_t sampleRate;
     uint16_t offset;

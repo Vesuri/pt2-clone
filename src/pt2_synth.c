@@ -1319,6 +1319,256 @@ void putWord(uint32_t data, FILE* file)
 	fputc(data, file);
 }
 
+void getPart(part_t* part, FILE* file)
+{
+	part->program = (uint8_t)fgetc(file);
+	part->padding = (uint8_t)fgetc(file);
+	part->volume = getWord(file);
+	part->sampleRate = getWord(file);
+	part->offset = getWord(file);
+}
+
+void getPerformance(performance_t* performance, FILE* file)
+{
+	fread(performance->name, 1, sizeof(performance->name), file);
+	for (int part = 0; part < 8; part++) {
+		getPart(&performance->parts[part], file);
+	}
+}
+
+void getProgram(program_t* program, FILE* file)
+{
+	fread(program->name, 1, sizeof(program->name), file);
+    program->oscillator_1_waveform = (enum waveform_t)getWord(file);
+    program->oscillator_1_mix = getWord(file);
+    program->oscillator_1_mix_lfo_1 = getWord(file);
+    program->oscillator_1_mix_lfo_2 = getWord(file);
+    program->oscillator_1_mix_env_2 = getWord(file);
+    program->oscillator_1_mix_env_3 = getWord(file);
+    program->oscillator_1_pitch = getWord(file);
+    program->oscillator_1_pitch_lfo_1 = getWord(file);
+    program->oscillator_1_pitch_lfo_2 = getWord(file);
+    program->oscillator_1_pitch_env_2 = getWord(file);
+    program->oscillator_1_pitch_env_3 = getWord(file);
+    program->oscillator_1_width = getWord(file);
+    program->oscillator_1_width_lfo_1 = getWord(file);
+    program->oscillator_1_width_lfo_2 = getWord(file);
+    program->oscillator_1_width_env_2 = getWord(file);
+    program->oscillator_1_width_env_3 = getWord(file);
+    program->oscillator_1_sync = getWord(file);
+    program->oscillator_1_sync_lfo_1 = getWord(file);
+    program->oscillator_1_sync_lfo_2 = getWord(file);
+    program->oscillator_1_sync_env_2 = getWord(file);
+    program->oscillator_1_sync_env_3 = getWord(file);
+    program->oscillator_2_waveform = (enum waveform_t)getWord(file);
+    program->oscillator_2_mix = getWord(file);
+    program->oscillator_2_mix_lfo_1 = getWord(file);
+    program->oscillator_2_mix_lfo_2 = getWord(file);
+    program->oscillator_2_mix_env_2 = getWord(file);
+    program->oscillator_2_mix_env_3 = getWord(file);
+    program->oscillator_2_pitch = getWord(file);
+    program->oscillator_2_pitch_lfo_1 = getWord(file);
+    program->oscillator_2_pitch_lfo_2 = getWord(file);
+    program->oscillator_2_pitch_env_2 = getWord(file);
+    program->oscillator_2_pitch_env_3 = getWord(file);
+    program->oscillator_2_width = getWord(file);
+    program->oscillator_2_width_lfo_1 = getWord(file);
+    program->oscillator_2_width_lfo_2 = getWord(file);
+    program->oscillator_2_width_env_2 = getWord(file);
+    program->oscillator_2_width_env_3 = getWord(file);
+    program->oscillator_2_sync = getWord(file);
+    program->oscillator_2_sync_lfo_1 = getWord(file);
+    program->oscillator_2_sync_lfo_2 = getWord(file);
+    program->oscillator_2_sync_env_2 = getWord(file);
+    program->oscillator_2_sync_env_3 = getWord(file);
+    program->oscillator_3_waveform = (enum waveform_t)getWord(file);
+    program->oscillator_3_mix = getWord(file);
+    program->oscillator_3_mix_lfo_1 = getWord(file);
+    program->oscillator_3_mix_lfo_2 = getWord(file);
+    program->oscillator_3_mix_env_2 = getWord(file);
+    program->oscillator_3_mix_env_3 = getWord(file);
+    program->oscillator_3_pitch = getWord(file);
+    program->oscillator_3_pitch_lfo_1 = getWord(file);
+    program->oscillator_3_pitch_lfo_2 = getWord(file);
+    program->oscillator_3_pitch_env_2 = getWord(file);
+    program->oscillator_3_pitch_env_3 = getWord(file);
+    program->oscillator_3_width = getWord(file);
+    program->oscillator_3_width_lfo_1 = getWord(file);
+    program->oscillator_3_width_lfo_2 = getWord(file);
+    program->oscillator_3_width_env_2 = getWord(file);
+    program->oscillator_3_width_env_3 = getWord(file);
+    program->oscillator_3_sync = getWord(file);
+    program->oscillator_3_sync_lfo_1 = getWord(file);
+    program->oscillator_3_sync_lfo_2 = getWord(file);
+    program->oscillator_3_sync_env_2 = getWord(file);
+    program->oscillator_3_sync_env_3 = getWord(file);
+    program->oscillator_noise_mix = getWord(file);
+    program->oscillator_noise_mix_lfo_1 = getWord(file);
+    program->oscillator_noise_mix_lfo_2 = getWord(file);
+    program->oscillator_noise_mix_env_2 = getWord(file);
+    program->oscillator_noise_mix_env_3 = getWord(file);
+    program->oscillator_13_mix = getWord(file);
+    program->oscillator_13_mix_lfo_1 = getWord(file);
+    program->oscillator_13_mix_lfo_2 = getWord(file);
+    program->oscillator_13_mix_env_2 = getWord(file);
+    program->oscillator_13_mix_env_3 = getWord(file);
+    program->oscillator_13_fm = getWord(file);
+    program->oscillator_23_mix = getWord(file);
+    program->oscillator_23_mix_lfo_1 = getWord(file);
+    program->oscillator_23_mix_lfo_2 = getWord(file);
+    program->oscillator_23_mix_env_2 = getWord(file);
+    program->oscillator_23_mix_env_3 = getWord(file);
+    program->oscillator_23_fm = getWord(file);
+    program->filter_frequency = getWord(file);
+    program->filter_frequency_lfo_1 = getWord(file);
+    program->filter_frequency_lfo_2 = getWord(file);
+    program->filter_frequency_env_2 = getWord(file);
+    program->filter_frequency_env_3 = getWord(file);
+    program->filter_resonance = getWord(file);
+    program->filter_resonance_lfo_1 = getWord(file);
+    program->filter_resonance_lfo_2 = getWord(file);
+    program->filter_resonance_env_2 = getWord(file);
+    program->filter_resonance_env_3 = getWord(file);
+    program->envelope_1_attack = getWord(file);
+    program->envelope_1_decay = getWord(file);
+    program->envelope_1_sustain = getWord(file);
+    program->envelope_2_attack = getWord(file);
+    program->envelope_2_decay = getWord(file);
+    program->envelope_2_sustain = getWord(file);
+    program->envelope_3_attack = getWord(file);
+    program->envelope_3_decay = getWord(file);
+    program->envelope_3_sustain = getWord(file);
+    program->lfo_1_speed = getWord(file);
+    program->lfo_1_waveform = (enum waveform_lfo_t)getWord(file);
+    program->lfo_2_speed = getWord(file);
+    program->lfo_2_waveform = (enum waveform_lfo_t)getWord(file);
+}
+
+void putPart(part_t* part, FILE* file)
+{
+	fputc(part->program, file);
+	fputc(part->padding, file);
+	putWord(part->volume, file);
+	putWord(part->sampleRate, file);
+	putWord(part->offset, file);
+}
+
+void putPerformance(performance_t* performance, FILE* file)
+{
+	fwrite(performance->name, 1, sizeof(performance->name), file);
+	for (int part = 0; part < 8; part++) {
+		putPart(&performance->parts[part], file);
+	}
+}
+
+void putProgram(program_t* program, FILE* file)
+{
+	fwrite(program->name, 1, sizeof(program->name), file);
+    putWord(program->oscillator_1_waveform, file);
+    putWord(program->oscillator_1_mix, file);
+    putWord(program->oscillator_1_mix_lfo_1, file);
+    putWord(program->oscillator_1_mix_lfo_2, file);
+    putWord(program->oscillator_1_mix_env_2, file);
+    putWord(program->oscillator_1_mix_env_3, file);
+    putWord(program->oscillator_1_pitch, file);
+    putWord(program->oscillator_1_pitch_lfo_1, file);
+    putWord(program->oscillator_1_pitch_lfo_2, file);
+    putWord(program->oscillator_1_pitch_env_2, file);
+    putWord(program->oscillator_1_pitch_env_3, file);
+    putWord(program->oscillator_1_width, file);
+    putWord(program->oscillator_1_width_lfo_1, file);
+    putWord(program->oscillator_1_width_lfo_2, file);
+    putWord(program->oscillator_1_width_env_2, file);
+    putWord(program->oscillator_1_width_env_3, file);
+    putWord(program->oscillator_1_sync, file);
+    putWord(program->oscillator_1_sync_lfo_1, file);
+    putWord(program->oscillator_1_sync_lfo_2, file);
+    putWord(program->oscillator_1_sync_env_2, file);
+    putWord(program->oscillator_1_sync_env_3, file);
+    putWord(program->oscillator_2_waveform, file);
+    putWord(program->oscillator_2_mix, file);
+    putWord(program->oscillator_2_mix_lfo_1, file);
+    putWord(program->oscillator_2_mix_lfo_2, file);
+    putWord(program->oscillator_2_mix_env_2, file);
+    putWord(program->oscillator_2_mix_env_3, file);
+    putWord(program->oscillator_2_pitch, file);
+    putWord(program->oscillator_2_pitch_lfo_1, file);
+    putWord(program->oscillator_2_pitch_lfo_2, file);
+    putWord(program->oscillator_2_pitch_env_2, file);
+    putWord(program->oscillator_2_pitch_env_3, file);
+    putWord(program->oscillator_2_width, file);
+    putWord(program->oscillator_2_width_lfo_1, file);
+    putWord(program->oscillator_2_width_lfo_2, file);
+    putWord(program->oscillator_2_width_env_2, file);
+    putWord(program->oscillator_2_width_env_3, file);
+    putWord(program->oscillator_2_sync, file);
+    putWord(program->oscillator_2_sync_lfo_1, file);
+    putWord(program->oscillator_2_sync_lfo_2, file);
+    putWord(program->oscillator_2_sync_env_2, file);
+    putWord(program->oscillator_2_sync_env_3, file);
+    putWord(program->oscillator_3_waveform, file);
+    putWord(program->oscillator_3_mix, file);
+    putWord(program->oscillator_3_mix_lfo_1, file);
+    putWord(program->oscillator_3_mix_lfo_2, file);
+    putWord(program->oscillator_3_mix_env_2, file);
+    putWord(program->oscillator_3_mix_env_3, file);
+    putWord(program->oscillator_3_pitch, file);
+    putWord(program->oscillator_3_pitch_lfo_1, file);
+    putWord(program->oscillator_3_pitch_lfo_2, file);
+    putWord(program->oscillator_3_pitch_env_2, file);
+    putWord(program->oscillator_3_pitch_env_3, file);
+    putWord(program->oscillator_3_width, file);
+    putWord(program->oscillator_3_width_lfo_1, file);
+    putWord(program->oscillator_3_width_lfo_2, file);
+    putWord(program->oscillator_3_width_env_2, file);
+    putWord(program->oscillator_3_width_env_3, file);
+    putWord(program->oscillator_3_sync, file);
+    putWord(program->oscillator_3_sync_lfo_1, file);
+    putWord(program->oscillator_3_sync_lfo_2, file);
+    putWord(program->oscillator_3_sync_env_2, file);
+    putWord(program->oscillator_3_sync_env_3, file);
+    putWord(program->oscillator_noise_mix, file);
+    putWord(program->oscillator_noise_mix_lfo_1, file);
+    putWord(program->oscillator_noise_mix_lfo_2, file);
+    putWord(program->oscillator_noise_mix_env_2, file);
+    putWord(program->oscillator_noise_mix_env_3, file);
+    putWord(program->oscillator_13_mix, file);
+    putWord(program->oscillator_13_mix_lfo_1, file);
+    putWord(program->oscillator_13_mix_lfo_2, file);
+    putWord(program->oscillator_13_mix_env_2, file);
+    putWord(program->oscillator_13_mix_env_3, file);
+    putWord(program->oscillator_13_fm, file);
+    putWord(program->oscillator_23_mix, file);
+    putWord(program->oscillator_23_mix_lfo_1, file);
+    putWord(program->oscillator_23_mix_lfo_2, file);
+    putWord(program->oscillator_23_mix_env_2, file);
+    putWord(program->oscillator_23_mix_env_3, file);
+    putWord(program->oscillator_23_fm, file);
+    putWord(program->filter_frequency, file);
+    putWord(program->filter_frequency_lfo_1, file);
+    putWord(program->filter_frequency_lfo_2, file);
+    putWord(program->filter_frequency_env_2, file);
+    putWord(program->filter_frequency_env_3, file);
+    putWord(program->filter_resonance, file);
+    putWord(program->filter_resonance_lfo_1, file);
+    putWord(program->filter_resonance_lfo_2, file);
+    putWord(program->filter_resonance_env_2, file);
+    putWord(program->filter_resonance_env_3, file);
+    putWord(program->envelope_1_attack, file);
+    putWord(program->envelope_1_decay, file);
+    putWord(program->envelope_1_sustain, file);
+    putWord(program->envelope_2_attack, file);
+    putWord(program->envelope_2_decay, file);
+    putWord(program->envelope_2_sustain, file);
+    putWord(program->envelope_3_attack, file);
+    putWord(program->envelope_3_decay, file);
+    putWord(program->envelope_3_sustain, file);
+    putWord(program->lfo_1_speed, file);
+    putWord(program->lfo_1_waveform, file);
+    putWord(program->lfo_2_speed, file);
+    putWord(program->lfo_2_waveform, file);
+}
+
 void synthLoad(UNICHAR *fileName, bool allPerformances)
 {
 	FILE* file = UNICHAR_FOPEN(fileName, "rb");
@@ -1349,7 +1599,7 @@ void synthLoad(UNICHAR *fileName, bool allPerformances)
 						synth.performanceEnabled[performance] = true;
 					}
 
-					fread(&synth.performances[performance], 1, sizeof(performance_t), file);
+					getPerformance(&synth.performances[performance], file);
 					availableBytes -= sizeof(performance_t);
 				}
 			}
@@ -1357,7 +1607,7 @@ void synthLoad(UNICHAR *fileName, bool allPerformances)
 			for (int programLong = 0; programLong < 4; programLong++) {
 				for (int programBit = 0; programBit < 32; programBit++) {
 					if ((enabledPrograms[programLong] & 1) && availableBytes >= sizeof(program_t)) {
-						fread(&synth.programs[(programLong << 5) + programBit], 1, sizeof(program_t), file);
+						getProgram(&synth.programs[(programLong << 5) + programBit], file);
 						availableBytes -= sizeof(program_t);
 					}
 					enabledPrograms[programLong] >>= 1;
@@ -1416,14 +1666,14 @@ void synthSave(UNICHAR *fileName, bool allPerformances)
 
 		for (int performance = 0; performance < MOD_SAMPLES; performance++) {
 			if (enabledPerformances & (1 << performance)) {
-				fwrite(&synth.performances[performance], 1, sizeof(performance_t), file);
+				putPerformance(&synth.performances[performance], file);
 			}
 		}
 
 		for (int programLong = 0; programLong < 4; programLong++) {
 			for (int programBit = 0; programBit < 32; programBit++) {
 				if (enabledPrograms[programLong] & 1) {
-					fwrite(&synth.programs[(programLong << 5) + programBit], 1, sizeof(program_t), file);
+					putProgram(&synth.programs[(programLong << 5) + programBit], file);
 				}
 				enabledPrograms[programLong] >>= 1;
 			}
