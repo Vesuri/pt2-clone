@@ -1307,16 +1307,16 @@ uint16_t getWord(FILE* file)
 
 void putLong(uint32_t data, FILE* file)
 {
-	fputc(data >> 24, file);
-	fputc(data >> 16, file);
-	fputc(data >> 8, file);
-	fputc(data, file);
+	fputc((uint8_t)(data >> 24), file);
+	fputc((uint8_t)(data >> 16), file);
+	fputc((uint8_t)(data >> 8), file);
+	fputc((uint8_t)data, file);
 }
 
 void putWord(uint32_t data, FILE* file)
 {
-	fputc(data >> 8, file);
-	fputc(data, file);
+	fputc((uint8_t)(data >> 8), file);
+	fputc((uint8_t)data, file);
 }
 
 void getPart(part_t* part, FILE* file)
