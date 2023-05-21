@@ -796,7 +796,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -854,7 +854,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -912,7 +912,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -970,7 +970,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1059,7 +1059,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1099,7 +1099,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1139,7 +1139,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1179,7 +1179,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1259,7 +1259,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1299,7 +1299,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1339,7 +1339,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1379,7 +1379,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1459,7 +1459,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1499,7 +1499,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1539,7 +1539,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1579,7 +1579,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					switch (synth.currOsc) {
 					case OSCILLATOR_1:
@@ -1623,7 +1623,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1 = tmp16;
 
@@ -1639,7 +1639,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2 = tmp16;
 
@@ -1655,7 +1655,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2 = tmp16;
 
@@ -1671,7 +1671,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3 = tmp16;
 
@@ -1703,7 +1703,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1 = tmp16;
 
@@ -1719,7 +1719,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2 = tmp16;
 
@@ -1735,7 +1735,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2 = tmp16;
 
@@ -1751,7 +1751,7 @@ void exitGetTextLine(bool updateValue)
 
 				if (updateValue)
 				{
-					tmp16 = CLAMP(ui.tmpDisp16, 0, 0xfff);
+					tmp16 = CLAMP((int16_t)ui.tmpDisp16, -0x800, 0x7ff);
 
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3 = tmp16;
 
