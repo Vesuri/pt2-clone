@@ -226,7 +226,7 @@ typedef struct ui_t
 
 	bool changingSamplingNote;
 
-	bool force32BitNumPtr;
+	bool force32BitNumPtr, signed12BitNumPtr;
 	int8_t *numPtr8, tmpDisp8, pointerMode, editOpScreen, editTextType, askScreenType;
 	int8_t visualizerMode, previousPointerMode, forceVolDrag, changingChordNote;
 	uint8_t numLen, numBits;

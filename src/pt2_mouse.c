@@ -2414,6 +2414,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 	moduleSample_t *s;
 	
 	ui.force32BitNumPtr = false;
+	ui.signed12BitNumPtr = false;
 
 	switch (button)
 	{
@@ -4837,6 +4838,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 83) * 40 + 6; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_LFO1);
 		}
@@ -4869,6 +4871,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 93) * 40 + 6; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_LFO2);
 		}
@@ -4901,6 +4904,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 103) * 40 + 6; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_ENV2);
 		}
@@ -4933,6 +4937,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 113) * 40 + 6; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_MIX_ENV3);
 		}
@@ -4985,6 +4990,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 83) * 40 + 16; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_PITCH_LFO1);
 		}
@@ -5011,6 +5017,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 93) * 40 + 16; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_PITCH_LFO2);
 		}
@@ -5037,6 +5044,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 103) * 40 + 16; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_PITCH_ENV2);
 		}
@@ -5063,6 +5071,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 113) * 40 + 16; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_PITCH_ENV3);
 		}
@@ -5115,6 +5124,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 83) * 40 + 26; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_LFO1);
 		}
@@ -5141,6 +5151,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 93) * 40 + 26; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_LFO2);
 		}
@@ -5167,6 +5178,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 103) * 40 + 26; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_ENV2);
 		}
@@ -5193,6 +5205,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 113) * 40 + 26; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_WIDTH_ENV3);
 		}
@@ -5245,6 +5258,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 83) * 40 + 36; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_LFO1);
 		}
@@ -5271,6 +5285,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 93) * 40 + 36; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_LFO2);
 		}
@@ -5297,6 +5312,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 103) * 40 + 36; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV2);
 		}
@@ -5323,6 +5339,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 113) * 40 + 36; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV3);
 		}
@@ -5345,6 +5362,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 143) * 40 + 6; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_LFO1);
 		}
@@ -5356,6 +5374,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 153) * 40 + 6; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_LFO2);
 		}
@@ -5367,6 +5386,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 163) * 40 + 6; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_ENV2);
 		}
@@ -5378,6 +5398,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 173) * 40 + 6; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_ENV3);
 		}
@@ -5400,6 +5421,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 143) * 40 + 16; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LFO1);
 		}
@@ -5411,6 +5433,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 153) * 40 + 16; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LFO2);
 		}
@@ -5422,6 +5445,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 163) * 40 + 16; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV2);
 		}
@@ -5433,6 +5457,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			ui.numPtr16 = &ui.tmpDisp16;
 			ui.numLen = 3;
 			ui.numBits = 12;
+			ui.signed12BitNumPtr = true;
 			ui.editTextPos = (255 + 173) * 40 + 16; // (y * 40) + x
 			getNumLine(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV3);
 		}

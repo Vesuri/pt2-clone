@@ -4150,6 +4150,12 @@ void handleTextEditInputChar(char textChar)
 					}
 					else
 					{
+						if (ui.signed12BitNumPtr && ui.dstPos == 0) {
+							*ui.numPtr16 &= ~0x0F000;
+							if (textChar >= 8) {
+								*ui.numPtr16 |= 0x0F000;
+							}
+						}
 						*ui.numPtr16 &= ~(0x0F00 >> (ui.dstPos << 2));
 						*ui.numPtr16 |= textChar << (8 - (ui.dstPos << 2));
 					}
