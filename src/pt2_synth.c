@@ -1439,9 +1439,9 @@ void getProgram(program_t* program, FILE* file)
     program->envelope_3_decay = getWord(file);
     program->envelope_3_sustain = getWord(file);
     program->lfo_1_speed = getWord(file);
-    program->lfo_1_waveform = (enum waveform_lfo_t)getWord(file);
+    program->lfo_1_waveform = (enum waveform_lfo_t)((getWord(file) - 1536) / 2);
     program->lfo_2_speed = getWord(file);
-    program->lfo_2_waveform = (enum waveform_lfo_t)getWord(file);
+    program->lfo_2_waveform = (enum waveform_lfo_t)((getWord(file) - 1536) / 2);
 }
 
 void putPart(part_t* part, FILE* file)
@@ -1564,9 +1564,9 @@ void putProgram(program_t* program, FILE* file)
     putWord(program->envelope_3_decay, file);
     putWord(program->envelope_3_sustain, file);
     putWord(program->lfo_1_speed, file);
-    putWord(program->lfo_1_waveform, file);
+    putWord(program->lfo_1_waveform * 2 + 1536, file);
     putWord(program->lfo_2_speed, file);
-    putWord(program->lfo_2_waveform, file);
+    putWord(program->lfo_2_waveform * 2 + 1536, file);
 }
 
 void synthLoad(UNICHAR *fileName, bool allPerformances)
