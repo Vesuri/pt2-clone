@@ -1456,6 +1456,8 @@ void putPart(part_t* part, FILE* file)
 	putWord(part->offset, file);
 }
 
+#define PERFORMANCE_T_SIZE_ON_DISK 80
+
 void putPerformance(performance_t* performance, FILE* file)
 {
 	fwrite(performance->name, 1, sizeof(performance->name), file);
@@ -1463,6 +1465,8 @@ void putPerformance(performance_t* performance, FILE* file)
 		putPart(&performance->parts[part], file);
 	}
 }
+
+#define PROGRAM_T_SIZE_ON_DISK 222
 
 void putProgram(program_t* program, FILE* file)
 {
@@ -1597,21 +1601,21 @@ void synthLoad(UNICHAR *fileName, bool allPerformances)
 			availableBytes -= 16;
 
 			for (int performance = 0; performance < MOD_SAMPLES; performance++) {
-				if ((enabledPerformances & (1 << performance)) && availableBytes >= sizeof(performance_t)) {
+				if ((enabledPerformances & (1 << performance)) && availableBytes >= PERFORMANCE_T_SIZE_ON_DISK) {
 					if (!allPerformances) {
 						synth.performanceEnabled[performance] = true;
 					}
 
 					getPerformance(&synth.performances[performance], file);
-					availableBytes -= sizeof(performance_t);
+					availableBytes -= PERFORMANCE_T_SIZE_ON_DISK;
 				}
 			}
 
 			for (int programLong = 0; programLong < 4; programLong++) {
 				for (int programBit = 0; programBit < 32; programBit++) {
-					if ((enabledPrograms[programLong] & 1) && availableBytes >= sizeof(program_t)) {
+					if ((enabledPrograms[programLong] & 1) && availableBytes >= PROGRAM_T_SIZE_ON_DISK) {
 						getProgram(&synth.programs[(programLong << 5) + programBit], file);
-						availableBytes -= sizeof(program_t);
+						availableBytes -= PROGRAM_T_SIZE_ON_DISK;
 					}
 					enabledPrograms[programLong] >>= 1;
 				}
