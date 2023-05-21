@@ -802,6 +802,7 @@ void renderPart(part_t* part, bool add)
 					envelope_1_counter = program->envelope_1_decay;
 					break;
 				default:
+					envelope_1_current = program->envelope_1_sustain << 4;
 					envelope_1_delta = 0;
 					envelope_1_counter = 0x7fff;
 					break;
@@ -826,6 +827,7 @@ void renderPart(part_t* part, bool add)
 					envelope_2_counter = program->envelope_2_decay;
 					break;
 				default:
+					envelope_2_current = program->envelope_2_sustain << 4;
 					envelope_2_delta = 0;
 					envelope_2_counter = 0x7fff;
 					break;
@@ -850,6 +852,7 @@ void renderPart(part_t* part, bool add)
 					envelope_3_counter = program->envelope_3_decay;
 					break;
 				default:
+					envelope_3_current = program->envelope_3_sustain << 4;
 					envelope_3_delta = 0;
 					envelope_3_counter = 0x7fff;
 					break;
