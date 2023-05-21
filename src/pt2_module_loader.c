@@ -994,7 +994,7 @@ void loadModFromArg(char *arg)
 
 	filenameLen = (uint32_t)strlen(arg);
 
-	filenameU = (UNICHAR *)calloc(filenameLen + 2, sizeof (UNICHAR));
+	filenameU = (UNICHAR *)calloc(filenameLen + 2 + 4, sizeof (UNICHAR));
 	if (filenameU == NULL)
 	{
 		statusOutOfMemory();
