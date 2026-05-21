@@ -27,3 +27,22 @@ vs2019_project/pt2-clone/Debug/pt2-clone.vcxproj.FileListAbsolute.txt
 *.enc
 release/macos/pt2-clone-macos.app/Contents/MacOS/pt2-clone-macos
 pt_pal_editor/vs2019_project/pt_pal_editor/x64/Debug/pt_pal_editor.vcxproj.FileListAbsolute.txt
+
+# Build artifacts
+a.out
+src/*.o
+src/gfx/*.o
+src/modloaders/*.o
+src/smploaders/*.o
+
+# VS Code
+.vscode/
+
+# CLAUDE.md (Claude Code project instructions)
+CLAUDE.md
+
+# Test build outputs
+test/68k/synth_render
+test/68k/synth_render.s
+test/synth_test
+test/__pycache__/
