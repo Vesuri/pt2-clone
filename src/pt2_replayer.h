@@ -32,5 +32,4 @@ void modSetTempo(int32_t bpm, bool doLockAudio);
 void modFree(void);
 void clearSong(void);
 void clearSamples(void);
-void clearAll(void);
 void modSetPattern(uint8_t pattern);

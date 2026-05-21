@@ -668,28 +668,3 @@ void normalizeDoubleTo8Bit(double *dSampleData, uint32_t sampleLength)
 		dSampleData[i] *= dGain;
 }
 
-// Compatibility wrappers for old Paula API (used by synth branch edit code)
-void mixerUpdateLoops(void)
-{
-	if (song == NULL) return;
-	lockAudio();
-	for (int32_t i = 0; i < PAULA_VOICES; i++)
-	{
-		const moduleChannel_t *ch = &song->channels[i];
-		if (ch->n_samplenum == editor.currSample)
-		{
-			const moduleSample_t *s = &song->samples[editor.currSample];
-			const uint32_t voiceAddr = 0xDFF0A0 + (i * 16);
-			paulaWritePtr(voiceAddr + 0, &song->sampleData[s->offset + s->loopStart]);
-			paulaWriteWord(voiceAddr + 4, (uint16_t)(s->loopLength >> 1));
-		}
-	}
-	unlockAudio();
-}
-
-void paulaSetVolume(int32_t ch, uint16_t vol)  { paulaWriteWord(0xDFF0A0 + (ch * 16) + 8, vol); }
-void paulaSetPeriod(int32_t ch, uint16_t period) { paulaWriteWord(0xDFF0A0 + (ch * 16) + 6, period); }
-void paulaSetLength(int32_t ch, uint16_t len)  { paulaWriteWord(0xDFF0A0 + (ch * 16) + 4, len); }
-void paulaSetData(int32_t ch, const int8_t *src) { paulaWritePtr(0xDFF0A0 + (ch * 16) + 0, src); }
-void paulaStartDMA(int32_t ch) { paulaWriteWord(0xDFF096, 0x8000 | (uint16_t)(1 << ch)); }
-void paulaStopDMA(int32_t ch)  { paulaWriteWord(0xDFF096, (uint16_t)(1 << ch)); }

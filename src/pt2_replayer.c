@@ -1924,9 +1924,3 @@ void resetSong(void) // only call this after storeTempVariables() has been calle
 	modRenderDone = false;
 }
 
-void clearAll(void)
-{
-	clearSamples();
-	clearSong();
-	updateWindowTitle(MOD_NOT_MODIFIED);
-}

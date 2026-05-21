@@ -152,6 +152,8 @@ typedef struct editor_t
 	volatile uint16_t *vol1Disp, *vol2Disp, *currEditPatternDisp, *currPosDisp, *currPatternDisp;
 	volatile uint16_t *currPosEdPattDisp, *currLengthDisp, *lpCutOffDisp, *hpCutOffDisp;
 	volatile int32_t *samplePosDisp, *chordLengthDisp;
+
+	// synth display pointers
 	volatile uint8_t *currPartProgramDisp;
 	volatile uint16_t *currPartVolumeDisp, *currPartOffsetDisp;
 	volatile int16_t *currMixLevelDisp, *currMixLFO1Disp, *currMixLFO2Disp, *currMixEnv2Disp, *currMixEnv3Disp;
@@ -221,17 +223,14 @@ typedef struct ui_t
 {
 	char statusMessage[18], prevStatusMessage[18];
 	volatile bool askBoxShown, throwExit;
-	bool answerNo, answerYes, askScreenShown, editTextFlag, samplerScreenShown;
+	bool editTextFlag, samplerScreenShown;
 	bool leftLoopPinMoving, rightLoopPinMoving, changingSmpResample, changingDrumPadNote;
 	bool forceSampleDrag, forceSampleEdit;
-	bool aboutScreenShown, clearScreenShown, posEdScreenShown, diskOpScreenShown;
+	bool aboutScreenShown, posEdScreenShown, diskOpScreenShown;
 	bool samplerVolBoxShown, samplerFiltersBoxShown, samplingBoxShown, editOpScreenShown;
 	bool changingSamplingNote;
-
-	char *dstPtr, *editPos, *textEndPtr, *showTextPtr;
-	bool force32BitNumPtr, signed12BitNumPtr;
-	int8_t *numPtr8, tmpDisp8, pointerMode, editOpScreen, editTextType, askScreenType;
-	uint8_t numLen, numBits;
+	bool disableVisualizer; // ask boxes (f.ex. MOD2WAV)
+	int8_t pointerMode, editOpScreen;
 	int8_t visualizerMode, previousPointerMode, forceVolDrag, changingChordNote;
 	int16_t sampleMarkingPos;
 	uint16_t lastSampleOffset;
@@ -260,16 +259,13 @@ typedef struct ui_t
 	bool updateCurrSampleNum, updateCurrSampleVolume, updateCurrSampleLength;
 	bool updateCurrSampleRepeat, updateCurrSampleReplen, updateCurrSampleName;
 	bool updateSongSize, updateSongTiming, updateSongBPM;
-	bool updateCurrPattText, updateTrackerFlags, pat2SmpDialogShown;
+	bool updateCurrPattText, updateTrackerFlags;
 
 	// disk op.
 	bool updateLoadMode, updatePackText, updateSaveFormatText, updateDiskOpPathText;
 
 	// pos ed.
 	bool updatePosEd, updateDiskOpFileList;
-
-	// these are used when things are drawn on top, for example clear/ask dialogs
-	bool disablePosEd, disableVisualizer;
 
 	// synth
 	bool updateSynth;
@@ -287,11 +283,6 @@ typedef struct ui_t
 	bool updateEnv3AttackText, updateEnv3DecayText, updateEnv3SustainText;
 	bool updateLFO1SpeedText, updateLFO2SpeedText;
 	bool changingSynthNote;
-
-	int16_t lineCurX, lineCurY, editObject;
-	uint16_t *numPtr16, tmpDisp16, *dstOffset, dstPos, textLength, editTextPos;
-	uint16_t dstOffsetEnd, diskOpPathTextOffset;
-	int32_t askTempData, *numPtr32, tmpDisp32;
 } ui_t;
 
 typedef struct textEdit_t

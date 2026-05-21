@@ -28,9 +28,6 @@
 #include "pt2_visuals.h"
 #include "pt2_scopes.h"
 #include "pt2_edit.h"
-#include "pt2_pat2smp.h"
-#include "pt2_mod2wav.h"
-#include "pt2_synth.h"
 #include "pt2_config.h"
 #include "pt2_bmp.h"
 #include "pt2_sampling.h"
@@ -39,6 +36,7 @@
 #include "pt2_audio.h"
 #include "pt2_posed.h"
 #include "pt2_textedit.h"
+#include "pt2_synth.h"
 
 typedef struct sprite_t
 {
@@ -75,7 +73,6 @@ void updateSongInfo1(void);
 void updateSongInfo2(void);
 void updateSampler(void);
 void updatePatternData(void);
-void updateSynth(void);
 
 void blit32(int32_t x, int32_t y, int32_t w, int32_t h, const uint32_t *src)
 {
@@ -882,10 +879,6 @@ void updateCurrSample(void)
 
 	sampler.tmpLoopStart = 0;
 	sampler.tmpLoopLength = 0;
-
-	ui.updatePerformanceName = true;
-	ui.updateProgramName = true;
-	ui.updateSynth = true;
 }
 
 void updatePatternData(void)
@@ -1397,10 +1390,6 @@ void displayMainScreen(void)
 			renderMuteButtons();
 		}
 	}
-
-	renderSynthScreen();
-
-	ui.updateSynth = true;
 }
 
 void videoClose(void)
@@ -1928,6 +1917,166 @@ void updateRenderSizeVars(void)
 	createMouseCursors();
 }
 
+void toggleFullscreen(void)
+{
+	video.fullscreen ^= 1;
+	if (video.fullscreen)
+		SDL_SetWindowFullscreen(video.window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	else
+		SDL_SetWindowFullscreen(video.window, 0);
+
+	SDL_Delay(15); // fixes possible issues
+
+	updateRenderSizeVars();
+	updateMouseScaling();
+
+	if (video.fullscreen)
+	{
+		mouse.setPosX = video.displayW / 2;
+		mouse.setPosY = video.displayH / 2;
+	}
+	else
+	{
+		mouse.setPosX = video.renderW / 2;
+		mouse.setPosY = video.renderH / 2;
+	}
+
+	mouse.setPosFlag = true;
+}
+
+bool setupVideo(void)
+{
+	if (config.autoFitVideoScale)
+	{
+		int8_t i;
+		SDL_DisplayMode dm;
+
+		int32_t di = SDL_GetWindowDisplayIndex(video.window);
+		if (di < 0)
+			di = 0; // return display index 0 (default) on error
+
+		// find out which upscaling factor is the biggest to fit on screen
+		if (SDL_GetDesktopDisplayMode(di, &dm) == 0)
+		{
+			for (i = MAX_UPSCALE_FACTOR; i >= 1; i--)
+			{
+				// height test is slightly taller because of window title, window borders and taskbar/menu/dock
+				if (dm.w >= SCREEN_W*i && dm.h >= (SCREEN_H+64)*i)
+				{
+					config.videoScaleFactor = i;
+					break;
+				}
+			}
+
+			if (i == 0)
+				config.videoScaleFactor = 1; // 1x is not going to fit, but use 1x anyways...
+		}
+		else
+		{
+			// couldn't get screen resolution, set to 1x
+			config.videoScaleFactor = 1;
+		}
+	}
+
+	int32_t screenW = SCREEN_W * config.videoScaleFactor;
+	int32_t screenH = SCREEN_H * config.videoScaleFactor;
+
+	uint32_t rendererFlags = 0;
+
+	SDL_DisplayMode dm;
+
+	int32_t di = SDL_GetWindowDisplayIndex(video.window);
+	if (di < 0)
+		di = 0; // return display index 0 (default) on error
+
+	SDL_GetDesktopDisplayMode(di, &dm);
+	video.dMonitorRefreshRate = (double)dm.refresh_rate;
+
+	video.vsync60HzPresent = false;
+	if (!config.vsyncOff)
+	{
+		if (dm.refresh_rate >= 59 && dm.refresh_rate <= 61)
+		{
+			video.vsync60HzPresent = true;
+			rendererFlags |= SDL_RENDERER_PRESENTVSYNC;
+		}
+	}
+
+	uint32_t windowFlags = SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;
+
+#ifndef SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR
+/* older SDL2 versions don't define this, don't fail the build for it */
+#define SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR "SDL_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR"
+#endif
+	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+
+	video.window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED, screenW, screenH, windowFlags);
+
+	if (video.window == NULL)
+	{
+		showErrorMsgBox("Couldn't create SDL window:\n%s", SDL_GetError());
+		return false;
+	}
+
+	video.renderer = SDL_CreateRenderer(video.window, -1, rendererFlags);
+	if (video.renderer == NULL)
+	{
+		if (video.vsync60HzPresent) // try again without vsync flag
+		{
+			video.vsync60HzPresent = false;
+			rendererFlags &= ~SDL_RENDERER_PRESENTVSYNC;
+			video.renderer = SDL_CreateRenderer(video.window, -1, rendererFlags);
+		}
+
+		if (video.renderer == NULL)
+		{
+			showErrorMsgBox("Couldn't create SDL renderer:\n%s\n\n" \
+			                "Is your GPU (+ driver) too old?", SDL_GetError());
+			return false;
+		}
+	}
+
+	SDL_SetRenderDrawBlendMode(video.renderer, SDL_BLENDMODE_NONE);
+
+	if (config.pixelFilter == PIXELFILTER_LINEAR)
+		SDL_SetHint("SDL_RENDER_SCALE_QUALITY", "linear");
+	else if (config.pixelFilter == PIXELFILTER_BEST)
+		SDL_SetHint("SDL_RENDER_SCALE_QUALITY", "best");
+	else
+		SDL_SetHint("SDL_RENDER_SCALE_QUALITY", "nearest");
+
+	video.texture = SDL_CreateTexture(video.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_W, SCREEN_H);
+	if (video.texture == NULL)
+	{
+		showErrorMsgBox("Couldn't create %dx%d GPU texture:\n%s\n\n" \
+		                "Is your GPU (+ driver) too old?", SCREEN_W, SCREEN_H, SDL_GetError());
+		return false;
+	}
+
+	SDL_SetTextureBlendMode(video.texture, SDL_BLENDMODE_NONE);
+
+	// frame buffer used by SDL (for texture)
+	video.frameBuffer = (uint32_t *)malloc(SCREEN_W * SCREEN_H * sizeof (int32_t));
+	if (video.frameBuffer == NULL)
+	{
+		showErrorMsgBox("Out of memory!");
+		return false;
+	}
+
+	updateRenderSizeVars();
+	updateMouseScaling();
+
+	if (config.hwMouse)
+		SDL_ShowCursor(SDL_TRUE);
+	else
+		SDL_ShowCursor(SDL_FALSE);
+
+	SDL_SetRenderDrawColor(video.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+
+	dFrameDurationDiv = (1000.0 * FPS_SCAN_FRAMES) / hpcFreq.dFreqMulMs;
+	return true;
+}
 void updateSynth(void)
 {
 	if (ui.updatePerformanceName)
@@ -2511,171 +2660,3 @@ void renderSynthScreen(void)
 	ui.updatePerformanceName = true;
 	ui.updateProgramName = true;
 }
-
-void toggleFullscreen(void)
-{
-	video.fullscreen ^= 1;
-	if (video.fullscreen)
-		SDL_SetWindowFullscreen(video.window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-	else
-		SDL_SetWindowFullscreen(video.window, 0);
-
-	SDL_Delay(15); // fixes possible issues
-
-	updateRenderSizeVars();
-	updateMouseScaling();
-
-	if (video.fullscreen)
-	{
-		mouse.setPosX = video.displayW / 2;
-		mouse.setPosY = video.displayH / 2;
-	}
-	else
-	{
-		mouse.setPosX = video.renderW / 2;
-		mouse.setPosY = video.renderH / 2;
-	}
-
-	mouse.setPosFlag = true;
-}
-
-bool setupVideo(void)
-{
-	if (config.autoFitVideoScale)
-	{
-		int8_t i;
-		SDL_DisplayMode dm;
-
-		int32_t di = SDL_GetWindowDisplayIndex(video.window);
-		if (di < 0)
-			di = 0; // return display index 0 (default) on error
-
-		// find out which upscaling factor is the biggest to fit on screen
-		if (SDL_GetDesktopDisplayMode(di, &dm) == 0)
-		{
-			for (i = MAX_UPSCALE_FACTOR; i >= 1; i--)
-			{
-				// height test is slightly taller because of window title, window borders and taskbar/menu/dock
-				if (dm.w >= SCREEN_W*i && dm.h >= (SCREEN_H+64)*i)
-				{
-					config.videoScaleFactor = i;
-					break;
-				}
-			}
-
-			if (i == 0)
-				config.videoScaleFactor = 1; // 1x is not going to fit, but use 1x anyways...
-		}
-		else
-		{
-			// couldn't get screen resolution, set to 1x
-			config.videoScaleFactor = 1;
-		}
-	}
-
-	int32_t screenW = SCREEN_W * config.videoScaleFactor;
-	int32_t screenH = SCREEN_H * config.videoScaleFactor;
-
-	uint32_t rendererFlags = 0;
-
-	SDL_DisplayMode dm;
-
-	int32_t di = SDL_GetWindowDisplayIndex(video.window);
-	if (di < 0)
-		di = 0; // return display index 0 (default) on error
-
-	SDL_GetDesktopDisplayMode(di, &dm);
-	video.dMonitorRefreshRate = (double)dm.refresh_rate;
-
-	video.vsync60HzPresent = false;
-	if (!config.vsyncOff)
-	{
-		if (dm.refresh_rate >= 59 && dm.refresh_rate <= 61)
-		{
-			video.vsync60HzPresent = true;
-			rendererFlags |= SDL_RENDERER_PRESENTVSYNC;
-		}
-	}
-
-	uint32_t windowFlags = SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI;
-
-#ifndef SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR
-/* older SDL2 versions don't define this, don't fail the build for it */
-#define SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR "SDL_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR"
-#endif
-	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-
-	video.window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED, screenW, screenH, windowFlags);
-
-	if (video.window == NULL)
-	{
-		showErrorMsgBox("Couldn't create SDL window:\n%s", SDL_GetError());
-		return false;
-	}
-
-	video.renderer = SDL_CreateRenderer(video.window, -1, rendererFlags);
-	if (video.renderer == NULL)
-	{
-		if (video.vsync60HzPresent) // try again without vsync flag
-		{
-			video.vsync60HzPresent = false;
-			rendererFlags &= ~SDL_RENDERER_PRESENTVSYNC;
-			video.renderer = SDL_CreateRenderer(video.window, -1, rendererFlags);
-		}
-
-		if (video.renderer == NULL)
-		{
-			showErrorMsgBox("Couldn't create SDL renderer:\n%s\n\n" \
-			                "Is your GPU (+ driver) too old?", SDL_GetError());
-			return false;
-		}
-	}
-
-	SDL_SetRenderDrawBlendMode(video.renderer, SDL_BLENDMODE_NONE);
-
-	if (config.pixelFilter == PIXELFILTER_LINEAR)
-		SDL_SetHint("SDL_RENDER_SCALE_QUALITY", "linear");
-	else if (config.pixelFilter == PIXELFILTER_BEST)
-		SDL_SetHint("SDL_RENDER_SCALE_QUALITY", "best");
-	else
-		SDL_SetHint("SDL_RENDER_SCALE_QUALITY", "nearest");
-
-	video.texture = SDL_CreateTexture(video.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_W, SCREEN_H);
-	if (video.texture == NULL)
-	{
-		showErrorMsgBox("Couldn't create %dx%d GPU texture:\n%s\n\n" \
-		                "Is your GPU (+ driver) too old?", SCREEN_W, SCREEN_H, SDL_GetError());
-		return false;
-	}
-
-	SDL_SetTextureBlendMode(video.texture, SDL_BLENDMODE_NONE);
-
-	// frame buffer used by SDL (for texture)
-	video.frameBuffer = (uint32_t *)malloc(SCREEN_W * SCREEN_H * sizeof (int32_t));
-	if (video.frameBuffer == NULL)
-	{
-		showErrorMsgBox("Out of memory!");
-		return false;
-	}
-
-	updateRenderSizeVars();
-	updateMouseScaling();
-
-	if (config.hwMouse)
-		SDL_ShowCursor(SDL_TRUE);
-	else
-		SDL_ShowCursor(SDL_FALSE);
-
-	SDL_SetRenderDrawColor(video.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-
-	dFrameDurationDiv = (1000.0 * FPS_SCAN_FRAMES) / hpcFreq.dFreqMulMs;
-	return true;
-}
-
-void removeClearScreen(void) { displayMainScreen(); ui.disablePosEd = false; ui.disableVisualizer = false; }
-void renderClearScreen(void) { }
-void renderAskDialog(void)   { }
-void removeAskDialog(void)   { displayMainScreen(); }
-void handleAskNo(void)       { removeAskDialog(); }
-void handleAskYes(void)      { removeAskDialog(); }

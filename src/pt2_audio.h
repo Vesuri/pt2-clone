@@ -61,12 +61,5 @@ void outputAudio(int16_t *target, int32_t numSamples);
 bool setupAudio(void);
 void audioClose(void);
 
-void mixerUpdateLoops(void);
-void paulaStopDMA(int32_t ch);
-void paulaStartDMA(int32_t ch);
-void paulaSetPeriod(int32_t ch, uint16_t period);
-void paulaSetVolume(int32_t ch, uint16_t vol);
-void paulaSetLength(int32_t ch, uint16_t len);
-void paulaSetData(int32_t ch, const int8_t *src);
 
 extern audio_t audio; // pt2_audio.c

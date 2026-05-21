@@ -1,10 +1,3 @@
-// TODO
-// - replace "write" with "save config"
-// - module specific config
-//     - longword: bit per performanceEnabled
-//     - 4 longwords: bit per used program
-//     - numEnabledPerformances * sizeof(performance_t)
-//     - numUsedPrograms * sizeof(program_t)
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

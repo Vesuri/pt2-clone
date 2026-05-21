@@ -13,7 +13,6 @@
 #else
 #include <unistd.h>
 #endif
-#include "pt2_header.h"
 #include "pt2_textout.h"
 #include "pt2_helpers.h"
 #include "pt2_visuals.h"
@@ -27,77 +26,24 @@
 #include "pt2_config.h"
 #include "pt2_sampling.h"
 #include "pt2_chordmaker.h"
-#include "pt2_synth.h"
 #include "pt2_askbox.h"
+#include "pt2_synth.h"
 #include "pt2_replayer.h"
 #include "pt2_posed.h"
-#include "pt2_textedit_compat.h"
+#include "pt2_textedit.h"
 
 #if defined _WIN32 && !defined _DEBUG
 extern bool windowsKeyIsDown;
 extern HHOOK g_hKeyboardHook;
 #endif
 
-static bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode);
+static bool handleGeneralModes(SDL_Scancode scancode);
 static void movePatCurPrevCh(void);
 static void movePatCurNextCh(void);
 static void movePatCurRight(void);
 static void movePatCurLeft(void);
 
-
-static void textMarkerMoveLeft(void)
-{
-	if (ui.dstPos > 0)
-	{
-		removeTextEditMarker();
-		ui.dstPos--;
-		ui.lineCurX -= FONT_CHAR_W;
-		renderTextEditMarker();
-	}
-	else
-	{
-		if (ui.dstOffset != NULL)
-		{
-			(*ui.dstOffset)--;
-			if (ui.editObject == PTB_DO_DATAPATH)
-				ui.updateDiskOpPathText = true;
-		}
-	}
-}
-
-static void textMarkerMoveRight(void)
-{
-	if (ui.editTextType == TEXT_EDIT_STRING)
-	{
-		if (ui.dstPos < ui.textLength-1)
-		{
-			removeTextEditMarker();
-			ui.dstPos++;
-			ui.lineCurX += FONT_CHAR_W;
-			renderTextEditMarker();
-		}
-		else
-		{
-			if (ui.dstOffset != NULL)
-			{
-				(*ui.dstOffset)++;
-				if (ui.editObject == PTB_DO_DATAPATH)
-					ui.updateDiskOpPathText = true;
-			}
-		}
-	}
-	else
-	{
-		if (ui.dstPos < ui.numLen)
-			removeTextEditMarker();
-
-		ui.dstPos++;
-		ui.lineCurX += FONT_CHAR_W;
-
-		if (ui.dstPos < ui.numLen)
-			renderTextEditMarker();
-	}
-}
+bool handleTextEditMode(SDL_Scancode scancode);
 
 void readKeyModifiers(void)
 {
@@ -289,7 +235,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 	// XXX: This really needs some refactoring, it's messy and not logical
 
-	if (!handleGeneralModes(keycode, scancode)) return;
+	if (!handleGeneralModes(scancode)) return;
 	if (!handleTextEditMode(scancode)) return;
 	if (ui.samplerVolBoxShown || ui.samplingBoxShown) return;
 
@@ -3569,7 +3515,7 @@ static void swapChannel(uint8_t srcCh, uint8_t dstCh)
 	ui.updatePatternData = true;
 }
 
-static bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
+static bool handleGeneralModes(SDL_Scancode scancode)
 {
 	// if MOD2WAV is ongoing, only check for ESC key
 	if (editor.mod2WavOngoing)
@@ -3835,157 +3781,6 @@ static bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 		return false;
 	}
 
-	// YES/NO ASK DIALOG
-	if (ui.askScreenShown)
-	{
-		if (ui.pat2SmpDialogShown)
-		{
-			// PAT2SMP specific ask dialog
-			switch (keycode)
-			{
-				case SDLK_KP_ENTER:
-				case SDLK_RETURN:
-				case SDLK_h:
-				{
-					ui.askScreenShown = false;
-					ui.answerNo = true;
-					ui.answerYes = false;
-					editor.pat2SmpHQ = true;
-					handleAskYes();
-				}
-				break;
-
-				case SDLK_l:
-				{
-					ui.askScreenShown = false;
-					ui.answerNo = false;
-					ui.answerYes = true;
-					editor.pat2SmpHQ = false;
-					handleAskYes();
-					// pointer/status is updated by the 'yes handler'
-				}
-				break;
-
-				case SDLK_ESCAPE:
-				case SDLK_a:
-				case SDLK_n:
-				{
-					ui.askScreenShown = false;
-					ui.answerNo = true;
-					ui.answerYes = false;
-					handleAskNo();
-				}
-				break;
-
-				default: break;
-			}
-		}
-		else
-		{
-			// normal yes/no dialog
-			switch (keycode)
-			{
-				case SDLK_ESCAPE:
-				case SDLK_n:
-				{
-					ui.askScreenShown = false;
-					ui.answerNo = true;
-					ui.answerYes = false;
-					handleAskNo();
-				}
-				break;
-
-				case SDLK_KP_ENTER:
-				case SDLK_RETURN:
-				case SDLK_y:
-				{
-					ui.askScreenShown = false;
-					ui.answerNo = false;
-					ui.answerYes = true;
-					handleAskYes();
-					// pointer/status is updated by the 'yes handler'
-				}
-				break;
-
-				default: break;
-			}
-		}
-
-		return false;
-	}
-
-	// CLEAR SCREEN DIALOG
-	if (ui.clearScreenShown)
-	{
-		switch (keycode)
-		{
-			case SDLK_s:
-			{
-				ui.clearScreenShown = false;
-				removeClearScreen();
-
-				modStop();
-				clearSamples();
-
-				editor.playMode = PLAY_MODE_NORMAL;
-				editor.currMode = MODE_IDLE;
-
-				pointerSetPreviousMode();
-				setPrevStatusMessage();
-			}
-			break;
-
-			case SDLK_o:
-			{
-				ui.clearScreenShown = false;
-				removeClearScreen();
-
-				modStop();
-				clearSong();
-
-				editor.playMode = PLAY_MODE_NORMAL;
-				editor.currMode = MODE_IDLE;
-
-				pointerSetPreviousMode();
-				setPrevStatusMessage();
-			}
-			break;
-
-			case SDLK_a:
-			{
-				ui.clearScreenShown = false;
-				removeClearScreen();
-
-				modStop();
-				clearAll();
-
-				editor.playMode = PLAY_MODE_NORMAL;
-				editor.currMode = MODE_IDLE;
-
-				pointerSetPreviousMode();
-				setPrevStatusMessage();
-			}
-			break;
-
-			case SDLK_c:
-			case SDLK_ESCAPE:
-			{
-				ui.clearScreenShown = false;
-				removeClearScreen();
-
-				editor.currMode = MODE_IDLE;
-
-				pointerSetPreviousMode();
-				setPrevStatusMessage();
-			}
-			break;
-
-			default: break;
-		}
-
-		return false;
-	}
-
 	// SYNTH SCREEN
 	if (ui.changingSynthNote)
 	{
@@ -4004,7 +3799,7 @@ static bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 
 			uint8_t note = rawKey > 35 ? 35 : rawKey;
 			int32_t period = periodTable[note];
-			if (period < 113) // also happens in our "set period" Paula function
+			if (period < 113)
 				period = 113;
 
 			synth.performances[editor.currSample].parts[synth.currPart].sampleRate = (uint16_t)(((double)PAULA_PAL_CLK / period) + 0.5);
@@ -4019,4 +3814,3 @@ static bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 
 	return true;
 }
-

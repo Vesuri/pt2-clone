@@ -21,7 +21,3 @@ void handleEditKeys(SDL_Scancode scancode, bool normalMode);
 bool handleSpecialKeys(SDL_Scancode scancode);
 int8_t keyToNote(SDL_Scancode scancode);
 void handleSampleJamming(SDL_Scancode scancode);
-void updateTextObject(int16_t editObject);
-void getTextLine(int16_t editObject);
-void getNumLine(uint8_t type, int16_t editObject);
-void exitGetTextLine(bool updateValue);

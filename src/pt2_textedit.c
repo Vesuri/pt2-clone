@@ -20,6 +20,7 @@
 #include "pt2_audio.h"
 #include "pt2_chordmaker.h"
 #include "pt2_textedit.h"
+#include "pt2_synth.h"
 
 // PATH_MAX is the absolute longest editable string possible
 static char oldText[PATH_MAX+2];
@@ -387,6 +388,52 @@ static void redrawTextEditObject(void)
 		case PTB_SA_VOL_TO_NUM: ui.updateVolToText = true; break;
 		case PTB_SA_FIL_LP_CUTOFF: ui.updateLPText = true; break;
 		case PTB_SA_FIL_HP_CUTOFF: ui.updateHPText = true; break;
+		case PTB_SY_PERFORMANCE_NAME: ui.updatePerformanceName = true; break;
+		case PTB_SY_PART_PROGRAM: ui.updatePartProgramText = true; break;
+		case PTB_SY_PART_VOLUME: ui.updatePartVolumeText = true; break;
+		case PTB_SY_PART_OFFSET: ui.updatePartOffsetText = true; break;
+		case PTB_SY_PROGRAM_NAME: ui.updateProgramName = true; break;
+		case PTB_SY_MIX_LEVEL: ui.updateMixLevelText = true; break;
+		case PTB_SY_MIX_LFO1: ui.updateMixLFO1Text = true; break;
+		case PTB_SY_MIX_LFO2: ui.updateMixLFO2Text = true; break;
+		case PTB_SY_MIX_ENV2: ui.updateMixEnv2Text = true; break;
+		case PTB_SY_MIX_ENV3: ui.updateMixEnv3Text = true; break;
+		case PTB_SY_PITCH_LEVEL: ui.updatePitchLevelText = true; break;
+		case PTB_SY_PITCH_LFO1: ui.updatePitchLFO1Text = true; break;
+		case PTB_SY_PITCH_LFO2: ui.updatePitchLFO2Text = true; break;
+		case PTB_SY_PITCH_ENV2: ui.updatePitchEnv2Text = true; break;
+		case PTB_SY_PITCH_ENV3: ui.updatePitchEnv3Text = true; break;
+		case PTB_SY_WIDTH_LEVEL: ui.updateWidthLevelText = true; break;
+		case PTB_SY_WIDTH_LFO1: ui.updateWidthLFO1Text = true; break;
+		case PTB_SY_WIDTH_LFO2: ui.updateWidthLFO2Text = true; break;
+		case PTB_SY_WIDTH_ENV2: ui.updateWidthEnv2Text = true; break;
+		case PTB_SY_WIDTH_ENV3: ui.updateWidthEnv3Text = true; break;
+		case PTB_SY_SYNC_LEVEL: ui.updateSyncLevelText = true; break;
+		case PTB_SY_SYNC_LFO1: ui.updateSyncLFO1Text = true; break;
+		case PTB_SY_SYNC_LFO2: ui.updateSyncLFO2Text = true; break;
+		case PTB_SY_SYNC_ENV2: ui.updateSyncEnv2Text = true; break;
+		case PTB_SY_SYNC_ENV3: ui.updateSyncEnv3Text = true; break;
+		case PTB_SY_FREQUENCY_LEVEL: ui.updateFrequencyLevelText = true; break;
+		case PTB_SY_FREQUENCY_LFO1: ui.updateFrequencyLFO1Text = true; break;
+		case PTB_SY_FREQUENCY_LFO2: ui.updateFrequencyLFO2Text = true; break;
+		case PTB_SY_FREQUENCY_ENV2: ui.updateFrequencyEnv2Text = true; break;
+		case PTB_SY_FREQUENCY_ENV3: ui.updateFrequencyEnv3Text = true; break;
+		case PTB_SY_RESONANCE_LEVEL: ui.updateResonanceLevelText = true; break;
+		case PTB_SY_RESONANCE_LFO1: ui.updateResonanceLFO1Text = true; break;
+		case PTB_SY_RESONANCE_LFO2: ui.updateResonanceLFO2Text = true; break;
+		case PTB_SY_RESONANCE_ENV2: ui.updateResonanceEnv2Text = true; break;
+		case PTB_SY_RESONANCE_ENV3: ui.updateResonanceEnv3Text = true; break;
+		case PTB_SY_ENV1_ATTACK: ui.updateEnv1AttackText = true; break;
+		case PTB_SY_ENV1_DECAY: ui.updateEnv1DecayText = true; break;
+		case PTB_SY_ENV1_SUSTAIN: ui.updateEnv1SustainText = true; break;
+		case PTB_SY_ENV2_ATTACK: ui.updateEnv2AttackText = true; break;
+		case PTB_SY_ENV2_DECAY: ui.updateEnv2DecayText = true; break;
+		case PTB_SY_ENV2_SUSTAIN: ui.updateEnv2SustainText = true; break;
+		case PTB_SY_ENV3_ATTACK: ui.updateEnv3AttackText = true; break;
+		case PTB_SY_ENV3_DECAY: ui.updateEnv3DecayText = true; break;
+		case PTB_SY_ENV3_SUSTAIN: ui.updateEnv3SustainText = true; break;
+		case PTB_SY_LFO1_SPEED: ui.updateLFO1SpeedText = true; break;
+		case PTB_SY_LFO2_SPEED: ui.updateLFO2SpeedText = true; break;
 	}
 }
 

@@ -44,12 +44,6 @@ void statusSampleIsEmpty(void);
 void statusNotSampleZero(void);
 void changeStatusText(const char *text);
 void resetAllScreens(void);
-void handleAskNo(void);
-void handleAskYes(void);
-void removeClearScreen(void);
-void renderClearScreen(void);
-void renderAskDialog(void);
-void removeAskDialog(void);
 
 bool setupVideo(void);
 void renderFrame2(void);
