@@ -46,12 +46,25 @@ else
 fi
 
 #
-# Compile
+# Compile (parallel per-file, then link)
 #
+COMMON_CFLAGS="-g0 -DNDEBUG -ffast-math -Wall -Winit-self -Wextra -Wunused -Wredundant-decls"
+SRCS=(src/gfx/*.c src/modloaders/*.c src/smploaders/*.c src/*.c)
+
 function compile() {
-    rm $1 &> /dev/null
-    clang $VERBOSE $CFLAGS $SDL2_CFLAGS -g0 -DNDEBUG src/gfx/*.c src/modloaders/*.c src/smploaders/*.c src/*.c -ffast-math -Wall -Winit-self -Wextra -Wunused -Wredundant-decls $LDFLAGS $SDL2_LDFLAGS -framework Cocoa -lm -o $1
-    return $?
+    local output=$1
+    local pids=() objs=() failed=0
+
+    for src in "${SRCS[@]}"; do
+        local obj="${src%.c}.o"
+        clang $VERBOSE $CFLAGS $SDL2_CFLAGS $COMMON_CFLAGS -c "$src" -o "$obj" &
+        pids+=($!) objs+=("$obj")
+    done
+
+    for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
+    [ $failed -ne 0 ] && return 1
+
+    clang $VERBOSE $CFLAGS "${objs[@]}" $LDFLAGS $SDL2_LDFLAGS -framework Cocoa -lm -o "$output"
 }
 
 export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
