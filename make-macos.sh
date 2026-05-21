@@ -32,47 +32,66 @@ if [ ! -d $TARGET_DIR ]; then
 fi
 
 #
+# SDL2 detection: prefer installed framework, fall back to sdl2-config (e.g. Homebrew)
+#
+if [ -d /Library/Frameworks/SDL2.framework ]; then
+    SDL2_CFLAGS="-F /Library/Frameworks"
+    SDL2_LDFLAGS="-L /Library/Frameworks -framework SDL2"
+elif command -v sdl2-config &> /dev/null; then
+    SDL2_CFLAGS="-I$(sdl2-config --prefix)/include $(sdl2-config --cflags | sed 's/-I[^ ]*//')"
+    SDL2_LDFLAGS=$(sdl2-config --libs)
+else
+    echo "Error: SDL2 not found. Install SDL2.framework to /Library/Frameworks or install via Homebrew."
+    exit 1
+fi
+
+#
 # Compile
 #
 function compile() {
     rm $1 &> /dev/null
-    clang $VERBOSE $CFLAGS -F /Library/Frameworks -g0 -DNDEBUG src/gfx/*.c src/modloaders/*.c src/smploaders/*.c src/*.c -ffast-math -Wall -Winit-self -Wextra -Wunused -Wredundant-decls $LDFLAGS -L /Library/Frameworks -framework SDL2 -framework Cocoa -lm -o $1
+    clang $VERBOSE $CFLAGS $SDL2_CFLAGS -g0 -DNDEBUG src/gfx/*.c src/modloaders/*.c src/smploaders/*.c src/*.c -ffast-math -Wall -Winit-self -Wextra -Wunused -Wredundant-decls $LDFLAGS $SDL2_LDFLAGS -framework Cocoa -lm -o $1
     return $?
 }
 
-echo Compiling x86_64 binary, please wait patiently...
-CFLAGS="-target x86_64-apple-macos10.11 -mmacosx-version-min=10.11 -arch x86_64 -mmmx -mfpmath=sse -msse2 -O3"
-LDFLAGS=
 export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
-compile $TARGET_X86_64
-if [ $? -ne 0 ]; then
-    echo failed
-    exit 1
+
+if [ -d /Library/Frameworks/SDL2.framework ]; then
+    # Framework present: build universal binary
+    echo Compiling x86_64 binary, please wait patiently...
+    CFLAGS="-target x86_64-apple-macos10.11 -mmacosx-version-min=10.11 -arch x86_64 -mmmx -mfpmath=sse -msse2 -O3"
+    LDFLAGS=
+    compile $TARGET_X86_64
+    if [ $? -ne 0 ]; then echo failed; exit 1; fi
+
+    echo Compiling arm64 binary, please wait patiently...
+    CFLAGS="-target arm64-apple-macos11 -mmacosx-version-min=11.0 -arch arm64 -march=armv8.3-a+sha3 -O3"
+    LDFLAGS=
+    compile $TARGET_ARM64
+    if [ $? -ne 0 ]; then echo failed; exit 1; fi
+
+    echo Building universal binary...
+    rm $TARGET_UNIVERAL &> /dev/null
+    lipo -create -output $TARGET_UNIVERSAL $TARGET_X86_64 $TARGET_ARM64
+    rm $TARGET_X86_64
+    rm $TARGET_ARM64
+    strip $TARGET_UNIVERSAL
+    install_name_tool -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/Versions/A/SDL2 $TARGET_UNIVERSAL
+    codesign -s - --entitlements pt2-clone.entitlements release/macOS/pt2-clone-macos.app
+else
+    # No framework: build native arch only (e.g. Homebrew SDL2)
+    echo Compiling $(arch) binary, please wait patiently...
+    if [ $arch == "arm64" ]; then
+        CFLAGS="-target arm64-apple-macos11 -mmacosx-version-min=11.0 -arch arm64 -march=armv8.3-a+sha3 -O3"
+    else
+        CFLAGS="-target x86_64-apple-macos10.11 -mmacosx-version-min=10.11 -arch x86_64 -mmmx -mfpmath=sse -msse2 -O3"
+    fi
+    LDFLAGS=
+    compile $TARGET_UNIVERSAL
+    if [ $? -ne 0 ]; then echo failed; exit 1; fi
+    strip $TARGET_UNIVERSAL
 fi
 
-echo Compiling arm64 binary, please wait patiently...
-CFLAGS="-target arm64-apple-macos11 -mmacosx-version-min=11.0 -arch arm64 -march=armv8.3-a+sha3 -O3"
-LDFLAGS=
-export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
-compile $TARGET_ARM64
-if [ $? -ne 0 ]; then
-    echo failed
-    exit 1
-fi
-
-#
-# Merge binaries
-#
-# Reference: Building a Universal macOS Binary
-#   https://developer.apple.com/documentation/xcode/building_a_universal_macos_binary
-echo Building universal binary...
-rm $TARGET_UNIVERAL &> /dev/null
-lipo -create -output $TARGET_UNIVERSAL $TARGET_X86_64 $TARGET_ARM64
-rm $TARGET_X86_64
-rm $TARGET_ARM64
-strip $TARGET_UNIVERSAL
-install_name_tool -change @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../Frameworks/SDL2.framework/Versions/A/SDL2 $TARGET_UNIVERSAL
-codesign -s - --entitlements pt2-clone.entitlements release/macOS/pt2-clone-macos.app
 echo Done. The executable can be found in \'${RELEASE_MACOS_DIR}\' if everything went well.
 
 #
