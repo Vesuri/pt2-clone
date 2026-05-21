@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -1588,9 +1590,27 @@ void putProgram(program_t* program, FILE* file)
     putWord(program->lfo_2_waveform * 2 + 1536, file);
 }
 
+// Open ~/.protracker/protracker.jrm; for writing, creates ~/.protracker/ if needed.
+static FILE *openGlobalJrm(const char *mode)
+{
+#ifdef _WIN32
+	return UNICHAR_FOPEN(L"protracker.jrm", mode);
+#else
+	const char *home = getenv("HOME");
+	if (home == NULL)
+		return NULL;
+	char dir[PATH_MAX], path[PATH_MAX];
+	snprintf(dir,  sizeof(dir),  "%s/.protracker",              home);
+	snprintf(path, sizeof(path), "%s/.protracker/protracker.jrm", home);
+	if (strchr(mode, 'w'))
+		mkdir(dir, 0755); // ignore error if already exists
+	return fopen(path, mode);
+#endif
+}
+
 void synthLoad(UNICHAR *fileName, bool allPerformances)
 {
-	FILE* file = UNICHAR_FOPEN(fileName, "rb");
+	FILE* file = allPerformances ? openGlobalJrm("rb") : UNICHAR_FOPEN(fileName, "rb");
 	if (file == NULL)
 	{
 		return;
@@ -1640,11 +1660,9 @@ void synthLoad(UNICHAR *fileName, bool allPerformances)
 
 void synthSave(UNICHAR *fileName, bool allPerformances)
 {
-	FILE* file = UNICHAR_FOPEN(fileName, "wb");
+	FILE* file = allPerformances ? openGlobalJrm("wb") : UNICHAR_FOPEN(fileName, "wb");
 	if (file == NULL)
-	{
 		return;
-	}
 
 	uint32_t enabledPerformances;
 	uint32_t enabledPrograms[4];
