@@ -2260,7 +2260,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 2;
 			textEdit.cursorStartX = 192;
-			textEdit.cursorStartY = 74;
+			textEdit.cursorStartY = 78;
 			enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_EO_QUANTIZE);
 		}
 		break;
@@ -2272,7 +2272,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 2;
 			textEdit.cursorStartX = 168;
-			textEdit.cursorStartY = 85;
+			textEdit.cursorStartY = 89;
 			enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_EO_METRO_1);
 		}
 		break;
@@ -2284,7 +2284,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 2;
 			textEdit.cursorStartX = 192;
-			textEdit.cursorStartY = 85;
+			textEdit.cursorStartY = 89;
 			enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_EO_METRO_2);
 		}
 		break;
@@ -2297,7 +2297,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 2;
 			textEdit.numBits = 8;
 			textEdit.cursorStartX = 264;
-			textEdit.cursorStartY = 85;
+			textEdit.cursorStartY = 89;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_EO_FROM_NUM);
 		}
 		break;
@@ -2310,7 +2310,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 2;
 			textEdit.numBits = 8;
 			textEdit.cursorStartX = 264;
-			textEdit.cursorStartY = 96;
+			textEdit.cursorStartY = 100;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_EO_TO_NUM);
 		}
 		break;
@@ -2377,7 +2377,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.textEndPtr = editor.mixText + 15;
 				textEdit.numBlocks = 16;
 				textEdit.cursorStartX = 128;
-				textEdit.cursorStartY = 52;
+				textEdit.cursorStartY = 56;
 				textEdit.scrollable = false;
 				enterTextEditMode(PTB_EO_MIX);
 			}
@@ -2551,14 +2551,14 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 					textEdit.numDigits = 4;
 					textEdit.numBits = 16;
 					textEdit.cursorStartX = 248;
-					textEdit.cursorStartY = 63;
+					textEdit.cursorStartY = 67;
 				}
 				else
 				{
 					textEdit.numDigits = 5;
 					textEdit.numBits = 17;
 					textEdit.cursorStartX = 240;
-					textEdit.cursorStartY = 63;
+					textEdit.cursorStartY = 67;
 				}
 
 				enterNumberEditMode(TEXT_EDIT_HEX, PTB_EO_POS_NUM);
@@ -2957,7 +2957,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.numPtr16 = &textEdit.tmpDisp16;
 				textEdit.numDigits = 3;
 				textEdit.cursorStartX = 248;
-				textEdit.cursorStartY = 96;
+				textEdit.cursorStartY = 100;
 				enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_EO_VOL_NUM);
 			}
 		}
@@ -3070,7 +3070,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.numPtr16 = &textEdit.tmpDisp16;
 				textEdit.numDigits = 2;
 				textEdit.cursorStartX = 160;
-				textEdit.cursorStartY = 58;
+				textEdit.cursorStartY = 62;
 				enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_PE_PATT);
 			}
 		}
@@ -3114,7 +3114,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 					textEdit.numPtr16 = &textEdit.tmpDisp16;
 					textEdit.numDigits = 3;
 					textEdit.cursorStartX = 72;
-					textEdit.cursorStartY = 8;
+					textEdit.cursorStartY = 12;
 					enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_POSS);
 				}
 			}
@@ -3142,7 +3142,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 					textEdit.numPtr16 = &textEdit.tmpDisp16;
 					textEdit.numDigits = 2;
 					textEdit.cursorStartX = 80;
-					textEdit.cursorStartY = 19;
+					textEdit.cursorStartY = 23;
 					enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_PATTERNS);
 				}
 			}
@@ -3176,7 +3176,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 					textEdit.numPtr16 = &textEdit.tmpDisp16;
 					textEdit.numDigits = 3;
 					textEdit.cursorStartX = 72;
-					textEdit.cursorStartY = 30;
+					textEdit.cursorStartY = 34;
 					enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_LENGTHS);
 				}
 			}
@@ -3198,7 +3198,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.numPtr16 = &textEdit.tmpDisp16;
 				textEdit.numDigits = 2;
 				textEdit.cursorStartX = 64;
-				textEdit.cursorStartY = 132;
+				textEdit.cursorStartY = 136;
 				enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_PATTDATA);
 			}
 		}
@@ -3218,7 +3218,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 2;
 			textEdit.numBits = 8;
 			textEdit.cursorStartX = 80;
-			textEdit.cursorStartY = 52;
+			textEdit.cursorStartY = 56;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SAMPLES);
 		}
 		break;
@@ -3243,7 +3243,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.numDigits = 2;
 				textEdit.numBits = 8;
 				textEdit.cursorStartX = 80;
-				textEdit.cursorStartY = 63;
+				textEdit.cursorStartY = 67;
 				enterNumberEditMode(TEXT_EDIT_HEX, PTB_SVOLUMES);
 			}
 		}
@@ -3295,14 +3295,14 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 					textEdit.numDigits = 4;
 					textEdit.numBits = 16;
 					textEdit.cursorStartX = 64;
-					textEdit.cursorStartY = 74;
+					textEdit.cursorStartY = 78;
 				}
 				else
 				{
 					textEdit.numDigits = 5;
 					textEdit.numBits = 17;
 					textEdit.cursorStartX = 56;
-					textEdit.cursorStartY = 74;
+					textEdit.cursorStartY = 78;
 				}
 
 				enterNumberEditMode(TEXT_EDIT_HEX, PTB_SLENGTHS);
@@ -3359,14 +3359,14 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 					textEdit.numDigits = 4;
 					textEdit.numBits = 16;
 					textEdit.cursorStartX = 64;
-					textEdit.cursorStartY = 85;
+					textEdit.cursorStartY = 89;
 				}
 				else
 				{
 					textEdit.numDigits = 5;
 					textEdit.numBits = 17;
 					textEdit.cursorStartX = 56;
-					textEdit.cursorStartY = 85;
+					textEdit.cursorStartY = 89;
 				}
 
 				enterNumberEditMode(TEXT_EDIT_HEX, PTB_SREPEATS);
@@ -3426,14 +3426,14 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 					textEdit.numDigits = 4;
 					textEdit.numBits = 16;
 					textEdit.cursorStartX = 64;
-					textEdit.cursorStartY = 96;
+					textEdit.cursorStartY = 100;
 				}
 				else
 				{
 					textEdit.numDigits = 5;
 					textEdit.numBits = 17;
 					textEdit.cursorStartX = 56;
-					textEdit.cursorStartY = 96;
+					textEdit.cursorStartY = 100;
 				}
 
 				enterNumberEditMode(TEXT_EDIT_HEX, PTB_SREPLENS);
@@ -3713,7 +3713,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.textEndPtr = &editor.currPath[PATH_MAX - 1];
 			textEdit.numBlocks = 26;
 			textEdit.cursorStartX = 192;
-			textEdit.cursorStartY = 30;
+			textEdit.cursorStartY = 34;
 			textEdit.scrollable = true;
 			enterTextEditMode(PTB_DO_DATAPATH);
 		}
@@ -3733,7 +3733,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.textEndPtr = song->header.name + 19;
 				textEdit.numBlocks = 20;
 				textEdit.cursorStartX = 104;
-				textEdit.cursorStartY = 107;
+				textEdit.cursorStartY = 111;
 				textEdit.scrollable = false;
 				enterTextEditMode(PTB_SONGNAME);
 			}
@@ -3754,7 +3754,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.textEndPtr = song->samples[editor.currSample].text + 21;
 				textEdit.numBlocks = 22;
 				textEdit.cursorStartX = 104;
-				textEdit.cursorStartY = 118;
+				textEdit.cursorStartY = 122;
 				textEdit.scrollable = false;
 				enterTextEditMode(PTB_SAMPLENAME);
 			}
@@ -4234,7 +4234,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.textEndPtr = synth.performances[editor.currSample].name + 15;
 				textEdit.numBlocks = 16;
 				textEdit.cursorStartX = 144;
-				textEdit.cursorStartY = 258;
+				textEdit.cursorStartY = 262;
 				textEdit.scrollable = false;
 				enterTextEditMode(PTB_SY_PERFORMANCE_NAME);
 			}
@@ -4268,7 +4268,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.cursorStartX = 232;
-			textEdit.cursorStartY = 268;
+			textEdit.cursorStartY = 272;
 			enterNumberEditMode(TEXT_EDIT_DECIMAL, PTB_SY_PART_PROGRAM);
 		}
 		break;
@@ -4280,7 +4280,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 56;
-			textEdit.cursorStartY = 278;
+			textEdit.cursorStartY = 282;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PART_VOLUME);
 		}
 		break;
@@ -4292,7 +4292,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 4;
 			textEdit.numBits = 16;
 			textEdit.cursorStartX = 144;
-			textEdit.cursorStartY = 278;
+			textEdit.cursorStartY = 282;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PART_OFFSET);
 		}
 		break;
@@ -4316,7 +4316,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 				textEdit.textEndPtr = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].name + 15;
 				textEdit.numBlocks = 16;
 				textEdit.cursorStartX = 112;
-				textEdit.cursorStartY = 288;
+				textEdit.cursorStartY = 292;
 				textEdit.scrollable = false;
 				enterTextEditMode(PTB_SY_PROGRAM_NAME);
 			}
@@ -4433,7 +4433,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 328;
+			textEdit.cursorStartY = 332;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_MIX_LEVEL);
 		}
 		break;
@@ -4466,7 +4466,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 338;
+			textEdit.cursorStartY = 342;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_MIX_LFO1);
 		}
 		break;
@@ -4499,7 +4499,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 348;
+			textEdit.cursorStartY = 352;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_MIX_LFO2);
 		}
 		break;
@@ -4532,7 +4532,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 358;
+			textEdit.cursorStartY = 362;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_MIX_ENV2);
 		}
 		break;
@@ -4565,7 +4565,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 368;
+			textEdit.cursorStartY = 372;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_MIX_ENV3);
 		}
 		break;
@@ -4591,7 +4591,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 328;
+			textEdit.cursorStartY = 332;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PITCH_LEVEL);
 		}
 		break;
@@ -4617,7 +4617,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 338;
+			textEdit.cursorStartY = 342;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PITCH_LFO1);
 		}
 		break;
@@ -4643,7 +4643,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 348;
+			textEdit.cursorStartY = 352;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PITCH_LFO2);
 		}
 		break;
@@ -4669,7 +4669,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 358;
+			textEdit.cursorStartY = 362;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PITCH_ENV2);
 		}
 		break;
@@ -4695,7 +4695,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 368;
+			textEdit.cursorStartY = 372;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PITCH_ENV3);
 		}
 		break;
@@ -4721,7 +4721,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 208;
-			textEdit.cursorStartY = 328;
+			textEdit.cursorStartY = 332;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_WIDTH_LEVEL);
 		}
 		break;
@@ -4747,7 +4747,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 208;
-			textEdit.cursorStartY = 338;
+			textEdit.cursorStartY = 342;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_WIDTH_LFO1);
 		}
 		break;
@@ -4773,7 +4773,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 208;
-			textEdit.cursorStartY = 348;
+			textEdit.cursorStartY = 352;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_WIDTH_LFO2);
 		}
 		break;
@@ -4799,7 +4799,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 208;
-			textEdit.cursorStartY = 358;
+			textEdit.cursorStartY = 362;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_WIDTH_ENV2);
 		}
 		break;
@@ -4825,7 +4825,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 208;
-			textEdit.cursorStartY = 368;
+			textEdit.cursorStartY = 372;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_WIDTH_ENV3);
 		}
 		break;
@@ -4851,7 +4851,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 288;
-			textEdit.cursorStartY = 328;
+			textEdit.cursorStartY = 332;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_SYNC_LEVEL);
 		}
 		break;
@@ -4877,7 +4877,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 288;
-			textEdit.cursorStartY = 338;
+			textEdit.cursorStartY = 342;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_SYNC_LFO1);
 		}
 		break;
@@ -4903,7 +4903,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 288;
-			textEdit.cursorStartY = 348;
+			textEdit.cursorStartY = 352;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_SYNC_LFO2);
 		}
 		break;
@@ -4929,7 +4929,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 288;
-			textEdit.cursorStartY = 358;
+			textEdit.cursorStartY = 362;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV2);
 		}
 		break;
@@ -4955,7 +4955,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 288;
-			textEdit.cursorStartY = 368;
+			textEdit.cursorStartY = 372;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV3);
 		}
 		break;
@@ -4967,7 +4967,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 388;
+			textEdit.cursorStartY = 392;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_LEVEL);
 		}
 		break;
@@ -4979,7 +4979,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 398;
+			textEdit.cursorStartY = 402;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_LFO1);
 		}
 		break;
@@ -4991,7 +4991,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 408;
+			textEdit.cursorStartY = 412;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_LFO2);
 		}
 		break;
@@ -5003,7 +5003,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 418;
+			textEdit.cursorStartY = 422;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_ENV2);
 		}
 		break;
@@ -5015,7 +5015,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
-			textEdit.cursorStartY = 428;
+			textEdit.cursorStartY = 432;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_ENV3);
 		}
 		break;
@@ -5027,7 +5027,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 388;
+			textEdit.cursorStartY = 392;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LEVEL);
 		}
 		break;
@@ -5039,7 +5039,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 398;
+			textEdit.cursorStartY = 402;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LFO1);
 		}
 		break;
@@ -5051,7 +5051,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 408;
+			textEdit.cursorStartY = 412;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LFO2);
 		}
 		break;
@@ -5063,7 +5063,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 418;
+			textEdit.cursorStartY = 422;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV2);
 		}
 		break;
@@ -5075,7 +5075,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
-			textEdit.cursorStartY = 428;
+			textEdit.cursorStartY = 432;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV3);
 		}
 		break;
@@ -5087,7 +5087,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 64;
-			textEdit.cursorStartY = 448;
+			textEdit.cursorStartY = 452;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV1_ATTACK);
 		}
 		break;
@@ -5099,7 +5099,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 64;
-			textEdit.cursorStartY = 458;
+			textEdit.cursorStartY = 462;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV1_DECAY);
 		}
 		break;
@@ -5111,7 +5111,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 64;
-			textEdit.cursorStartY = 468;
+			textEdit.cursorStartY = 472;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV1_SUSTAIN);
 		}
 		break;
@@ -5123,7 +5123,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 160;
-			textEdit.cursorStartY = 448;
+			textEdit.cursorStartY = 452;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV2_ATTACK);
 		}
 		break;
@@ -5135,7 +5135,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 160;
-			textEdit.cursorStartY = 458;
+			textEdit.cursorStartY = 462;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV2_DECAY);
 		}
 		break;
@@ -5147,7 +5147,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 160;
-			textEdit.cursorStartY = 468;
+			textEdit.cursorStartY = 472;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV2_SUSTAIN);
 		}
 		break;
@@ -5159,7 +5159,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 256;
-			textEdit.cursorStartY = 448;
+			textEdit.cursorStartY = 452;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV3_ATTACK);
 		}
 		break;
@@ -5171,7 +5171,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 256;
-			textEdit.cursorStartY = 458;
+			textEdit.cursorStartY = 462;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV3_DECAY);
 		}
 		break;
@@ -5183,7 +5183,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 256;
-			textEdit.cursorStartY = 468;
+			textEdit.cursorStartY = 472;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_ENV3_SUSTAIN);
 		}
 		break;
@@ -5214,7 +5214,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 4;
 			textEdit.numBits = 16;
 			textEdit.cursorStartX = 72;
-			textEdit.cursorStartY = 498;
+			textEdit.cursorStartY = 502;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_LFO1_SPEED);
 		}
 		break;
@@ -5245,7 +5245,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numDigits = 4;
 			textEdit.numBits = 16;
 			textEdit.cursorStartX = 216;
-			textEdit.cursorStartY = 498;
+			textEdit.cursorStartY = 502;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_LFO2_SPEED);
 		}
 		break;
