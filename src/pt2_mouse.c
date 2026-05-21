@@ -4429,7 +4429,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currMixLevelDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currMixLevelDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -4591,7 +4591,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currPitchLevelDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currPitchLevelDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -4725,7 +4725,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currWidthLevelDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currWidthLevelDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -4859,7 +4859,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			default:
 				break;
 			}
-			editor.currSyncLevelDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currSyncLevelDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -4979,7 +4979,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_FREQUENCY_LEVEL:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency;
-			editor.currFrequencyLevelDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currFrequencyLevelDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5043,7 +5043,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_RESONANCE_LEVEL:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance;
-			editor.currResonanceLevelDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currResonanceLevelDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5107,7 +5107,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV1_ATTACK:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack;
-			editor.currEnv1AttackDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv1AttackDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5119,7 +5119,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV1_DECAY:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay;
-			editor.currEnv1DecayDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv1DecayDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5131,7 +5131,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV1_SUSTAIN:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain;
-			editor.currEnv1SustainDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv1SustainDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5143,7 +5143,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV2_ATTACK:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack;
-			editor.currEnv2AttackDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv2AttackDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5155,7 +5155,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV2_DECAY:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay;
-			editor.currEnv2DecayDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv2DecayDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5167,7 +5167,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV2_SUSTAIN:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain;
-			editor.currEnv2SustainDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv2SustainDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5179,7 +5179,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV3_ATTACK:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack;
-			editor.currEnv3AttackDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv3AttackDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5191,7 +5191,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV3_DECAY:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay;
-			editor.currEnv3DecayDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv3DecayDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5203,7 +5203,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_ENV3_SUSTAIN:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain;
-			editor.currEnv3SustainDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currEnv3SustainDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 3;
 			textEdit.numBits = 12;
@@ -5234,7 +5234,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_LFO1_SPEED:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed;
-			editor.currLFO1SpeedDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currLFO1SpeedDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 4;
 			textEdit.numBits = 16;
@@ -5265,7 +5265,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		case PTB_SY_LFO2_SPEED:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed;
-			editor.currLFO2SpeedDisp = (volatile int16_t*)&textEdit.tmpDisp16;
+			editor.currLFO2SpeedDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
 			textEdit.numPtr16 = &textEdit.tmpDisp16;
 			textEdit.numDigits = 4;
 			textEdit.numBits = 16;

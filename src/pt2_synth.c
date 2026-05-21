@@ -1421,13 +1421,13 @@ void getProgram(program_t* program, FILE* file)
     program->oscillator_13_mix_lfo_2 = getWord(file);
     program->oscillator_13_mix_env_2 = getWord(file);
     program->oscillator_13_mix_env_3 = getWord(file);
-    program->oscillator_13_fm = getWord(file);
+    program->oscillator_13_fm = getWord(file) != 0 ? 1 : 0;
     program->oscillator_23_mix = getWord(file);
     program->oscillator_23_mix_lfo_1 = getWord(file);
     program->oscillator_23_mix_lfo_2 = getWord(file);
     program->oscillator_23_mix_env_2 = getWord(file);
     program->oscillator_23_mix_env_3 = getWord(file);
-    program->oscillator_23_fm = getWord(file);
+    program->oscillator_23_fm = getWord(file) != 0 ? 1 : 0;
     program->filter_frequency = getWord(file);
     program->filter_frequency_lfo_1 = getWord(file);
     program->filter_frequency_lfo_2 = getWord(file);
@@ -1448,9 +1448,15 @@ void getProgram(program_t* program, FILE* file)
     program->envelope_3_decay = getWord(file);
     program->envelope_3_sustain = getWord(file);
     program->lfo_1_speed = getWord(file);
-    program->lfo_1_waveform = (enum waveform_lfo_t)((getWord(file) - 1536) / 2);
+    {
+        enum waveform_lfo_t wf = (enum waveform_lfo_t)((getWord(file) - 1536) / 2);
+        program->lfo_1_waveform = (wf == WAVEFORM_LFO_SQUARE || wf == WAVEFORM_LFO_TRIANGLE) ? wf : WAVEFORM_LFO_SAW;
+    }
     program->lfo_2_speed = getWord(file);
-    program->lfo_2_waveform = (enum waveform_lfo_t)((getWord(file) - 1536) / 2);
+    {
+        enum waveform_lfo_t wf = (enum waveform_lfo_t)((getWord(file) - 1536) / 2);
+        program->lfo_2_waveform = (wf == WAVEFORM_LFO_SQUARE || wf == WAVEFORM_LFO_TRIANGLE) ? wf : WAVEFORM_LFO_SAW;
+    }
 }
 
 void putPart(part_t* part, FILE* file)
