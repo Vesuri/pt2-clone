@@ -55,8 +55,20 @@ else
     fi
 
     if [ -n "$SDL2_CONFIG" ]; then
-        SDL2_CFLAGS="-I$($SDL2_CONFIG --prefix)/include $($SDL2_CONFIG --cflags | sed 's/-I[^ ]*//')"
+        SDL2_PREFIX=$($SDL2_CONFIG --prefix)
+        SDL2_CFLAGS="-I${SDL2_PREFIX}/include $($SDL2_CONFIG --cflags | sed 's/-I[^ ]*//')"
         SDL2_LDFLAGS=$($SDL2_CONFIG --libs)
+        # sdl2-config may return -framework SDL2 (official DMG style) even when only the
+        # Homebrew dylib is installed. If the framework is missing but the dylib exists,
+        # fall back to -lSDL2 so the link succeeds.
+        if echo "$SDL2_LDFLAGS" | grep -q "\-framework SDL2"; then
+            FRAMEWORK_PATH=$(echo "$SDL2_LDFLAGS" | grep -o '\-F[^ ]*' | sed 's/-F//')
+            if [ -z "$FRAMEWORK_PATH" ] || [ ! -d "${FRAMEWORK_PATH}/SDL2.framework" ]; then
+                if [ -f "${SDL2_PREFIX}/lib/libSDL2.dylib" ]; then
+                    SDL2_LDFLAGS="-L${SDL2_PREFIX}/lib -lSDL2"
+                fi
+            fi
+        fi
     elif command -v pkg-config &> /dev/null && pkg-config --exists sdl2; then
         SDL2_CFLAGS=$(pkg-config --cflags-only-I sdl2 | sed 's|-I\([^ ]*\)/SDL2|-I\1|g')
         SDL2_LDFLAGS=$(pkg-config --libs sdl2)
