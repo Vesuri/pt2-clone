@@ -287,7 +287,7 @@ typedef struct ui_t
 
 typedef struct textEdit_t
 {
-	bool endReached, scrollable, force32BitNumPtr;
+	bool endReached, scrollable, force32BitNumPtr, signed12BitNumPtr;
 	char *textPtr, *textEndPtr, *textStartPtr;
 	int8_t *numPtr8, tmpDisp8, type;
 	uint8_t numDigits, numBits;

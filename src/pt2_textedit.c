@@ -956,6 +956,1277 @@ void leaveTextEditMode(bool updateValue)
 			}
 			break;
 
+			case PTB_SY_PART_PROGRAM:
+			{
+				editor.currPartProgramDisp = &synth.performances[editor.currSample].parts[synth.currPart].program;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 127);
+
+					synth.performances[editor.currSample].parts[synth.currPart].program = tmp16;
+
+					ui.updatePartProgramText = true;
+					ui.updateProgramName = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PART_VOLUME:
+			{
+				editor.currPartVolumeDisp = &synth.performances[editor.currSample].parts[synth.currPart].volume;
+
+				if (updateValue)
+				{
+					synth.performances[editor.currSample].parts[synth.currPart].volume = textEdit.tmpDisp16;
+
+					ui.updatePartVolumeText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PART_OFFSET:
+			{
+				editor.currPartOffsetDisp = &synth.performances[editor.currSample].parts[synth.currPart].offset;
+
+				if (updateValue)
+				{
+					synth.performances[editor.currSample].parts[synth.currPart].offset = textEdit.tmpDisp16;
+
+					ui.updatePartOffsetText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_LEVEL:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_LFO1:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_1;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_1;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_1;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_1;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_1;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_1;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_1 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_LFO2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_2;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_2;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_2;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_lfo_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_ENV2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_2;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_2;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_2;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_2 = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_MIX_ENV3:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_3;
+					break;
+				case OSCILLATOR_2:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_3;
+					break;
+				case OSCILLATOR_3:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_3;
+					break;
+				case OSCILLATOR_13:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_3;
+					break;
+				case OSCILLATOR_23:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_3;
+					break;
+				case OSCILLATOR_NOISE:
+					editor.currMixEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_3;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_13:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_13_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_23:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_23_mix_env_3 = tmp16;
+						break;
+					case OSCILLATOR_NOISE:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_noise_mix_env_3 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateMixEnv3Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PITCH_LEVEL:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currPitchLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch;
+					break;
+				case OSCILLATOR_2:
+					editor.currPitchLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch;
+					break;
+				case OSCILLATOR_3:
+					editor.currPitchLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updatePitchLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PITCH_LFO1:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currPitchLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_1;
+					break;
+				case OSCILLATOR_2:
+					editor.currPitchLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_lfo_1;
+					break;
+				case OSCILLATOR_3:
+					editor.currPitchLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_lfo_1;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_lfo_1 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updatePitchLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PITCH_LFO2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currPitchLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currPitchLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_lfo_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currPitchLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_lfo_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_lfo_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updatePitchLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PITCH_ENV2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currPitchEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currPitchEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_env_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currPitchEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_env_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_env_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_env_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updatePitchEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_PITCH_ENV3:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currPitchEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_3;
+					break;
+				case OSCILLATOR_2:
+					editor.currPitchEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_env_3;
+					break;
+				case OSCILLATOR_3:
+					editor.currPitchEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_env_3;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_pitch_env_3 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_pitch_env_3 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_pitch_env_3 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updatePitchEnv3Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_WIDTH_LEVEL:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currWidthLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width;
+					break;
+				case OSCILLATOR_2:
+					editor.currWidthLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width;
+					break;
+				case OSCILLATOR_3:
+					editor.currWidthLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateWidthLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_WIDTH_LFO1:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currWidthLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_1;
+					break;
+				case OSCILLATOR_2:
+					editor.currWidthLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_1;
+					break;
+				case OSCILLATOR_3:
+					editor.currWidthLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_1;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_1 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateWidthLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_WIDTH_LFO2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currWidthLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currWidthLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currWidthLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_lfo_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateWidthLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_WIDTH_ENV2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currWidthEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currWidthEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currWidthEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateWidthEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_WIDTH_ENV3:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currWidthEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_3;
+					break;
+				case OSCILLATOR_2:
+					editor.currWidthEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_3;
+					break;
+				case OSCILLATOR_3:
+					editor.currWidthEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_3;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_width_env_3 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_width_env_3 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_width_env_3 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateWidthEnv3Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_SYNC_LEVEL:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currSyncLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync;
+					break;
+				case OSCILLATOR_2:
+					editor.currSyncLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync;
+					break;
+				case OSCILLATOR_3:
+					editor.currSyncLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateSyncLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_SYNC_LFO1:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currSyncLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_1;
+					break;
+				case OSCILLATOR_2:
+					editor.currSyncLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_1;
+					break;
+				case OSCILLATOR_3:
+					editor.currSyncLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_1;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_1 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_1 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateSyncLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_SYNC_LFO2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currSyncLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currSyncLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currSyncLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_lfo_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_lfo_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateSyncLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_SYNC_ENV2:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currSyncEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_2;
+					break;
+				case OSCILLATOR_2:
+					editor.currSyncEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_2;
+					break;
+				case OSCILLATOR_3:
+					editor.currSyncEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_2;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_2 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_2 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_2 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateSyncEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_SYNC_ENV3:
+			{
+				switch (synth.currOsc) {
+				case OSCILLATOR_1:
+					editor.currSyncEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_3;
+					break;
+				case OSCILLATOR_2:
+					editor.currSyncEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_3;
+					break;
+				case OSCILLATOR_3:
+					editor.currSyncEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_3;
+					break;
+				default:
+					break;
+				}
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					switch (synth.currOsc) {
+					case OSCILLATOR_1:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_1_sync_env_3 = tmp16;
+						break;
+					case OSCILLATOR_2:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_2_sync_env_3 = tmp16;
+						break;
+					case OSCILLATOR_3:
+						synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].oscillator_3_sync_env_3 = tmp16;
+						break;
+					default:
+						break;
+					}
+
+					ui.updateSyncEnv3Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_LEVEL:
+			{
+				editor.currFrequencyLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency = tmp16;
+
+					ui.updateFrequencyLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_LFO1:
+			{
+				editor.currFrequencyLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_1 = tmp16;
+
+					ui.updateFrequencyLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_LFO2:
+			{
+				editor.currFrequencyLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_lfo_2 = tmp16;
+
+					ui.updateFrequencyLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_ENV2:
+			{
+				editor.currFrequencyEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_2 = tmp16;
+
+					ui.updateFrequencyEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FREQUENCY_ENV3:
+			{
+				editor.currFrequencyEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_frequency_env_3 = tmp16;
+
+					ui.updateFrequencyEnv3Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_LEVEL:
+			{
+				editor.currResonanceLevelDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance = tmp16;
+
+					ui.updateResonanceLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_LFO1:
+			{
+				editor.currResonanceLFO1Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1 = tmp16;
+
+					ui.updateResonanceLFO1Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_LFO2:
+			{
+				editor.currResonanceLFO2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2 = tmp16;
+
+					ui.updateResonanceLFO2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_ENV2:
+			{
+				editor.currResonanceEnv2Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2 = tmp16;
+
+					ui.updateResonanceEnv2Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_RESONANCE_ENV3:
+			{
+				editor.currResonanceEnv3Disp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP((int16_t)textEdit.tmpDisp16, -0x800, 0x7ff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3 = tmp16;
+
+					ui.updateResonanceEnv3Text = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV1_ATTACK:
+			{
+				editor.currEnv1AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack = tmp16;
+
+					ui.updateEnv1AttackText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV1_DECAY:
+			{
+				editor.currEnv1DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay = tmp16;
+
+					ui.updateEnv1DecayText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV1_SUSTAIN:
+			{
+				editor.currEnv1SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain = tmp16;
+
+					ui.updateEnv1SustainText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV2_ATTACK:
+			{
+				editor.currEnv2AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_attack = tmp16;
+
+					ui.updateEnv2AttackText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV2_DECAY:
+			{
+				editor.currEnv2DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_decay = tmp16;
+
+					ui.updateEnv2DecayText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV2_SUSTAIN:
+			{
+				editor.currEnv2SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_2_sustain = tmp16;
+
+					ui.updateEnv2SustainText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV3_ATTACK:
+			{
+				editor.currEnv3AttackDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_attack = tmp16;
+
+					ui.updateEnv3AttackText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV3_DECAY:
+			{
+				editor.currEnv3DecayDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_decay = tmp16;
+
+					ui.updateEnv3DecayText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_ENV3_SUSTAIN:
+			{
+				editor.currEnv3SustainDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_3_sustain = tmp16;
+
+					ui.updateEnv3SustainText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_LFO1_SPEED:
+			{
+				editor.currLFO1SpeedDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0x7fff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_1_speed = tmp16;
+
+					ui.updateLFO1SpeedText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_LFO2_SPEED:
+			{
+				editor.currLFO2SpeedDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0x7fff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].lfo_2_speed = tmp16;
+
+					ui.updateLFO2SpeedText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
 			default: break;
 		}
 
@@ -1098,6 +2369,17 @@ void handleTextEditInputChar(char textChar)
 						*textEdit.numPtr16 &= ~(0xF000 >> (textEdit.cursorBlock << 2));
 						*textEdit.numPtr16 |= textChar << (12 - (textEdit.cursorBlock << 2));
 					}
+				}
+				else if (textEdit.numBits == 12)
+				{
+					if (textEdit.signed12BitNumPtr && textEdit.cursorBlock == 0)
+					{
+						*textEdit.numPtr16 &= ~0xF000;
+						if (textChar >= 8)
+							*textEdit.numPtr16 |= 0xF000;
+					}
+					*textEdit.numPtr16 &= ~(0x0F00 >> (textEdit.cursorBlock << 2));
+					*textEdit.numPtr16 |= textChar << (8 - (textEdit.cursorBlock << 2));
 				}
 				else if (textEdit.numBits == 8)
 				{
