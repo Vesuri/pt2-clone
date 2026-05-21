@@ -32,17 +32,38 @@ if [ ! -d $TARGET_DIR ]; then
 fi
 
 #
-# SDL2 detection: prefer installed framework, fall back to sdl2-config (e.g. Homebrew)
+# SDL2 detection: prefer installed framework, fall back to sdl2-config / brew / pkg-config
 #
 if [ -d /Library/Frameworks/SDL2.framework ]; then
     SDL2_CFLAGS="-F /Library/Frameworks"
     SDL2_LDFLAGS="-L /Library/Frameworks -framework SDL2"
-elif command -v sdl2-config &> /dev/null; then
-    SDL2_CFLAGS="-I$(sdl2-config --prefix)/include $(sdl2-config --cflags | sed 's/-I[^ ]*//')"
-    SDL2_LDFLAGS=$(sdl2-config --libs)
 else
-    echo "Error: SDL2 not found. Install SDL2.framework to /Library/Frameworks or install via Homebrew."
-    exit 1
+    # Locate sdl2-config: check PATH, then Homebrew prefix (arm64 and Intel)
+    SDL2_CONFIG=
+    if command -v sdl2-config &> /dev/null; then
+        SDL2_CONFIG=sdl2-config
+    else
+        for candidate in \
+            "$(brew --prefix sdl2 2>/dev/null)/bin/sdl2-config" \
+            /opt/homebrew/bin/sdl2-config \
+            /usr/local/bin/sdl2-config; do
+            if [ -x "$candidate" ]; then
+                SDL2_CONFIG="$candidate"
+                break
+            fi
+        done
+    fi
+
+    if [ -n "$SDL2_CONFIG" ]; then
+        SDL2_CFLAGS="-I$($SDL2_CONFIG --prefix)/include $($SDL2_CONFIG --cflags | sed 's/-I[^ ]*//')"
+        SDL2_LDFLAGS=$($SDL2_CONFIG --libs)
+    elif command -v pkg-config &> /dev/null && pkg-config --exists sdl2; then
+        SDL2_CFLAGS=$(pkg-config --cflags-only-I sdl2 | sed 's|-I\([^ ]*\)/SDL2|-I\1|g')
+        SDL2_LDFLAGS=$(pkg-config --libs sdl2)
+    else
+        echo "Error: SDL2 not found. Install SDL2.framework to /Library/Frameworks or install via Homebrew (brew install sdl2)."
+        exit 1
+    fi
 fi
 
 #
