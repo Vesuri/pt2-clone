@@ -1590,21 +1590,72 @@ void putProgram(program_t* program, FILE* file)
     putWord(program->lfo_2_waveform * 2 + 1536, file);
 }
 
-// Open ~/.protracker/protracker.jrm; for writing, creates ~/.protracker/ if needed.
+// Directory where protracker.jrm was found on load, or where it will be saved.
+// Empty string = not yet determined (will default to ~/.config/protracker on first save).
+static char globalJrmDir[PATH_MAX];
+
+// Open protracker.jrm, searching the same three locations as protracker.ini.
+// On load: records which directory it was found in.
+// On save: uses the recorded directory, defaulting to ~/.config/protracker/.
 static FILE *openGlobalJrm(const char *mode)
 {
 #ifdef _WIN32
 	return UNICHAR_FOPEN(L"protracker.jrm", mode);
 #else
 	const char *home = getenv("HOME");
-	if (home == NULL)
+	char path[PATH_MAX];
+	bool writing = strchr(mode, 'w') != NULL;
+
+	if (!writing)
+	{
+		FILE *f;
+
+		// 1. Current directory (same first priority as protracker.ini)
+		f = fopen("protracker.jrm", "rb");
+		if (f != NULL)
+		{
+			getcwd(globalJrmDir, sizeof(globalJrmDir));
+			return f;
+		}
+
+		if (home != NULL)
+		{
+			// 2. ~/.config/protracker/
+			snprintf(path, sizeof(path), "%s/.config/protracker/protracker.jrm", home);
+			f = fopen(path, "rb");
+			if (f != NULL)
+			{
+				snprintf(globalJrmDir, sizeof(globalJrmDir), "%s/.config/protracker", home);
+				return f;
+			}
+
+			// 3. ~/.protracker/
+			snprintf(path, sizeof(path), "%s/.protracker/protracker.jrm", home);
+			f = fopen(path, "rb");
+			if (f != NULL)
+			{
+				snprintf(globalJrmDir, sizeof(globalJrmDir), "%s/.protracker", home);
+				return f;
+			}
+
+			// Not found: set default save location for later
+			snprintf(globalJrmDir, sizeof(globalJrmDir), "%s/.config/protracker", home);
+		}
 		return NULL;
-	char dir[PATH_MAX], path[PATH_MAX];
-	snprintf(dir,  sizeof(dir),  "%s/.protracker",              home);
-	snprintf(path, sizeof(path), "%s/.protracker/protracker.jrm", home);
-	if (strchr(mode, 'w'))
-		mkdir(dir, 0755); // ignore error if already exists
-	return fopen(path, mode);
+	}
+	else
+	{
+		// Use recorded directory; initialise to default if not yet set
+		if (globalJrmDir[0] == '\0' && home != NULL)
+			snprintf(globalJrmDir, sizeof(globalJrmDir), "%s/.config/protracker", home);
+
+		if (globalJrmDir[0] == '\0')
+			return NULL;
+
+		mkdir(globalJrmDir, 0755); // create if it doesn't exist yet
+		snprintf(path, sizeof(path), "%s/protracker.jrm", globalJrmDir);
+		return fopen(path, mode);
+	}
 #endif
 }
 
