@@ -13,14 +13,12 @@
 #include <unistd.h>
 #include <limits.h>
 #endif
-#include "pt2_header.h"
 #include "pt2_helpers.h"
 #include "pt2_config.h"
 #include "pt2_tables.h"
-#include "pt2_audio.h"
-#include "pt2_diskop.h"
-#include "pt2_textout.h"
 #include "pt2_sampler.h"
+#include "pt2_diskop.h" // changePathToDesktop(), changePathToHome()
+#include "pt2_visuals.h" // MAX_UPSCALE_FACTOR
 
 #ifndef _WIN32
 static char oldCwd[PATH_MAX];
@@ -35,7 +33,6 @@ static bool loadColorsDotIni(void);
 
 void loadConfig(void)
 {
-	bool proTrackerDotIniFound, ptDotConfigFound;
 #ifndef _WIN32
 	bool colorsDotIniFound;
 #endif
@@ -43,15 +40,16 @@ void loadConfig(void)
 
 	// set default config values first
 	config.noDownsampleOnSmpLoad = false;
-	config.disableE8xEffect = false;
+	config.enableE8xEffect = false;
 	config.fullScreenStretch = false;
 	config.pattDots = false;
 	config.waveformCenterLine = true;
-	config.filterModel = FILTERMODEL_A1200;
+	config.amigaModel = MODEL_A1200;
 	config.soundFrequency = 48000;
 	config.rememberPlayMode = false;
 	config.stereoSeparation = 20;
-	config.videoScaleFactor = 2;
+	config.autoFitVideoScale = true;
+	config.videoScaleFactor = 0; // will be set later if autoFitVideoScale is set
 	config.realVuMeters = false;
 	config.modDot = false;
 	config.accidental = 0; // sharp
@@ -67,27 +65,35 @@ void loadConfig(void)
 	config.pixelFilter = PIXELFILTER_NEAREST;
 	config.integerScaling = true;
 	config.audioInputFrequency = 44100;
+	config.mod2WavOutputFreq = 44100;
 	config.keepEditModeAfterStepPlay = false;
-
 	config.maxSampleLength = 65534;
-	config.reservedSampleOffset = (MOD_SAMPLES+1) * config.maxSampleLength;
+	config.restrictedPattEditClick = false;
 
 #ifndef _WIN32
 	getcwd(oldCwd, PATH_MAX);
 #endif
 
 	// load protracker.ini
-	proTrackerDotIniFound = false;
+	bool proTrackerDotIniFound = false;
 
 #ifdef _WIN32
 	f = fopen("protracker.ini", "r");
 	if (f != NULL)
 		proTrackerDotIniFound = true;
 #else
-	// check in program directory
+	// check in program executable directory (first priority)
 	f = fopen("protracker.ini", "r");
 	if (f != NULL)
 		proTrackerDotIniFound = true;
+
+	// check in ~/.config/protracker/
+	if (!proTrackerDotIniFound && changePathToHome() && chdir(".config/protracker") == 0)
+	{
+		f = fopen("protracker.ini", "r");
+		if (f != NULL)
+			proTrackerDotIniFound = true;
+	}
 
 	// check in ~/.protracker/
 	if (!proTrackerDotIniFound && changePathToHome() && chdir(".protracker") == 0)
@@ -106,17 +112,25 @@ void loadConfig(void)
 	editor.oldTempo = editor.initialTempo;
 
 	// load PT.Config (if available)
-	ptDotConfigFound = false;
+	bool ptDotConfigFound = false;
 
 #ifdef _WIN32
 	f = openPTDotConfig();
 	if (f != NULL)
 		ptDotConfigFound = true;
 #else
-	// check in program directory
+	// check in program executable directory (first priority)
 	f = openPTDotConfig();
 	if (f != NULL)
 		ptDotConfigFound = true;
+
+	// check in ~/.config/protracker/
+	if (!ptDotConfigFound && changePathToHome() && chdir(".config/protracker") == 0)
+	{
+		f = openPTDotConfig();
+		if (f != NULL)
+			ptDotConfigFound = true;
+	}
 
 	// check in ~/.protracker/
 	if (!ptDotConfigFound && changePathToHome() && chdir(".protracker") == 0)
@@ -139,32 +153,31 @@ void loadConfig(void)
 #ifdef _WIN32
 	loadColorsDotIni();
 #else
-	// check in program directory
+	// check in program executable directory (first priority)
 	colorsDotIniFound = loadColorsDotIni();
+
+	// check in ~/.config/protracker/
+	if (!colorsDotIniFound && changePathToHome() && chdir(".config/protracker") == 0)
+		colorsDotIniFound = loadColorsDotIni();
 
 	// check in ~/.protracker/
 	if (!colorsDotIniFound && changePathToHome() && chdir(".protracker") == 0)
 		loadColorsDotIni();
-#endif
 
-#ifndef _WIN32
 	chdir(oldCwd);
 #endif
 
-	// use palette for generating sample data mark (invert) table
+	// make 'sample data mark' palette-invert table now
 	createSampleMarkTable();
 }
 
 static bool loadProTrackerDotIni(FILE *f)
 {
-	char *configBuffer, *configLine;
-	uint32_t configFileSize, lineLen, i;
-
 	fseek(f, 0, SEEK_END);
-	configFileSize = ftell(f);
+	uint32_t configFileSize = ftell(f);
 	rewind(f);
 
-	configBuffer = (char *)malloc(configFileSize + 1);
+	char *configBuffer = (char *)malloc(configFileSize + 1);
 	if (configBuffer == NULL)
 	{
 		fclose(f);
@@ -176,10 +189,10 @@ static bool loadProTrackerDotIni(FILE *f)
 	configBuffer[configFileSize] = '\0';
 	fclose(f);
 
-	configLine = strtok(configBuffer, "\n");
+	char *configLine = strtok(configBuffer, "\n");
 	while (configLine != NULL)
 	{
-		lineLen = (uint32_t)strlen(configLine);
+		uint32_t lineLen = (uint32_t)strlen(configLine);
 
 		// remove CR in CRLF linefeed (if present)
 		if (lineLen > 1)
@@ -198,6 +211,15 @@ static bool loadProTrackerDotIni(FILE *f)
 			continue;
 		}
 
+		// RESTRICTED_PATT_EDIT_CLICK
+		else if (!_strnicmp(configLine, "RESTRICTED_PATT_EDIT_CLICK=", 27))
+		{
+			if (!_strnicmp(&configLine[27], "TRUE", 4))
+				config.restrictedPattEditClick = true;
+			else if (!_strnicmp(&configLine[27], "FALSE", 5))
+				config.restrictedPattEditClick = false;
+		}
+
 		// STEPPLAY_KEEP_EDITMODE
 		else if (!_strnicmp(configLine, "STEPPLAY_KEEP_EDITMODE=", 23))
 		{
@@ -211,15 +233,9 @@ static bool loadProTrackerDotIni(FILE *f)
 		else if (!_strnicmp(configLine, "64K_LIMIT=", 10))
 		{
 			if (!_strnicmp(&configLine[10], "TRUE", 4))
-			{
 				config.maxSampleLength = 65534;
-				config.reservedSampleOffset = (MOD_SAMPLES+1) * config.maxSampleLength;
-			}
 			else if (!_strnicmp(&configLine[10], "FALSE", 5))
-			{
 				config.maxSampleLength = 131070;
-				config.reservedSampleOffset = (MOD_SAMPLES+1) * config.maxSampleLength;
-			}
 		}
 
 		// NO_DWNSMP_ON_SMP_LOAD (no dialog for 2x downsample after >22kHz sample load)
@@ -229,11 +245,11 @@ static bool loadProTrackerDotIni(FILE *f)
 			else if (!_strnicmp(&configLine[22], "FALSE", 5)) config.noDownsampleOnSmpLoad = false;
 		}
 
-		// DISABLE_E8X (Karplus-Strong command)
-		else if (!_strnicmp(configLine, "DISABLE_E8X=", 12))
+		// ENABLE_E8X (Karplus-Strong command)
+		else if (!_strnicmp(configLine, "ENABLE_E8X=", 11))
 		{
-			     if (!_strnicmp(&configLine[12], "TRUE",  4)) config.disableE8xEffect = true;
-			else if (!_strnicmp(&configLine[12], "FALSE", 5)) config.disableE8xEffect = false;
+			     if (!_strnicmp(&configLine[11], "TRUE",  4)) config.enableE8xEffect = true;
+			else if (!_strnicmp(&configLine[11], "FALSE", 5)) config.enableE8xEffect = false;
 		}
 
 		// HWMOUSE
@@ -359,18 +375,20 @@ static bool loadProTrackerDotIni(FILE *f)
 			else if (!_strnicmp(&configLine[7], "FALSE", 5)) config.modDot = false;
 		}
 
-		// SCALE3X (deprecated)
-		else if (!_strnicmp(configLine, "SCALE3X=", 8))
-		{
-			     if (!_strnicmp(&configLine[8], "TRUE",  4)) config.videoScaleFactor = 3;
-			else if (!_strnicmp(&configLine[8], "FALSE", 5)) config.videoScaleFactor = 2;
-		}
-
 		// VIDEOSCALE
 		else if (!_strnicmp(configLine, "VIDEOSCALE=", 11))
 		{
-			if (lineLen >= 13 && configLine[12] == 'X' && isdigit(configLine[11]))
-				config.videoScaleFactor = configLine[11] - '0';
+			if (!_strnicmp(&configLine[11], "AUTO", 4))
+			{
+				config.autoFitVideoScale = true;
+				config.videoScaleFactor = 0; // will be set later
+			}
+			else if (lineLen >= 13 && toupper(configLine[12]) == 'X' && isdigit(configLine[11]))
+			{
+				config.autoFitVideoScale = false;
+				config.videoScaleFactor = (int8_t)(configLine[11] - '0');
+				config.videoScaleFactor = CLAMP(config.videoScaleFactor, 1, MAX_UPSCALE_FACTOR);
+			}
 		}
 
 		// REMEMBERPLAYMODE
@@ -385,7 +403,7 @@ static bool loadProTrackerDotIni(FILE *f)
 		{
 			if (lineLen > 11)
 			{
-				i = 11;
+				uint32_t i = 11;
 				while (configLine[i] == ' ') i++; // remove spaces before string (if present)
 				while (configLine[lineLen-1] == ' ') lineLen--; // remove spaces after string (if present)
 
@@ -400,7 +418,7 @@ static bool loadProTrackerDotIni(FILE *f)
 		{
 			if (lineLen > 14)
 			{
-				i = 14;
+				uint32_t i = 14;
 				while (configLine[i] == ' ') i++; // remove spaces before string (if present)
 				while (configLine[lineLen-1] == ' ') lineLen--; // remove spaces after string (if present)
 
@@ -413,22 +431,15 @@ static bool loadProTrackerDotIni(FILE *f)
 		// FILTERMODEL
 		else if (!_strnicmp(configLine, "FILTERMODEL=", 12))
 		{
-			     if (!_strnicmp(&configLine[12], "A500",  4)) config.filterModel = FILTERMODEL_A500;
-			else if (!_strnicmp(&configLine[12], "A1200", 5)) config.filterModel = FILTERMODEL_A1200;
+			     if (!_strnicmp(&configLine[12], "A500",  4)) config.amigaModel = MODEL_A500;
+			else if (!_strnicmp(&configLine[12], "A1200", 5)) config.amigaModel = MODEL_A1200;
 		}
 
 		// A500LOWPASSFILTER (deprecated, same as A4000LOWPASSFILTER)
 		else if (!_strnicmp(configLine, "A500LOWPASSFILTER=", 18))
 		{
-			     if (!_strnicmp(&configLine[18], "TRUE",  4)) config.filterModel = FILTERMODEL_A500;
-			else if (!_strnicmp(&configLine[18], "FALSE", 5)) config.filterModel = FILTERMODEL_A1200;
-		}
-
-		// A4000LOWPASSFILTER (deprecated)
-		else if (!_strnicmp(configLine, "A4000LOWPASSFILTER=", 19))
-		{
-			     if (!_strnicmp(&configLine[19], "TRUE",  4)) config.filterModel = FILTERMODEL_A500;
-			else if (!_strnicmp(&configLine[19], "FALSE", 5)) config.filterModel = FILTERMODEL_A1200;
+			     if (!_strnicmp(&configLine[18], "TRUE",  4)) config.amigaModel = MODEL_A500;
+			else if (!_strnicmp(&configLine[18], "FALSE", 5)) config.amigaModel = MODEL_A1200;
 		}
 
 		// SAMPLINGFREQ
@@ -441,13 +452,23 @@ static bool loadProTrackerDotIni(FILE *f)
 			}
 		}
 
+		// MOD2WAVFREQUENCY
+		else if (!_strnicmp(configLine, "MOD2WAVFREQUENCY=", 17))
+		{
+			if (configLine[17] != '\0')
+			{
+				const int32_t num = atoi(&configLine[17]);
+				config.mod2WavOutputFreq = CLAMP(num, MIN_AUDIO_FREQUENCY, MAX_AUDIO_FREQUENCY);
+			}
+		}
+
 		// FREQUENCY
 		else if (!_strnicmp(configLine, "FREQUENCY=", 10))
 		{
 			if (configLine[10] != '\0')
 			{
 				const int32_t num = atoi(&configLine[10]);
-				config.soundFrequency = CLAMP(num, 44100, 192000);
+				config.soundFrequency = CLAMP(num, MIN_AUDIO_FREQUENCY, MAX_AUDIO_FREQUENCY);
 			}
 		}
 
@@ -480,16 +501,17 @@ static bool loadProTrackerDotIni(FILE *f)
 
 static FILE *openPTDotConfig(void)
 {
-	char tmpFilename[16];
-	uint8_t i;
-	FILE *f;
-
-	f = fopen("PT.Config", "rb"); // PT didn't read PT.Config with no number, but let's support it
+	FILE *f = fopen("PT.Config", "rb"); // PT didn't read PT.Config with no number, but let's support it
 	if (f == NULL)
 	{
+		// try regular PT config filenames (PT.Config-xx)
+		char tmpFilename[16];
+		int32_t i;
+
 		for (i = 0; i < 100; i++)
 		{
 			sprintf(tmpFilename, "PT.Config-%02d", i);
+
 			f = fopen(tmpFilename, "rb");
 			if (f != NULL)
 				break;
@@ -507,12 +529,10 @@ static bool loadPTDotConfig(FILE *f)
 	char cfgString[24];
 	uint8_t tmp8;
 	uint16_t tmp16;
-	int32_t i;
-	uint32_t configFileSize;
 
 	// get filesize
 	fseek(f, 0, SEEK_END);
-	configFileSize = ftell(f);
+	uint32_t configFileSize = ftell(f);
 	if (configFileSize != 1024)
 	{
 		// not a valid PT.Config file
@@ -538,7 +558,7 @@ static bool loadPTDotConfig(FILE *f)
 
 	// Palette
 	fseek(f, 154, SEEK_SET);
-	for (i = 0; i < 8; i++)
+	for (int32_t i = 0; i < 8; i++)
 	{
 		fread(&tmp16, 2, 1, f); // stored as Big-Endian
 		tmp16 = SWAP16(tmp16);
@@ -566,7 +586,7 @@ static bool loadPTDotConfig(FILE *f)
 
 	// Effect Macros
 	fseek(f, 466, SEEK_SET);
-	for (i = 0; i < 10; i++)
+	for (int32_t i = 0; i < 10; i++)
 	{
 		fread(&tmp16, 2, 1, f); // stored as Big-Endian
 		tmp16 = SWAP16(tmp16);
@@ -600,6 +620,9 @@ static bool loadPTDotConfig(FILE *f)
 	if (tmp8 > 35) tmp8 = 35;
 	editor.tuningNote = tmp8;
 
+	if (editor.tuningNote > 35)
+		editor.tuningNote = 35;
+
 	// Tuning Tone Volume
 	fseek(f, 503, SEEK_SET);
 	fread(&tmp8, 1, 1, f);
@@ -621,7 +644,7 @@ static bool loadPTDotConfig(FILE *f)
 
 	// VU-Meter Colors
 	fseek(f, 546, SEEK_SET);
-	for (i = 0; i < 48; i++)
+	for (int32_t i = 0; i < 48; i++)
 	{
 		fread(&vuMeterColors[i], 2, 1, f); // stored as Big-Endian
 		vuMeterColors[i] = SWAP16(vuMeterColors[i]);
@@ -629,7 +652,7 @@ static bool loadPTDotConfig(FILE *f)
 
 	// Spectrum Analyzer Colors
 	fseek(f, 642, SEEK_SET);
-	for (i = 0; i < 36; i++)
+	for (int32_t i = 0; i < 36; i++)
 	{
 		fread(&analyzerColors[i], 2, 1, f); // stored as Big-Endian
 		analyzerColors[i] = SWAP16(analyzerColors[i]);
@@ -643,29 +666,26 @@ static uint8_t hex2int(char ch)
 {
 	ch = (char)toupper(ch);
 
-	     if (ch >= 'A' && ch <= 'F') return 10 + (ch - 'A');
-	else if (ch >= '0' && ch <= '9') return ch - '0';
+	if (ch >= 'A' && ch <= 'F')
+		return 10 + (ch - 'A');
+	else if (ch >= '0' && ch <= '9')
+		return ch - '0';
 
 	return 0; // not a hex
 }
 
 static bool loadColorsDotIni(void)
 {
-	char *configBuffer, *configLine;
-	uint16_t color;
-	uint32_t line, fileSize, lineLen;
-	FILE *f;
-
-	f = fopen("colors.ini", "r");
+	FILE *f = fopen("colors.ini", "r");
 	if (f == NULL)
 		return false;
 
 	// get filesize
 	fseek(f, 0, SEEK_END);
-	fileSize = ftell(f);
+	uint32_t fileSize = ftell(f);
 	rewind(f);
 
-	configBuffer = (char *)malloc(fileSize + 1);
+	char *configBuffer = (char *)malloc(fileSize + 1);
 	if (configBuffer == NULL)
 	{
 		fclose(f);
@@ -678,10 +698,10 @@ static bool loadColorsDotIni(void)
 	fclose(f);
 
 	// do parsing
-	configLine = strtok(configBuffer, "\n");
+	char *configLine = strtok(configBuffer, "\n");
 	while (configLine != NULL)
 	{
-		lineLen = (uint32_t)strlen(configLine);
+		uint32_t lineLen = (uint32_t)strlen(configLine);
 
 		// read palette
 		if (lineLen >= (sizeof ("[Palette]")-1))
@@ -690,10 +710,10 @@ static bool loadColorsDotIni(void)
 			{
 				configLine = strtok(NULL, "\n");
 
-				line = 0;
+				uint32_t line = 0;
 				while (configLine != NULL && line < 8)
 				{
-					color = (hex2int(configLine[0]) << 8) | (hex2int(configLine[1]) << 4) | hex2int(configLine[2]);
+					uint16_t color = (hex2int(configLine[0]) << 8) | (hex2int(configLine[1]) << 4) | hex2int(configLine[2]);
 					color &= 0xFFF;
 					video.palette[line] = RGB12_to_RGB24(color);
 
@@ -715,10 +735,10 @@ static bool loadColorsDotIni(void)
 			{
 				configLine = strtok(NULL, "\n");
 
-				line = 0;
+				uint32_t line = 0;
 				while (configLine != NULL && line < 48)
 				{
-					color = (hex2int(configLine[0]) << 8) | (hex2int(configLine[1]) << 4) | hex2int(configLine[2]);
+					uint16_t color = (hex2int(configLine[0]) << 8) | (hex2int(configLine[1]) << 4) | hex2int(configLine[2]);
 					vuMeterColors[line] = color & 0xFFF;
 
 					configLine = strtok(NULL, "\n");
@@ -739,10 +759,10 @@ static bool loadColorsDotIni(void)
 			{
 				configLine = strtok(NULL, "\n");
 
-				line = 0;
+				uint32_t line = 0;
 				while (configLine != NULL && line < 36)
 				{
-					color = (hex2int(configLine[0]) << 8) | (hex2int(configLine[1]) << 4) | hex2int(configLine[2]);
+					uint16_t color = (hex2int(configLine[0]) << 8) | (hex2int(configLine[1]) << 4) | hex2int(configLine[2]);
 					analyzerColors[line] = color & 0xFFF;
 
 					configLine = strtok(NULL, "\n");

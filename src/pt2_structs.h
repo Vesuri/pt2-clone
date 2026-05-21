@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "pt2_header.h"
 #include "pt2_hpc.h"
+#include "pt2_paula.h"
 
 // for .WAV sample loading/saving
 typedef struct wavHeader_t
@@ -51,7 +52,7 @@ typedef struct note_t
 typedef struct moduleHeader_t
 {
 	char name[20 + 1];
-	uint16_t order[MOD_ORDERS], numOrders;
+	uint16_t patternTable[128], songLength;
 	uint16_t initialTempo; // used for STK/UST modules after module is loaded
 } moduleHeader_t;
 
@@ -67,14 +68,14 @@ typedef struct moduleSample_t
 
 typedef struct moduleChannel_t
 {
-	int8_t *n_start, *n_wavestart, *n_loopstart, n_chanindex, n_volume;
+	int8_t *n_start, *n_wavestart, *n_loopstart, n_volume, n_dmabit;
 	int8_t n_toneportdirec, n_pattpos, n_loopcount;
 	uint8_t n_wavecontrol, n_glissfunk, n_sampleoffset, n_toneportspeed;
 	uint8_t n_vibratocmd, n_tremolocmd, n_finetune, n_funkoffset, n_samplenum;
 	uint8_t n_vibratopos, n_tremolopos;
 	int16_t n_period, n_note, n_wantedperiod;
 	uint16_t n_cmd, n_length, n_replen;
-	uint32_t n_scopedelta;
+	uint32_t n_scopedelta, n_chanindex;
 
 	// for pt2_sync.c
 	uint8_t syncFlags;
@@ -93,13 +94,13 @@ typedef struct module_t
 
 	moduleHeader_t header;
 	moduleSample_t samples[MOD_SAMPLES];
-	moduleChannel_t channels[AMIGA_VOICES];
+	moduleChannel_t channels[PAULA_VOICES];
 	note_t *patterns[MAX_PATTERNS];
 
 	// for pattern viewer
 	int8_t currRow;
 	int32_t currSpeed, currBPM;
-	uint16_t currOrder, currPattern;
+	uint16_t currPos, currPattern;
 
 	// for MOD2WAV progress bar
 	uint32_t rowsCounter, rowsInTotal;
@@ -111,46 +112,42 @@ typedef struct keyb_t
 	bool shiftPressed, leftCtrlPressed, leftAltPressed;
 	bool leftCommandPressed, leftAmigaPressed, keypadEnterPressed;
 	uint8_t repeatCounter, delayCounter;
-	uint64_t repeatDelta, repeatFrac;
+	uint64_t repeatFrac;
 	SDL_Scancode lastRepKey, lastKey;
 } keyb_t;
 
 typedef struct mouse_t
 {
-	volatile bool setPosFlag, resetCursorColorFlag;
+	volatile bool setPosFlag, updatePointerColorFlag;
 	bool buttonWaiting, leftButtonPressed, rightButtonPressed;
 	uint8_t repeatCounter, buttonWaitCounter;
-	int32_t rawX, rawY, x, y, lastMouseX, setPosX, setPosY, lastGUIButton, prevX, prevY;
+	int32_t absX, absY, rawX, rawY, x, y, lastMouseX, setPosX, setPosY, lastGUIButton, prevX, prevY;
 	int32_t lastSmpFilterButton, lastSamplingButton;
 	uint32_t buttonState;
 } mouse_t;
 
 typedef struct video_t
 {
-	bool fullscreen, vsync60HzPresent, windowHidden, useDesktopMouseCoords;
-	int32_t renderX, renderY, renderW, renderH, displayW, displayH;
-	int32_t xScale, yScale;
-	float fMouseXMul, fMouseYMul;
-	hpc_t vblankHpc;
-	SDL_PixelFormat *pixelFormat;
-	uint32_t *frameBuffer, *frameBufferUnaligned;
-
-	SDL_Window *window;
-	SDL_Renderer *renderer;
-	SDL_Texture  *texture;
-
-	uint32_t palette[PALETTE_NUM];
-
+	bool fullscreen, vsync60HzPresent, windowHidden, useCustomRenderRect, debug;
+	int32_t renderX, renderY, renderW, renderH, displayW, displayH, windowW, windowH;
+	uint32_t mouseCursorUpscaleFactor, *frameBuffer, palette[PALETTE_NUM];
+	uint64_t amigaVblankDelta; // 0.52 fixed-point
+	double dMonitorRefreshRate, dMouseXMul, dMouseYMul;
 #ifdef _WIN32
 	HWND hWnd;
 #endif
+	hpc_t vblankHpc;
+	SDL_Window *window;
+	SDL_Rect renderRect;
+	SDL_Renderer *renderer;
+	SDL_Texture  *texture;
 } video_t;
 
 typedef struct editor_t
 {
-	volatile int8_t vuMeterVolumes[AMIGA_VOICES], spectrumVolumes[SPECTRUM_BAR_NUM];
-	volatile int8_t *sampleFromDisp, *sampleToDisp, *currSampleDisp, realVuMeterVolumes[AMIGA_VOICES];
-	volatile bool songPlaying, programRunning, isWAVRendering, isSMPRendering, smpRenderingDone;
+	volatile uint8_t vuMeterVolumes[PAULA_VOICES], spectrumVolumes[SPECTRUM_BAR_NUM];
+	volatile int8_t *sampleFromDisp, *sampleToDisp, *currSampleDisp, realVuMeterVolumes[PAULA_VOICES], mod2WavNumLoops, mod2WavFadeOutSeconds;
+	volatile bool songPlaying, programRunning, mod2WavOngoing, pat2SmpOngoing, mainLoopOngoing, abortMod2Wav, mod2WavFadeOut;
 	volatile uint16_t *quantizeValueDisp, *metroSpeedDisp, *metroChannelDisp, *sampleVolDisp;
 	volatile uint16_t *vol1Disp, *vol2Disp, *currEditPatternDisp, *currPosDisp, *currPatternDisp;
 	volatile uint16_t *currPosEdPattDisp, *currLengthDisp, *lpCutOffDisp, *hpCutOffDisp;
@@ -168,19 +165,19 @@ typedef struct editor_t
 	volatile int16_t *currEnv3AttackDisp, *currEnv3DecayDisp, *currEnv3SustainDisp;
 	volatile int16_t *currLFO1SpeedDisp, *currLFO2SpeedDisp;
 
-	char mixText[16];
+	char mixText[16+1];
 	char *entryNameTmp, *currPath, *dropTempFileName;
 	UNICHAR *fileNameTmpU, *currPathU, *modulesPathU, *samplesPathU;
 
 	bool errorMsgActive, errorMsgBlock, multiFlag, metroFlag, keypadToggle8CFlag, normalizeFiltersFlag;
-	bool sampleAllFlag, halfClipFlag, newOldFlag, pat2SmpHQ, mixFlag, useLEDFilter;
-	bool modLoaded, autoInsFlag, repeatKeyFlag, sampleZero, tuningFlag;
+	bool sampleAllFlag, halveSampleFlag, newOldFlag, pat2SmpHQ, mixFlag;
+	bool modLoaded, autoInsFlag, repeatKeyFlag, sampleZero, tuningToneFlag;
 	bool stepPlayEnabled, stepPlayBackwards, blockBufferFlag, blockMarkFlag, didQuantize;
-	bool swapChannelFlag, configFound, abortMod2Wav, chordLengthMin, rowVisitTable[MOD_ORDERS * MOD_ROWS];
-	bool muted[AMIGA_VOICES];
+	bool swapChannelFlag, configFound, chordLengthMin, rowVisitTable[128 * MOD_ROWS];
+	bool muted[PAULA_VOICES];
 
 	int8_t smpRedoFinetunes[MOD_SAMPLES], smpRedoVolumes[MOD_SAMPLES], multiModeNext[4], trackPattFlag;
-	int8_t *smpRedoBuffer[MOD_SAMPLES], *tempSample, currSample, recordMode, sampleFrom, sampleTo, autoInsSlot;
+	int8_t *smpRedoBuffer[MOD_SAMPLES], currSample, recordMode, sampleFrom, sampleTo, autoInsSlot;
 	int8_t hiLowInstr, note1, note2, note3, note4, oldNote1, oldNote2, oldNote3, oldNote4, stepPlayLastMode;
 	uint8_t playMode, currMode, tuningChan, tuningVol, errorMsgCounter, buffFromPos, buffToPos;
 	uint8_t blockFromPos, blockToPos, timingMode, f6Pos, f7Pos, f8Pos, f9Pos, f10Pos, keyOctave, pNoteFlag;
@@ -190,12 +187,18 @@ typedef struct editor_t
 	uint16_t metroSpeed, metroChannel, sampleVol;
 	uint16_t effectMacros[10], currPlayNote, vol1, vol2, lpCutOff, hpCutOff;
 	int32_t smpRedoLoopStarts[MOD_SAMPLES], smpRedoLoopLengths[MOD_SAMPLES], smpRedoLengths[MOD_SAMPLES];
-	int32_t oldTempo, modulatePos, modulateOffset, markStartOfs, markEndOfs, pat2SmpPos, samplePos, chordLength;
-	uint64_t musicTime64;
-	double *dPat2SmpBuf;
+	int32_t oldTempo, markStartOfs, markEndOfs, samplePos, chordLength;
+	uint32_t playbackSeconds, playbackSecondsFrac;
+
+	uint32_t framesPassed;
+
 	note_t trackBuffer[MOD_ROWS], cmdsBuffer[MOD_ROWS], blockBuffer[MOD_ROWS];
-	note_t patternBuffer[MOD_ROWS * AMIGA_VOICES], undoBuffer[MOD_ROWS * AMIGA_VOICES];
+	note_t patternBuffer[MOD_ROWS * PAULA_VOICES], undoBuffer[MOD_ROWS * PAULA_VOICES];
 	SDL_Thread *mod2WavThread, *pat2SmpThread;
+
+#ifdef __APPLE__
+	bool macCmdQIssued;
+#endif
 } editor_t;
 
 typedef struct diskop_t
@@ -204,6 +207,7 @@ typedef struct diskop_t
 	bool modPackFlg;
 	int8_t mode, smpSaveType;
 	int32_t numEntries, scrollOffset;
+	SDL_Keycode lastEntryJumpKey;
 	SDL_Thread *fillThread;
 } diskop_t;
 
@@ -216,20 +220,21 @@ typedef struct cursor_t
 typedef struct ui_t
 {
 	char statusMessage[18], prevStatusMessage[18];
-	char *dstPtr, *editPos, *textEndPtr, *showTextPtr;
-
-	bool answerNo, answerYes, throwExit, editTextFlag, askScreenShown, samplerScreenShown;
+	volatile bool askBoxShown, throwExit;
+	bool answerNo, answerYes, askScreenShown, editTextFlag, samplerScreenShown;
 	bool leftLoopPinMoving, rightLoopPinMoving, changingSmpResample, changingDrumPadNote;
-	bool forceSampleDrag, forceSampleEdit, introScreenShown;
+	bool forceSampleDrag, forceSampleEdit;
 	bool aboutScreenShown, clearScreenShown, posEdScreenShown, diskOpScreenShown;
 	bool samplerVolBoxShown, samplerFiltersBoxShown, samplingBoxShown, editOpScreenShown;
-
 	bool changingSamplingNote;
 
+	char *dstPtr, *editPos, *textEndPtr, *showTextPtr;
 	bool force32BitNumPtr, signed12BitNumPtr;
 	int8_t *numPtr8, tmpDisp8, pointerMode, editOpScreen, editTextType, askScreenType;
-	int8_t visualizerMode, previousPointerMode, forceVolDrag, changingChordNote;
 	uint8_t numLen, numBits;
+	int8_t visualizerMode, previousPointerMode, forceVolDrag, changingChordNote;
+	int16_t sampleMarkingPos;
+	uint16_t lastSampleOffset;
 
 	// render/update flags
 	bool updateStatusText, updatePatternData;
@@ -283,11 +288,22 @@ typedef struct ui_t
 	bool updateLFO1SpeedText, updateLFO2SpeedText;
 	bool changingSynthNote;
 
-	int16_t lineCurX, lineCurY, editObject, sampleMarkingPos;
+	int16_t lineCurX, lineCurY, editObject;
 	uint16_t *numPtr16, tmpDisp16, *dstOffset, dstPos, textLength, editTextPos;
-	uint16_t dstOffsetEnd, lastSampleOffset, diskOpPathTextOffset;
+	uint16_t dstOffsetEnd, diskOpPathTextOffset;
 	int32_t askTempData, *numPtr32, tmpDisp32;
 } ui_t;
+
+typedef struct textEdit_t
+{
+	bool endReached, scrollable, force32BitNumPtr;
+	char *textPtr, *textEndPtr, *textStartPtr;
+	int8_t *numPtr8, tmpDisp8, type;
+	uint8_t numDigits, numBits;
+	int16_t cursorStartX, cursorStartY, object;
+	uint16_t *numPtr16, tmpDisp16, cursorBlock, numBlocks;
+	int32_t scrollOffset, *numPtr32, tmpDisp32;
+} textEdit_t;
 
 extern keyb_t keyb;
 extern mouse_t mouse;
@@ -296,5 +312,5 @@ extern editor_t editor;
 extern diskop_t diskop;
 extern cursor_t cursor;
 extern ui_t ui;
-
+extern textEdit_t textEdit;
 extern module_t *song; // pt2_main.c

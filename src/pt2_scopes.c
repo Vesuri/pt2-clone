@@ -4,14 +4,10 @@
 #ifndef _WIN32
 #include <unistd.h> // usleep()
 #endif
-#include "pt2_header.h"
 #include "pt2_helpers.h"
 #include "pt2_visuals.h"
 #include "pt2_scopes.h"
-#include "pt2_tables.h"
-#include "pt2_structs.h"
 #include "pt2_config.h"
-#include "pt2_hpc.h"
 
 // this uses code that is not entirely thread safe, but I have never had any issues so far...
 
@@ -19,22 +15,12 @@ static volatile bool scopesUpdatingFlag, scopesDisplayingFlag;
 static hpc_t scopeHpc;
 static SDL_Thread *scopeThread;
 
-scope_t scope[AMIGA_VOICES]; // global
-
-void resetCachedScopePeriod(void)
-{
-	scope_t *s = scope;
-	for (int32_t i = 0; i < AMIGA_VOICES; i++, s++)
-	{
-		s->oldPeriod = -1;
-		s->dOldScopeDelta = 0.0;
-	}
-}
+scope_t scope[PAULA_VOICES]; // global
 
 // this is quite hackish, but fixes sample swapping issues
 static int32_t getSampleSlotFromReadAddress(const int8_t *sampleReadAddress)
 {
-	assert(song != NULL);
+	ASSERT(song != NULL);
 	const int8_t *sampleData = song->sampleData;
 	const int32_t sampleSlotSize = config.maxSampleLength;
 
@@ -97,37 +83,27 @@ int32_t getSampleReadPos(int32_t ch) // used for the sampler screen
 
 void scopeSetPeriod(int32_t ch, int32_t period)
 {
-	volatile scope_t *s = &scope[ch];
+	period &= 0xFFFF;
 
-	// if the new period was the same as the previous period, use cached delta
-	if (period != s->oldPeriod)
-	{
-		s->oldPeriod = period;
+	if (period < 113) // just in case, should already be clamped
+		period = 113;
 
-		const double dPeriodToScopeDeltaDiv = PAULA_PAL_CLK / (double)SCOPE_HZ;
-		s->dOldScopeDelta = dPeriodToScopeDeltaDiv / period;
-	}
-
-	s->dDelta = s->dOldScopeDelta;
+	scope[ch].dDelta = (PAULA_PAL_CLK / (double)SCOPE_HZ) / period;
 }
 
-void scopeTrigger(int32_t ch)
+void scopeTrigger(int32_t ch) // expects data & length variables to be set already
 {
 	volatile scope_t *sc = &scope[ch];
 	scope_t tempState = *sc; // cache it
 
-	const int8_t *newData = tempState.newData;
-	if (newData == NULL)
-		newData = &song->sampleData[config.reservedSampleOffset]; // 128K reserved sample
+	if (tempState.data == NULL)
+		tempState.data = paulaGetNullSamplePtr();
 
-	int32_t newLength = tempState.newLength; // in bytes, not words
-	if (newLength < 2)
-		newLength = 2; // for safety
+	if (tempState.length < 2)
+		tempState.length = 2; // for safety
 
 	tempState.dPhase = 0.0;
 	tempState.pos = 0;
-	tempState.data = newData;
-	tempState.length = newLength;
 	tempState.active = true;
 
 	/* Update live scope now.
@@ -143,13 +119,13 @@ void updateScopes(void)
 {
 	scope_t tempState;
 
-	if (editor.isWAVRendering)
+	if (editor.mod2WavOngoing)
 		return;
 
 	volatile scope_t *sc = scope;
 
 	scopesUpdatingFlag = true;
-	for (int32_t i = 0; i < AMIGA_VOICES; i++, sc++)
+	for (int32_t i = 0; i < PAULA_VOICES; i++, sc++)
 	{
 		tempState = *sc; // cache it
 		if (!tempState.active)
@@ -191,7 +167,7 @@ static void updateRealVuMeters(void)
 	scope_t tmpScope, *sc;
 
 	// sink VU-meters first
-	for (int32_t i = 0; i < AMIGA_VOICES; i++)
+	for (int32_t i = 0; i < PAULA_VOICES; i++)
 	{
 		editor.realVuMeterVolumes[i] -= 4;
 		if (editor.realVuMeterVolumes[i] < 0)
@@ -200,14 +176,14 @@ static void updateRealVuMeters(void)
 
 	// get peak sample data from running scope voices
 	sc = scope;
-	for (int32_t i = 0; i < AMIGA_VOICES; i++, sc++)
+	for (int32_t i = 0; i < PAULA_VOICES; i++, sc++)
 	{
 		tmpScope = *sc; // cache it
 
 		if (!tmpScope.active || tmpScope.data == NULL || tmpScope.volume == 0 || tmpScope.length == 0)
 			continue;
 
-		// amount of integer samples getting skipped every frame
+		// amount of integer samples getting skipped every frame (periods < 113 are clamped, this number can't get big)
 		const int32_t samplesToScan = (const int32_t)tmpScope.dDelta;
 		if (samplesToScan <= 0)
 			continue;
@@ -259,23 +235,21 @@ void drawScopes(void)
 	const uint32_t fgColor = video.palette[PAL_QADSCP];
 
 	scopesDisplayingFlag = true;
-	for (int32_t i = 0; i < AMIGA_VOICES; i++, sc++)
+	for (int32_t i = 0; i < PAULA_VOICES; i++, sc++)
 	{
 		scope_t tmpScope = *sc; // cache it
+
+		// clear scope background
+		fillRect(scopeX, 55, SCOPE_WIDTH, SCOPE_HEIGHT, bgColor);
 
 		// render scope
 		if (tmpScope.active && tmpScope.data != NULL && tmpScope.volume != 0 && tmpScope.length > 0)
 		{
-			sc->emptyScopeDrawn = false;
-
-			// fill scope background
-			fillRect(scopeX, 55, SCOPE_WIDTH, SCOPE_HEIGHT, bgColor);
-
 			// render scope data
 			int16_t scopeData;
 			int32_t pos = tmpScope.pos;
 			int32_t length = tmpScope.length;
-			const int16_t volume = -(tmpScope.volume << 7);
+			const int8_t volume = -(tmpScope.volume >> 1);
 			const int8_t *data = tmpScope.data;
 			uint32_t *scopeDrawPtr = &video.frameBuffer[(71 * SCREEN_W) + scopeX];
 
@@ -283,11 +257,12 @@ void drawScopes(void)
 			{
 				scopeData = 0;
 				if (data != NULL)
-					scopeData = (data[pos] * volume) >> 16;
+					scopeData = (data[pos] * volume) >> 8;
 
 				scopeDrawPtr[(scopeData * SCREEN_W) + x] = fgColor;
 
-				if (++pos >= length)
+				pos++;
+				if (pos >= length)
 				{
 					pos = 0;
 
@@ -297,17 +272,10 @@ void drawScopes(void)
 				}
 			}
 		}
-		else if (!sc->emptyScopeDrawn)
+		else
 		{
-			// scope is inactive (or vol=0), draw empty scope once until it gets active again
-
-			// fill scope background
-			fillRect(scopeX, 55, SCOPE_WIDTH, SCOPE_HEIGHT, bgColor);
-
-			// draw scope line
+			// draw centered scope line
 			hLine(scopeX, 71, SCOPE_WIDTH, fgColor);
-
-			sc->emptyScopeDrawn = true;
 		}
 
 		scopeX += SCOPE_WIDTH+8;
@@ -315,13 +283,13 @@ void drawScopes(void)
 	scopesDisplayingFlag = false;
 }
 
-static int32_t SDLCALL scopeThreadFunc(void *ptr)
+static int32_t scopeThreadFunc(void *ptr)
 {
-	// this is needed for scope stability (confirmed)
+	// this is confirmed to be needed for scope stability
 	SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
 	hpc_SetDurationInHz(&scopeHpc, SCOPE_HZ);
-	hpc_ResetEndTime(&scopeHpc);
+	hpc_ResetCounters(&scopeHpc);
 
 	while (editor.programRunning)
 	{
@@ -339,9 +307,7 @@ static int32_t SDLCALL scopeThreadFunc(void *ptr)
 
 bool initScopes(void)
 {
-	resetCachedScopePeriod();
-
-	scopeThread = SDL_CreateThread(scopeThreadFunc, NULL, NULL);
+	scopeThread = SDL_CreateThread(scopeThreadFunc, "scope thread", NULL);
 	if (scopeThread == NULL)
 	{
 		showErrorMsgBox("Couldn't create scope thread!");
@@ -368,7 +334,7 @@ void stopAllScopes(void)
 	// wait for scopes to finish updating
 	while (scopesUpdatingFlag);
 
-	for (int32_t i = 0; i < AMIGA_VOICES; i++)
+	for (int32_t i = 0; i < PAULA_VOICES; i++)
 		scope[i].active = false;
 
 	// wait for scope displaying to be done (safety)

@@ -7,7 +7,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <math.h>
+#include <ctype.h>
 #ifdef _WIN32
 #include <direct.h>
 #include <io.h>
@@ -23,19 +25,16 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <limits.h>
-#include "pt2_header.h"
 #include "pt2_textout.h"
 #include "pt2_diskop.h"
 #include "pt2_tables.h"
 #include "pt2_module_loader.h"
-#include "pt2_audio.h"
-#include "pt2_sampler.h"
 #include "pt2_config.h"
-#include "pt2_helpers.h"
-#include "pt2_keyboard.h"
 #include "pt2_visuals.h"
 #include "pt2_sample_loader.h"
 #include "pt2_bmp.h"
+#include "pt2_askbox.h"
+#include "pt2_replayer.h"
 
 typedef struct fileEntry_t
 {
@@ -63,7 +62,6 @@ static DIR *hFind;
 #endif
 
 static char fileNameBuffer[PATH_MAX + 1];
-static uint32_t oldFileEntryRow;
 static UNICHAR pathTmp[PATH_MAX + 2];
 static fileEntry_t *diskOpEntry;
 
@@ -79,9 +77,7 @@ void addSampleFileExt(char *fileName)
 
 static fileEntry_t *bufferCreateEmptyDir(void) // special case: creates a dir entry with a ".." directory
 {
-	fileEntry_t *dirEntry;
-
-	dirEntry = (fileEntry_t *)malloc(sizeof (fileEntry_t));
+	fileEntry_t *dirEntry = (fileEntry_t *)malloc(sizeof (fileEntry_t));
 	if (dirEntry == NULL)
 		return NULL;
 
@@ -283,7 +279,7 @@ static void findClose(void)
 
 void diskOpShowSelectText(void)
 {
-	if (!ui.diskOpScreenShown || ui.pointerMode == POINTER_MODE_MSG1 || editor.errorMsgActive)
+	if (ui.pointerMode == POINTER_MODE_MSG1 || editor.errorMsgActive)
 		return;
 
 	if (diskop.mode == DISKOP_MODE_MOD)
@@ -296,22 +292,55 @@ void handleEntryJumping(SDL_Keycode jumpToChar) // SHIFT+character
 {
 	if (diskOpEntry != NULL)
 	{
-		for (int32_t i = 0; i < diskop.numEntries; i++)
+		fileEntry_t *f;
+		
+		// if last jump key was the same, go to next page of matching character
+		if (diskop.numEntries > DISKOP_LINES && diskop.lastEntryJumpKey == jumpToChar)
 		{
-			if (jumpToChar == diskOpEntry[i].firstAnsiChar)
+			for (int32_t i = 0; i < DISKOP_LINES; i++)
 			{
-				// fix visual overrun
-				if (diskop.numEntries > DISKOP_LINES && i > diskop.numEntries-DISKOP_LINES)
-					i = diskop.numEntries - DISKOP_LINES;
+				int32_t offset = diskop.scrollOffset+DISKOP_LINES;
+				if (offset > diskop.numEntries-DISKOP_LINES)
+					offset = diskop.numEntries-DISKOP_LINES;
 
-				diskop.scrollOffset = i;
-				ui.updateDiskOpFileList = true;
+				f = &diskOpEntry[offset];
+
+				if (!f->isDir && tolower(f->firstAnsiChar) == jumpToChar)
+				{
+					diskop.scrollOffset += DISKOP_LINES;
+					if (diskop.scrollOffset > diskop.numEntries-DISKOP_LINES)
+						diskop.scrollOffset = diskop.numEntries-DISKOP_LINES;
+
+					ui.updateDiskOpFileList = true;
+					return;
+				}
+			}
+		}
+
+		diskop.lastEntryJumpKey = jumpToChar;
+
+		// jump to first match from the beginning of file list
+
+		f = diskOpEntry;
+		for (int32_t i = 0; i < diskop.numEntries; i++, f++)
+		{
+			if (!f->isDir && tolower(f->firstAnsiChar) == jumpToChar)
+			{
+				if (diskop.numEntries > DISKOP_LINES)
+				{
+					diskop.scrollOffset = i;
+					if (diskop.scrollOffset > diskop.numEntries-DISKOP_LINES)
+						diskop.scrollOffset = diskop.numEntries-DISKOP_LINES;
+
+					ui.updateDiskOpFileList = true;
+				}
+
 				return;
 			}
 		}
 	}
 
-	// character not found in file list, show red mouse pointer (error)!
+	// character not found in file list, show red mouse pointer (error)
 	editor.errorMsgActive = true;
 	editor.errorMsgBlock = true;
 	editor.errorMsgCounter = 0;
@@ -340,11 +369,9 @@ bool diskOpEntryIsDir(int32_t fileIndex)
 
 char *diskOpGetAnsiEntry(int32_t fileIndex)
 {
-	UNICHAR *filenameU;
-
 	if (diskOpEntry != NULL && !diskOpEntryIsEmpty(fileIndex))
 	{
-		filenameU = diskOpEntry[diskop.scrollOffset+fileIndex].nameU;
+		UNICHAR *filenameU = diskOpEntry[diskop.scrollOffset+fileIndex].nameU;
 		if (filenameU != NULL)
 		{
 			unicharToAnsi(fileNameBuffer, filenameU, PATH_MAX);
@@ -378,12 +405,11 @@ static void setVisualPathToCwd(void)
 	ui.updateDiskOpPathText = true;
 }
 
-bool changePathToHome(void)
+bool changePathToDesktop(void)
 {
 #ifdef _WIN32
 	UNICHAR pathU[PATH_MAX + 2];
-
-	if (SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, pathU) >= 0)
+	if (SHGetFolderPathW(NULL, CSIDL_DESKTOPDIRECTORY, NULL, 0, pathU) >= 0)
 	{
 		if (UNICHAR_CHDIR(pathU) == 0)
 			return true;
@@ -391,15 +417,27 @@ bool changePathToHome(void)
 
 	return false;
 #else
-	char *homePath;
-
-	homePath = getenv("HOME");
+	char *homePath = getenv("HOME");
 	if (homePath != NULL && chdir(homePath) == 0)
+	{
+		chdir("Desktop"); // keep home dir in case we couldn't change the dir to desktop
 		return true;
+	}
 
 	return false;
 #endif
 }
+
+#ifndef _WIN32
+bool changePathToHome(void)
+{
+	char *homePath = getenv("HOME");
+	if (homePath != NULL && chdir(homePath) == 0)
+		return true;
+
+	return false;
+}
+#endif
 
 void setPathFromDiskOpMode(void)
 {
@@ -420,6 +458,8 @@ bool diskOpSetPath(UNICHAR *path, bool cache)
 			ui.updateDiskOpFileList = true;
 
 		diskop.scrollOffset = 0;
+		diskop.lastEntryJumpKey = SDLK_UNKNOWN;
+
 		return true;
 	}
 	else
@@ -556,10 +596,10 @@ static void sortEntries(void)
 
 static bool diskOpFillBuffer(void)
 {
-	uint8_t lastFindFileFlag;
-	fileEntry_t tmpBuffer, *newPtr;
+	fileEntry_t tmpBuffer;
 
 	diskop.scrollOffset = 0;
+	diskop.lastEntryJumpKey = SDLK_UNKNOWN;
 
 	// do we have a path set?
 	if (editor.currPathU[0] == '\0')
@@ -570,7 +610,7 @@ static bool diskOpFillBuffer(void)
 	// fill disk op. buffer (type, size, path, file name, date changed)
 
 	// read first file
-	lastFindFileFlag = findFirst(&tmpBuffer);
+	uint8_t lastFindFileFlag = findFirst(&tmpBuffer);
 	if (lastFindFileFlag != LFF_DONE && lastFindFileFlag != LFF_SKIP)
 	{
 		diskOpEntry = (fileEntry_t *)malloc(sizeof (fileEntry_t) * (diskop.numEntries + 1));
@@ -592,7 +632,7 @@ static bool diskOpFillBuffer(void)
 		lastFindFileFlag = findNext(&tmpBuffer);
 		if (lastFindFileFlag != LFF_DONE && lastFindFileFlag != LFF_SKIP)
 		{
-			newPtr = (fileEntry_t *)realloc(diskOpEntry, sizeof (fileEntry_t) * (diskop.numEntries + 1));
+			fileEntry_t *newPtr = (fileEntry_t *)realloc(diskOpEntry, sizeof (fileEntry_t) * (diskop.numEntries + 1));
 			if (newPtr == NULL)
 			{
 				findClose();
@@ -626,7 +666,7 @@ static bool diskOpFillBuffer(void)
 	return true;
 }
 
-static int32_t SDLCALL diskOpFillThreadFunc(void *ptr)
+static int32_t diskOpFillThreadFunc(void *ptr)
 {
 	(void)ptr;
 
@@ -641,7 +681,6 @@ static int32_t SDLCALL diskOpFillThreadFunc(void *ptr)
 static void printFileSize(fileEntry_t *entry, uint16_t x, uint16_t y)
 {
 	char tmpStr[7];
-	uint32_t fileSize, j;
 
 	if (entry->filesize == -1) // -1 means that the original filesize is above 2GB in our directory reader
 	{
@@ -649,7 +688,7 @@ static void printFileSize(fileEntry_t *entry, uint16_t x, uint16_t y)
 		return;
 	}
 
-	fileSize = (uint32_t)entry->filesize;
+	uint32_t fileSize = (uint32_t)entry->filesize;
 	if (fileSize <= 999999)
 	{
 		// bytes
@@ -669,12 +708,12 @@ static void printFileSize(fileEntry_t *entry, uint16_t x, uint16_t y)
 	}
 
 	// turn zeroes on the left side into spaces
-	for (j = 0; j < 7; j++)
+	for (int32_t i = 0; i < 7; i++)
 	{
-		if (tmpStr[j] != '0')
+		if (tmpStr[i] != '0')
 			break;
 
-		tmpStr[j] = ' ';
+		tmpStr[i] = ' ';
 	}
 
 	textOut(x, y, tmpStr, video.palette[PAL_QADSCP]);
@@ -685,8 +724,8 @@ static void printEntryName(char *entryName, int32_t entryLength, int32_t maxLeng
 	if (entryLength > maxLength)
 	{
 		// shorten name and add ".." to end
-		for (int32_t j = 0; j < maxLength-2; j++)
-			charOut(x + (j * FONT_CHAR_W), y, entryName[j], video.palette[PAL_QADSCP]);
+		for (int32_t i = 0; i < maxLength-2; i++)
+			charOut(x + (i * FONT_CHAR_W), y, entryName[i], video.palette[PAL_QADSCP]);
 
 		textOut(x + ((maxLength - 2) * FONT_CHAR_W), y, "..", video.palette[PAL_QADSCP]);
 	}
@@ -699,11 +738,8 @@ static void printEntryName(char *entryName, int32_t entryLength, int32_t maxLeng
 
 void diskOpRenderFileList(void)
 {
-	char *entryName;
 	uint8_t maxFilenameChars, maxDirNameChars;
-	uint16_t x, y, textXStart;
-	int32_t entryLength;
-	fileEntry_t *entry;
+	uint16_t textXStart;
 
 	if (config.hideDiskOpDates)
 	{
@@ -726,11 +762,13 @@ void diskOpRenderFileList(void)
 	// if needed, update the file list and add entries
 	if (!diskop.cached)
 	{
-		diskop.fillThread = SDL_CreateThread(diskOpFillThreadFunc, NULL, NULL);
-		if (diskop.fillThread != NULL)
-			SDL_DetachThread(diskop.fillThread);
+		diskop.fillThread = SDL_CreateThread(diskOpFillThreadFunc, "file lister thread", NULL);
+		if (diskop.fillThread == NULL)
+			return;
 
+		SDL_DetachThread(diskop.fillThread);
 		diskop.cached = true;
+
 		return;
 	}
 
@@ -746,12 +784,12 @@ void diskOpRenderFileList(void)
 		if (diskop.scrollOffset+i >= diskop.numEntries)
 			break;
 
-		entry = &diskOpEntry[diskop.scrollOffset+i];
-		entryName = diskOpGetAnsiEntry(i);
-		entryLength = (int32_t)strlen(entryName);
+		fileEntry_t *entry = &diskOpEntry[diskop.scrollOffset+i];
+		char *entryName = diskOpGetAnsiEntry(i);
+		int32_t entryLength = (int32_t)strlen(entryName);
 
-		x = textXStart;
-		y = (uint8_t)(35 + (i * (FONT_CHAR_H + 1)));
+		uint16_t x = textXStart;
+		uint16_t y = (uint8_t)(35 + (i * (FONT_CHAR_H + 1)));
 
 		if (!entry->isDir)
 		{
@@ -774,9 +812,6 @@ void diskOpRenderFileList(void)
 
 void diskOpLoadFile(uint32_t fileEntryRow, bool songModifiedCheck)
 {
-	uint8_t oldMode, oldPlayMode;
-	UNICHAR *filePath;
-
 	// if we clicked on an empty space, return...
 	if (diskOpEntryIsEmpty(fileEntryRow))
 		return;
@@ -787,23 +822,22 @@ void diskOpLoadFile(uint32_t fileEntryRow, bool songModifiedCheck)
 	}
 	else
 	{
-		filePath = diskOpGetUnicodeEntry(fileEntryRow);
+		UNICHAR *filePath = diskOpGetUnicodeEntry(fileEntryRow);
 		if (filePath != NULL)
 		{
 			if (diskop.mode == DISKOP_MODE_MOD)
 			{
 				if (songModifiedCheck && song->modified)
 				{
-					oldFileEntryRow = fileEntryRow;
-					showSongUnsavedAskBox(ASK_DISCARD_SONG);
-					return;
+					if (!askBox(ASKBOX_YES_NO, "SONG IS UNSAVED !"))
+						return;
 				}
 
 				module_t *newSong = modLoad(filePath);
 				if (newSong != NULL)
 				{
-					oldMode = editor.currMode;
-					oldPlayMode = editor.playMode;
+					uint8_t oldMode = editor.currMode;
+					uint8_t oldPlayMode = editor.playMode;
 
 					modStop();
 					modFree();
@@ -865,11 +899,6 @@ void diskOpLoadFile(uint32_t fileEntryRow, bool songModifiedCheck)
 	}
 }
 
-void diskOpLoadFile2(void)
-{
-	diskOpLoadFile(oldFileEntryRow, false);
-}
-
 void renderDiskOpScreen(void)
 {
 	blit32(0, 0, 320, 99, diskOpScreenBMP);
@@ -883,9 +912,7 @@ void renderDiskOpScreen(void)
 
 void updateDiskOp(void)
 {
-	char tmpChar;
-
-	if (!ui.diskOpScreenShown || ui.posEdScreenShown)
+	if (!ui.diskOpScreenShown || ui.posEdScreenShown || ui.askBoxShown)
 		return;
 
 	if (ui.updateDiskOpFileList)
@@ -930,11 +957,17 @@ void updateDiskOp(void)
 		// print disk op. path
 		for (int32_t i = 0; i < 26; i++)
 		{
-			tmpChar = editor.currPath[ui.diskOpPathTextOffset+i];
-			if (tmpChar == '\0')
-				tmpChar = '_';
+			char ch;
+			
+			if (ui.editTextFlag)
+				ch = editor.currPath[textEdit.scrollOffset + i];
+			else
+				ch = editor.currPath[i];
 
-			charOutBg(24 + (i * FONT_CHAR_W), 25, tmpChar, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+			if (ch == '\0')
+				ch = '_';
+
+			charOutBg(24 + (i * FONT_CHAR_W), 25, ch, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 		}
 	}
 }

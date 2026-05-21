@@ -17,7 +17,6 @@
 #include <unistd.h> // chdir()
 #endif
 #include <sys/stat.h>
-#include "pt2_header.h"
 #include "pt2_helpers.h"
 #include "pt2_keyboard.h"
 #include "pt2_textout.h"
@@ -30,18 +29,19 @@
 #include "pt2_edit.h"
 #include "pt2_module_loader.h"
 #include "pt2_module_saver.h"
-#include "pt2_sample_loader.h"
-#include "pt2_unicode.h"
 #include "pt2_scopes.h"
 #include "pt2_audio.h"
 #include "pt2_bmp.h"
-#include "pt2_sync.h"
+#include "pt2_visuals_sync.h"
 #include "pt2_sampling.h"
-#include "pt2_hpc.h"
+#include "pt2_askbox.h"
+#include "pt2_replayer.h"
+#include "pt2_textedit.h"
 
-#define CRASH_TEXT "Oh no!\nThe ProTracker 2 clone has crashed...\n\nA backup .mod was hopefully " \
+#define CRASH_TEXT "Oh no! The ProTracker 2 clone has crashed...\nA backup .mod was hopefully " \
                    "saved to the current module directory.\n\nPlease report this bug if you can.\n" \
-                   "Try to mention what you did before the crash happened."
+                   "Try to mention what you did before the crash happened.\n" \
+                   "My email is on the bottom of https://16-bits.org"
 
 module_t *song = NULL; // globalized
 
@@ -91,21 +91,38 @@ static void cleanUp(void);
 
 static void clearStructs(void)
 {
-	memset(&keyb,   0, sizeof (keyb));
-	memset(&mouse,  0, sizeof (mouse));
-	memset(&video,  0, sizeof (video));
+	memset(&keyb, 0, sizeof (keyb));
+	memset(&mouse, 0, sizeof (mouse));
+	memset(&video, 0, sizeof (video));
 	memset(&editor, 0, sizeof (editor));
 	memset(&diskop, 0, sizeof (diskop));
 	memset(&cursor, 0, sizeof (cursor));
-	memset(&ui,     0, sizeof (ui));
+	memset(&ui, 0, sizeof (ui));
 	memset(&config, 0, sizeof (config));
-	memset(&audio,  0, sizeof (audio));
+	memset(&audio, 0, sizeof (audio));
+	memset(&textEdit, 0, sizeof (textEdit));
 
 	audio.rescanAudioDevicesSupported = true;
 }
 
 int main(int argc, char *argv[])
 {
+#ifdef _WIN32 // test for SSE/SSE2 presence very first, to make sure no SSE/SSE2 code is attempted to be ran
+	if (!SDL_HasSSE())
+	{
+		MessageBoxA(NULL, "Your computer's processor doesn't have the SSE instruction set " \
+			"which is needed for this program to run. Sorry!", "Error", MB_ICONEXCLAMATION);
+		return 0;
+	}
+
+	if (!SDL_HasSSE2())
+	{
+		MessageBoxA(NULL, "Your computer's processor doesn't have the SSE2 instruction set " \
+			"which is needed for this program to run. Sorry!", "Error", MB_ICONEXCLAMATION);
+		return 0;
+	}
+#endif
+
 #ifndef _WIN32
 	struct sigaction act, oldAct;
 #endif
@@ -119,9 +136,15 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-#if SDL_PATCHLEVEL < 5
-	#pragma message("WARNING: The SDL2 dev lib is older than ver 2.0.5. You'll get fullscreen mode issues.")
+#if SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL < 5
+#pragma message("WARNING: The SDL2 dev lib is older than ver 2.0.5. You'll get fullscreen mode issues and no audio input sampling.")
+#pragma message("At least version 2.0.7 is recommended.")
 #endif
+
+	SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
+	SDL_EnableScreenSaver(); // allow screensaver to activate
+
+	clearStructs();
 
 	// set up crash handler
 #ifndef _DEBUG
@@ -139,8 +162,6 @@ int main(int argc, char *argv[])
 	sigaction(SIGSEGV, &act, &oldAct);
 #endif
 #endif
-
-	clearStructs();
 
 	// on Windows and macOS, test what version SDL2.DLL is (against library version used in compilation)
 #if defined _WIN32 || defined __APPLE__
@@ -164,25 +185,17 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-#ifdef _WIN32
+	// ALT+F4 is used in ProTracker, but is "close program" in some cases...
+#if SDL_MINOR_VERSION >= 24 || (SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL >= 4)
+	SDL_SetHint("SDL_WINDOWS_NO_CLOSE_ON_ALT_F4", "1");
+#endif
 
+	SDL_SetHint("SDL_MOUSE_FOCUS_CLICKTHROUGH", "1");
+
+#ifdef _WIN32
 #ifndef _MSC_VER
 	SetProcessDPIAware();
 #endif
-
-	if (!SDL_HasSSE())
-	{
-		showErrorMsgBox("Your computer's processor doesn't have the SSE+SSE2 instruction set\n" \
-		                "which is needed for this program to run. Sorry!");
-		return 0;
-	}
-
-	if (!SDL_HasSSE2())
-	{
-		showErrorMsgBox("Your computer's processor doesn't have the SSE2 instruction set\n" \
-		                "which is needed for this program to run. Sorry!");
-		return 0;
-	}
 
 	disableWasapi(); // disable problematic WASAPI SDL2 audio driver on Windows (causes clicks/pops sometimes...)
 	                 // 13.03.2020: This is still needed with SDL 2.0.12...
@@ -193,7 +206,7 @@ int main(int argc, char *argv[])
 	** reinitialized in Windows and what not.
 	** Ref.: https://bugzilla.libsdl.org/show_bug.cgi?id=4391
 	*/
-#if defined _WIN32 && SDL_PATCHLEVEL == 9
+#if defined _WIN32 && SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL == 9
 	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0)
 #else
 	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) != 0)
@@ -203,8 +216,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
-	SDL_EnableScreenSaver(); // allow screensaver to activate
+	hpc_Init();
 
 	/* Text input is started by default in SDL2, turn it off to remove ~2ms spikes per key press.
 	** We manuallay start it again when someone clicks on a text edit box, and stop it when done.
@@ -244,7 +256,7 @@ int main(int argc, char *argv[])
 
 	loadConfig();
 
-	if (!setupVideo())
+	if (!allocSamplerVars() || !setupVideo())
 	{
 		cleanUp();
 		SDL_Quit();
@@ -263,10 +275,9 @@ int main(int argc, char *argv[])
 	SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
 #endif
 
-	hpc_Init();
 	hpc_SetDurationInHz(&video.vblankHpc, VBLANK_HZ);
 
-	if (!initKaiserTable() || !setupAudio() || !unpackBMPs())
+	if (!setupAudio() || !unpackBMPs())
 	{
 		cleanUp();
 		SDL_Quit();
@@ -283,6 +294,13 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	// setup GUI text pointers (for recently allocated song structure)
+	editor.currEditPatternDisp = &song->currPattern;
+	editor.currPosDisp = &song->currPos;
+	editor.currPatternDisp = &song->header.patternTable[0];
+	editor.currPosEdPattDisp = &song->header.patternTable[0];
+	editor.currLengthDisp = &song->header.songLength;
+
 	if (!initScopes())
 	{
 		cleanUp();
@@ -296,7 +314,6 @@ int main(int argc, char *argv[])
 	updateWindowTitle(MOD_NOT_MODIFIED);
 	pointerSetMode(POINTER_MODE_IDLE, DO_CARRY);
 	statusAllRight();
-	setStatusMessage("PROTRACKER V2.3D", NO_CARRY);
 
 	// load a .MOD from the command arguments if passed (also ignore OS X < 10.9 -psn argument on double-click launch)
 	if ((argc >= 2 && argv[1][0] != '\0') && (argc != 2 || strncmp(argv[1], "-psn_", 5)))
@@ -325,16 +342,21 @@ int main(int argc, char *argv[])
 	SDL_ShowWindow(video.window);
 
 	if (config.startInFullscreen)
-		toggleFullScreen();
+		toggleFullscreen();
 
-	changePathToHome(); // set path to home/user-dir now
+	changePathToDesktop(); // change path to desktop now
 	diskOpSetInitPath(); // set path to custom path in config (if present)
 
 	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
-	hpc_ResetEndTime(&video.vblankHpc);
+	editor.mainLoopOngoing = true;
+	hpc_ResetCounters(&video.vblankHpc); // this must be the last thing we do before entering the main loop
+
+	// XXX: if you change anything in the main loop, make sure it goes in the askBox()(pt2_askbox.c) loop too, if needed
 	while (editor.programRunning)
 	{
+		beginFPSCounter();
+		handleThreadedAskBox();
 		sinkVisualizerBars();
 		updateChannelSyncBuffer();
 		readMouseXY();
@@ -343,14 +365,12 @@ int main(int argc, char *argv[])
 		updateMouseCounters();
 		handleKeyRepeat(keyb.lastRepKey);
 
-		if (!mouse.buttonWaiting && ui.sampleMarkingPos == -1 &&
-			!ui.forceSampleDrag && !ui.forceVolDrag && !ui.forceSampleEdit)
-		{
+		if (!mouse.buttonWaiting && ui.sampleMarkingPos == -1 && !ui.forceSampleDrag && !ui.forceVolDrag && !ui.forceSampleEdit)
 			handleGUIButtonRepeat();
-		}
 
 		renderFrame();
 		flipFrame();
+		endFPSCounter();
 	}
 
 	cleanUp();
@@ -361,9 +381,9 @@ int main(int argc, char *argv[])
 
 static void handleInput(void)
 {
-	char inputChar;
-	SDL_Event event;
+	bool focusGained = false;
 
+	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
 		if (event.type == SDL_WINDOWEVENT)
@@ -373,19 +393,23 @@ static void handleInput(void)
 			else if (event.window.event == SDL_WINDOWEVENT_SHOWN)
 				video.windowHidden = false;
 
+			if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+				focusGained = true;
+
 			// reset vblank end time if we minimize window
 			if (event.window.event == SDL_WINDOWEVENT_MINIMIZED || event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
-				hpc_ResetEndTime(&video.vblankHpc);
+				hpc_ResetCounters(&video.vblankHpc);
 		}
 
 #ifdef _WIN32
-		handleSysMsg(event);
+		if (event.type == SDL_SYSWMEVENT)
+			handleSysMsg(event);
 #endif
 		if (ui.editTextFlag && event.type == SDL_TEXTINPUT)
 		{
 			// text input when editing texts/numbers
 
-			inputChar = event.text.text[0];
+			char inputChar = event.text.text[0];
 			if (inputChar == '\0')
 				continue;
 
@@ -399,17 +423,35 @@ static void handleInput(void)
 		}
 		else if (event.type == SDL_DROPFILE)
 		{
+			if (!video.fullscreen)
+			{
+				if (SDL_GetWindowFlags(video.window) & SDL_WINDOW_MINIMIZED)
+					SDL_RestoreWindow(video.window);
+
+				SDL_RaiseWindow(video.window);
+			}
+
 			loadDroppedFile(event.drop.file, (uint32_t)strlen(event.drop.file), false, true);
 			SDL_free(event.drop.file);
-			SDL_RaiseWindow(video.window); // set window focus
 		}
-		if (event.type == SDL_QUIT)
+		else if (event.type == SDL_QUIT)
 		{
-			handleSigTerm();
+#ifdef __APPLE__
+			/* On Mac, command+Q sends a quit signal to the program.
+			** However, command+Q is also one of the transpose keys in this ProTracker port.
+			** Ignore the signal if command+Q was pressed.
+			*/
+			if (!editor.macCmdQIssued)
+#endif
+				handleSigTerm();
+
+#ifdef __APPLE__
+			editor.macCmdQIssued = false; // read note above
+#endif
 		}
 		else if (event.type == SDL_KEYUP)
 		{
-			keyUpHandler(event.key.keysym.scancode, event.key.keysym.sym);
+			keyUpHandler(event.key.keysym.scancode);
 		}
 		else if (event.type == SDL_KEYDOWN)
 		{
@@ -418,45 +460,33 @@ static void handleInput(void)
 		}
 		else if (event.type == SDL_MOUSEBUTTONUP)
 		{
+#if defined __APPLE__ && defined __aarch64__
+			armMacGhostMouseCursorFix();
+#endif
 			mouseButtonUpHandler(event.button.button);
-
-			if (!ui.askScreenShown && ui.introScreenShown)
-			{
-				if (!ui.clearScreenShown && !ui.diskOpScreenShown && !editor.errorMsgActive)
-					statusAllRight();
-
-				ui.introScreenShown = false;
-			}
 		}
 		else if (event.type == SDL_MOUSEBUTTONDOWN)
 		{
-			if (ui.sampleMarkingPos == -1 &&
-				!ui.forceSampleDrag && !ui.forceVolDrag &&
-				!ui.forceSampleEdit)
+			/* If program was not in focus and we clicked somewhere,
+			** only accept the click if an ask box dialog is shown.
+			*/
+			if (!focusGained || ui.askBoxShown)
 			{
-				mouseButtonDownHandler(event.button.button);
+				if (ui.sampleMarkingPos == -1 && !ui.forceSampleDrag && !ui.forceVolDrag && !ui.forceSampleEdit)
+					mouseButtonDownHandler(event.button.button);
 			}
+
+			focusGained = false;
 		}
+#if defined __APPLE__ && defined __aarch64__
+		else if (event.type == SDL_MOUSEMOTION)
+		{
+			armMacGhostMouseCursorFix();
+		}
+#endif
 
 		if (ui.throwExit)
-		{
 			editor.programRunning = false;
-
-			if (diskop.isFilling)
-			{
-				diskop.isFilling = false;
-
-				diskop.forceStopReading = true;
-				SDL_WaitThread(diskop.fillThread, NULL);
-			}
-
-			if (editor.isWAVRendering)
-			{
-				editor.isWAVRendering = false;
-				editor.abortMod2Wav = true;
-				SDL_WaitThread(editor.mod2WavThread, NULL);
-			}
-		}
 	}
 }
 
@@ -466,24 +496,23 @@ static bool initializeVars(void)
 
 	editor.repeatKeyFlag = (SDL_GetModState() & KMOD_CAPS) ? true : false;
 
-	// set key repeat rate to 49.9204Hz (Amiga PAL vblank rate)
-	const double dVblankHzRatio = AMIGA_PAL_VBLANK_HZ / (double)VBLANK_HZ;
-	keyb.repeatDelta = (uint64_t)floor((UINT32_MAX+1.0) * dVblankHzRatio);
+	// 0.52 fixed-point delta for Amiga PAL vblank (~49.92Hz) at VBLANK_HZ (60.0Hz)
+	const double dRatio = AMIGA_PAL_VBLANK_HZ / (double)VBLANK_HZ;
+	video.amigaVblankDelta = (uint64_t)((dRatio * (1ULL << 52)) + 0.5);
 
 	strcpy(editor.mixText, "MIX 01+02 TO 03");
 
 	// allocate some memory
 
-	if (!allocSamplerVars() || !allocDiskOpVars())
+	if (!allocDiskOpVars())
 		goto oom;
 
 	initSynth();
 
 	config.defModulesDir = (char *)calloc(PATH_MAX + 1, sizeof (char));
 	config.defSamplesDir = (char *)calloc(PATH_MAX + 1, sizeof (char));
-	editor.tempSample = (int8_t *)calloc(131070, 1);
 
-	if (config.defModulesDir == NULL || config.defSamplesDir == NULL || editor.tempSample == NULL)
+	if (config.defModulesDir == NULL || config.defSamplesDir == NULL)
 		goto oom;
 
 	turnOffVoices();
@@ -527,8 +556,8 @@ static bool initializeVars(void)
 	editor.multiModeNext[1] = 3;
 	editor.multiModeNext[2] = 4;
 	editor.multiModeNext[3] = 1;
-	ui.introScreenShown = true;
 	editor.normalizeFiltersFlag = true;
+	editor.halveSampleFlag = true;
 	editor.markStartOfs = -1;
 	ui.sampleMarkingPos = -1;
 	ui.previousPointerMode = ui.pointerMode;
@@ -551,6 +580,8 @@ static bool initializeVars(void)
 	editor.currPartVolumeDisp = &synth.performances[editor.currSample].parts[synth.currPart].volume;
 	editor.currPartOffsetDisp = &synth.performances[editor.currSample].parts[synth.currPart].offset;
 
+	editor.mod2WavFadeOutSeconds = 6;
+
 	editor.programRunning = true;
 	return true;
 
@@ -561,6 +592,19 @@ oom:
 
 static void handleSigTerm(void)
 {
+	if (diskop.isFilling)
+	{
+		diskop.forceStopReading = true;
+		while (diskop.isFilling) SDL_Delay(5);
+	}
+
+	if (editor.mod2WavOngoing)
+	{
+		editor.abortMod2Wav = true;
+		while (editor.mod2WavOngoing) SDL_Delay(5);
+		removeAskBox(); // removes MOD2WAV dialog
+	}
+
 	if (song->modified)
 	{
 		resetAllScreens();
@@ -568,16 +612,14 @@ static void handleSigTerm(void)
 		if (!video.fullscreen)
 		{
 			// de-minimize window and set focus so that the user sees the message box
-			SDL_RestoreWindow(video.window);
+			if (SDL_GetWindowFlags(video.window) & SDL_WINDOW_MINIMIZED)
+				SDL_RestoreWindow(video.window);
+
 			SDL_RaiseWindow(video.window);
 		}
 
-		ui.askScreenShown = true;
-		ui.askScreenType = ASK_QUIT;
-
-		pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-		setStatusMessage("REALLY QUIT ?", NO_CARRY);
-		renderAskDialog();
+		if (askBox(ASKBOX_YES_NO, "REALLY QUIT ?"))
+			ui.throwExit = true;
 	}
 	else
 	{
@@ -589,21 +631,19 @@ static void handleSigTerm(void)
 #ifdef __APPLE__
 static void osxSetDirToProgramDirFromArgs(char **argv)
 {
-	char *tmpPath;
-	int32_t i, tmpPathLen;
-
 	/* OS X/macOS: hackish way of setting the current working directory to the place where we double clicked
-	** on the icon (for protracker.ini loading) */
+	** on the icon (for protracker.ini loading)
+	*/
 
 	// if we launched from the terminal, argv[0][0] would be '.'
 	if (argv[0] != NULL && argv[0][0] == DIR_DELIMITER) // don't do the hack if we launched from the terminal
 	{
-		tmpPath = strdup(argv[0]);
+		char *tmpPath = strdup(argv[0]);
 		if (tmpPath != NULL)
 		{
 			// cut off program filename
-			tmpPathLen = strlen(tmpPath);
-			for (i = tmpPathLen-1; i >= 0; i--)
+			int32_t tmpPathLen = strlen(tmpPath);
+			for (int32_t i = tmpPathLen-1; i >= 0; i--)
 			{
 				if (tmpPath[i] == DIR_DELIMITER)
 				{
@@ -684,20 +724,20 @@ static void disableWasapi(void)
 static void makeSureDirIsProgramDir(void)
 {
 #ifndef _DEBUG
-	UNICHAR *allocPtr, *path;
-	int32_t i, pathLen;
+	int32_t i;
 
 	// this can return two paths in Windows, but first one is .exe path
-	path = GetCommandLineW();
+	UNICHAR *path = GetCommandLineW();
 	if (path == NULL)
 		return;
 
-	allocPtr = UNICHAR_STRDUP(path);
+	UNICHAR *allocPtr = UNICHAR_STRDUP(path);
 	if (allocPtr == NULL)
 		return; // out of memory (but it doesn't matter)
 
 	path = allocPtr;
-	pathLen = (int32_t)UNICHAR_STRLEN(path);
+
+	int32_t pathLen = (int32_t)UNICHAR_STRLEN(path);
 
 	// remove first "
 	if (path[0] == L'\"')
@@ -818,9 +858,6 @@ static bool handleSingleInstancing(int32_t argc, char **argv)
 
 static void handleSysMsg(SDL_Event inputEvent)
 {
-	if (inputEvent.type != SDL_SYSWMEVENT)
-		return;
-
 	SDL_SysWMmsg *wmMsg = inputEvent.syswm.msg;
 	if (wmMsg->subsystem == SDL_SYSWM_WINDOWS && wmMsg->msg.win.msg == SYSMSG_FILE_ARG)
 	{
@@ -830,6 +867,14 @@ static void handleSysMsg(SDL_Event inputEvent)
 			sharedMemBuf = (LPTSTR)MapViewOfFile(hMapFile, FILE_MAP_READ, 0, 0, ARGV_SHARED_MEM_MAX_LEN);
 			if (sharedMemBuf != NULL)
 			{
+				if (video.window != NULL && !video.fullscreen)
+				{
+					if (SDL_GetWindowFlags(video.window) & SDL_WINDOW_MINIMIZED)
+						SDL_RestoreWindow(video.window);
+
+					SDL_RaiseWindow(video.window);
+				}
+
 				loadDroppedFile((char *)sharedMemBuf, (uint32_t)strlen(sharedMemBuf), true, true);
 
 				UnmapViewOfFile(sharedMemBuf);
@@ -905,11 +950,9 @@ static void cleanUp(void) // never call this inside the main loop!
 	videoClose();
 	freeSprites();
 	freeAudioDeviceList(); // pt2_sampling.c
-	freeKaiserTable(); // pt2_sampling.c
 
 	if (config.defModulesDir != NULL) free(config.defModulesDir);
 	if (config.defSamplesDir != NULL) free(config.defSamplesDir);
-	if (editor.tempSample != NULL) free(editor.tempSample);
 
 #ifdef _WIN32
 #ifndef _DEBUG

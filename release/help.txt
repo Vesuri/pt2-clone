@@ -1,12 +1,7 @@
-Windows: If the program can't start at all, you might need to install
-"Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019"
-which can be found here:
-https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
-
  == Frequently Asked Questions (FAQ) ==
  
-  * Is there a way to make the window bigger?
- - Set VIDEOSCALE to 2X, 3x or 4X in protracker.ini.
+ * Is there a way to make the window bigger?
+ - Set VIDEOSCALE to 2X, 3x or 4X (or higher) in protracker.ini.
  
  * Is there a way to run the program in fullscreen mode?
  - Press F11. On some keyboards/configurations you may need to press fn+F11.
@@ -28,7 +23,8 @@ https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-d
  - Adjust the STEREOSEPARATION setting in protracker.ini. It's a percentage
    value ranging from 0 to 100. 0 being mono and 100 being 100% separated like
    the audio output from an Amiga.
-   Pressing SHIFT+F12 will toggle between STEREOSEPARATION and 100% (hard pan).
+   Pressing SHIFT+F12 toggles between centered (0%), Amiga (100%) and
+   custom (STEREOSEPARATION %).
 
  * How do I change the Multi channel ordering?
  - When in idle mode (not edit/play etc), press ALT+1/2/3/4 to increase
@@ -53,7 +49,8 @@ https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-d
    function is extremely limited and will only revert to the last loaded sample.
 
  * [insert random question]
- - Try to send an email to olav.sorensen@live.no or visit #protracker at IRCnet.
+ - Try to send an email (address found on the bottom of 16-bits.org) or join
+   the Discord server (also found at 16-bits.org).
 
  == Some misc. info ==
 
@@ -68,7 +65,7 @@ https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-d
   * MIDI support
   * Setup screen
   
- == Some ProTracker keybindings are used by other things in OS X! ==
+ == Some ProTracker keybindings are used by other things in macOS/OS X! ==
  
   - In OS X, go to System Preferences -> Keyboard -> Keyboard Shortcuts and
     disable keybindings that could interrupt with any PT keybindings.
@@ -93,15 +90,17 @@ https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-d
    If you press ctrl+z, the current sample's data+attributes will be restored.
    Now you don't need to reload a sample when you make a change you regret!
    
- * WAV sample loader.
+ * WAV sample loader
    Supports: 8-bit, 16-bit, 24-bit, 32-bit and 32-bit/64-bit floating point
-   The WAV samples are mixed to mono and quantized to 8-bit.
-   It also attempts to load the "SMPL" chunk to get loop points and
-   volume from sampler WAVs and Open ModPlug Tracker and the like.
+   Stereo WAV samples are mixed to mono.
    
- * AIFF sample loader.
+ * AIFF sample loader
    Supports: 8-bit, 16-bit, 24-bit and 32-bit
-   The AIFF samples are mixed to mono and quantized to 8-bit.
+   Stereo AIFF samples are mixed to mono.
+   
+ * FLAC sample loader
+   Supports: 8-bit, 16-bit and 24-bit
+   Stereo FLAC samples are mixed to mono.
    
  * PAGE UP/DOWN and HOME/END works in POS-ED, DISK OP. and the pattern editor
    (and HOME/END works while editing strings)
@@ -301,6 +300,11 @@ https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-d
 
  ## Copy ## (or ctrl+C)
  Will copy the marked range to the copy buffer.
+
+ New feature in PT2 clone by holding down SHIFT:
+ - Finds a free sample slot and clones the sample to it.
+   If you have marked part of the sample, only the slice
+   will get copied.
 
  ## Paste ## (or ctrl+V)
  Will paste the copy buffer into the current sample.

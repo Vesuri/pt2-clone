@@ -14,18 +14,10 @@ enum ptbuttons
 	PTB_SAMPLENAME,
 	PTB_LOADSAMPLE,
 
-	// ASK DIALOG
-	PTB_SUREY,
-	PTB_SUREN,
-
-	// PAT2SMP ASK DIALOG
-	PTB_PAT2SMP_HI,
-	PTB_PAT2SMP_LO,
-	PTB_PAT2SMP_ABORT,
-
 	// POS ED. SCREEN
 	PTB_PE_BADGE,
 	PTB_PE_PATT,
+	PTB_PE_PATTNAME,
 	PTB_PE_SCROLLTOP,
 	PTB_PE_SCROLLUP,
 	PTB_PE_EXIT,
@@ -137,12 +129,6 @@ enum ptbuttons
 	PTB_DO_SCROLLDOWN,
 	PTB_DO_SCROLLBOT,
 	PTB_DO_FILEAREA,
-
-	// CLEAR
-	PTB_CLEARSONG,
-	PTB_CLEARSAMPLES,
-	PTB_CLEARALL,
-	PTB_CLEARCANCEL,
 
 	// MAIN SCREEN
 	PTB_QUIT,
@@ -326,17 +312,20 @@ enum
 
 #define NUM_CURSORS 6
 
-extern SDL_Cursor *cursors[NUM_CURSORS];
+#if defined __APPLE__ && defined __aarch64__
+void armMacGhostMouseCursorFix(void);
+#endif
 
+void sampleUpButton(void);
+void sampleDownButton(void);
 void setMsgPointer(void);
 void setErrPointer(void);
 void pointerSetMode(uint8_t pointerMode, bool carry);
-void pointerResetThreadSafe(void); // used for effect F00 in replayer (stop song)
+void pointerSetModeThreadSafe(uint8_t pointerMode, bool carry);
 void pointerSetPreviousMode(void);
 bool setSystemCursor(SDL_Cursor *cur);
 void freeMouseCursors(void);
 bool createMouseCursors(void);
-
 void readMouseXY(void);
 void updateMouseScaling(void);
 void mouseWheelUpHandler(void);
@@ -345,3 +334,5 @@ void mouseButtonUpHandler(uint8_t mouseButton);
 void mouseButtonDownHandler(uint8_t mouseButton);
 void handleGUIButtonRepeat(void);
 void updateMouseCounters(void);
+
+extern SDL_Cursor *cursors[NUM_CURSORS];

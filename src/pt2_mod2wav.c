@@ -1,98 +1,267 @@
-// for finding memory leaks in debug mode with Visual Studio 
+// for finding memory leaks in debug mode with Visual Studio
 #if defined _DEBUG && defined _MSC_VER
 #include <crtdbg.h>
 #endif
 
+#include <math.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <sys/stat.h> // stat()
-#include "pt2_header.h"
+#ifndef _WIN32
+#include <unistd.h> // chdir()
+#endif
 #include "pt2_audio.h"
 #include "pt2_mouse.h"
 #include "pt2_textout.h"
 #include "pt2_visuals.h"
 #include "pt2_mod2wav.h"
-#include "pt2_structs.h"
 #include "pt2_downsample2x.h"
+#include "pt2_config.h"
+#include "pt2_askbox.h"
+#include "pt2_replayer.h"
 
+#define FADEOUT_CHUNK_SAMPLES 16384
 #define TICKS_PER_RENDER_CHUNK 64
 
-// pt2_replayer.c
-void storeTempVariables(void);
-bool intMusic(void);
-// ---------------------
-
-static int16_t *mod2WavBuffer;
+static int16_t *mod2WavBuffer, fadeOutBuffer[FADEOUT_CHUNK_SAMPLES * 2];
+static char lastFilename[PATH_MAX + 1];
 
 static void calcMod2WavTotalRows(void);
 
-static int32_t SDLCALL mod2WavThreadFunc(void *ptr)
+void mod2WavDrawFadeoutToggle(void)
+{
+	fillRect(143, 50, FONT_CHAR_W, FONT_CHAR_H, video.palette[PAL_GENBKG]);
+	if (editor.mod2WavFadeOut)
+		charOut(143, 50, 'X', video.palette[PAL_GENTXT]);
+}
+
+void mod2WavDrawFadeoutSeconds(void)
+{
+	fillRect(259, 61, FONT_CHAR_W*2, FONT_CHAR_H+1, video.palette[PAL_GENBKG]);
+	charOut(259, 62, '0' + ((editor.mod2WavFadeOutSeconds / 10) % 10), video.palette[PAL_GENTXT]);
+	charOut(267, 62, '0' + ( editor.mod2WavFadeOutSeconds       % 10), video.palette[PAL_GENTXT]);
+}
+
+void mod2WavDrawLoopCount(void)
+{
+	fillRect(259, 72, FONT_CHAR_W*2, FONT_CHAR_H+1, video.palette[PAL_GENBKG]);
+	charOut(259, 73, '0' + ((editor.mod2WavNumLoops / 10)  % 10), video.palette[PAL_GENTXT]);
+	charOut(267, 73, '0' + ( editor.mod2WavNumLoops        % 10), video.palette[PAL_GENTXT]);
+}
+
+void toggleMod2WavFadeout(void)
+{
+	editor.mod2WavFadeOut ^= 1;
+	mod2WavDrawFadeoutToggle();
+}
+
+void mod2WavFadeoutUp(void)
+{
+	if (editor.mod2WavFadeOutSeconds < 60)
+	{
+		editor.mod2WavFadeOutSeconds++;
+		mod2WavDrawFadeoutSeconds();
+	}
+}
+
+void mod2WavFadeoutDown(void)
+{
+	if (editor.mod2WavFadeOutSeconds > 1)
+	{
+		editor.mod2WavFadeOutSeconds--;
+		mod2WavDrawFadeoutSeconds();
+	}
+}
+
+void mod2WavLoopCountUp(void)
+{
+	if (editor.mod2WavNumLoops < 50)
+	{
+		editor.mod2WavNumLoops++;
+		mod2WavDrawLoopCount();
+	}
+}
+
+void mod2WavLoopCountDown(void)
+{
+	if (editor.mod2WavNumLoops > 0)
+	{
+		editor.mod2WavNumLoops--;
+		mod2WavDrawLoopCount();
+	}
+}
+
+void drawMod2WavProgressDialog(void)
+{
+	drawFramework3(120, 44, 200, 55);
+	textOut2(150, 53, "- RENDERING MODULE -");
+
+	const int32_t buttonW = (MOD2WAV_CANCEL_BTN_X2 - MOD2WAV_CANCEL_BTN_X1)+1;
+	const int32_t buttonH = (MOD2WAV_CANCEL_BTN_Y2 - MOD2WAV_CANCEL_BTN_Y1)+1;
+	drawButton1(MOD2WAV_CANCEL_BTN_X1, MOD2WAV_CANCEL_BTN_Y1, buttonW, buttonH, "CANCEL");
+}
+
+static void showMod2WavProgress(void)
+{
+	char percText[16];
+
+	if (song->rowsInTotal == 0)
+		return;
+
+	// render progress bar
+
+	int32_t percent = (song->rowsCounter * 100) / song->rowsInTotal;
+	if (percent > 100)
+		percent = 100;
+
+	const int32_t x = 130;
+	const int32_t y = 66;
+	const int32_t w = 180;
+	const int32_t h = 11;
+
+	// foreground (progress)
+	const int32_t progressBarWidth = (percent * w) / 100;
+	if (progressBarWidth > 0)
+		fillRect(x, y, progressBarWidth, h, video.palette[PAL_GENBKG2]); // foreground (progress)
+
+	// background
+	int32_t bgWidth = w - progressBarWidth;
+	if (bgWidth > 0)
+		fillRect(x+progressBarWidth, y, bgWidth, h, video.palette[PAL_BORDER]);
+
+	// draw percentage text
+	sprintf(percText, "%d%%", percent);
+	const int32_t percTextW = (int32_t)strlen(percText) * (FONT_CHAR_W-1);
+	textOutTight(x + ((w - percTextW) / 2), y + ((h - FONT_CHAR_H) / 2), percText, video.palette[PAL_GENTXT]);
+}
+
+static void resetAudio(void)
+{
+	audio.oversamplingFlag = (audio.outputRate < 96000);
+	const int32_t paulaMixFrequency = audio.oversamplingFlag ? audio.outputRate*2 : audio.outputRate;
+	paulaSetup(paulaMixFrequency, audio.amigaModel);
+	generateBpmTable(audio.outputRate, editor.timingMode == TEMPO_MODE_VBLANK);
+	clearDownsample2xStates();
+	modSetTempo(song->currBPM, true); // update BPM (samples per tick) with the tracker's audio frequency
+}
+
+static void handleMod2WavEnd(void)
+{
+	pointerSetMode(POINTER_MODE_IDLE, DO_CARRY);
+
+	if (editor.abortMod2Wav)
+	{
+		displayErrorMsg("MOD2WAV ABORTED!");
+	}
+	else
+	{
+		displayMsg("MOD RENDERED!");
+		setMsgPointer();
+	}
+
+	removeAskBox();
+	resetAudio();
+
+	editor.mod2WavOngoing = false; // must be set before calling resetSong() !
+	resetSong();
+}
+
+void updateMod2WavDialog(void)
+{
+	if (ui.updateMod2WavDialog)
+	{
+		ui.updateMod2WavDialog = false;
+
+		if (editor.mod2WavOngoing)
+		{
+			if (ui.mod2WavFinished)
+			{
+				ui.mod2WavFinished = false;
+				handleMod2WavEnd();
+			}
+			else
+			{
+				showMod2WavProgress();
+			}
+		}
+	}
+}
+
+static int32_t mod2WavThreadFunc(void *ptr)
 {
 	wavHeader_t wavHeader;
 
 	FILE *f = (FILE *)ptr;
-	assert(mod2WavBuffer != NULL && f != NULL);
+	ASSERT(mod2WavBuffer != NULL && f != NULL);
 
 	// skip wav header place, render data first
 	fseek(f, sizeof (wavHeader_t), SEEK_SET);
 
 	uint32_t sampleCounter = 0;
-	uint8_t tickCounter = 8;
-	int64_t tickSampleCounter64 = 0;
-
-	clearMixerDownsamplerStates();
+	uint64_t samplesToMixFrac = 0;
+	int8_t numLoops = editor.mod2WavNumLoops;
 
 	bool renderDone = false;
 	while (!renderDone)
 	{
 		uint32_t samplesInChunk = 0;
 
-		// render several ticks at once to prevent frequent disk I/O (can speed up the process)
+		// render several ticks at once to prevent frequent disk I/O (speeds up the process)
 		int16_t *ptr16 = mod2WavBuffer;
 		for (uint32_t i = 0; i < TICKS_PER_RENDER_CHUNK; i++)
 		{
-			if (!editor.isWAVRendering || renderDone || editor.abortMod2Wav || !editor.songPlaying)
+			if (!editor.mod2WavOngoing || renderDone || editor.abortMod2Wav)
 			{
 				renderDone = true;
 				break;
 			}
 
-			if (tickSampleCounter64 <= 0) // new replayer tick
+			/* Handle replayer tick (also sets audio.samplesPerTickInt and audio.samplesPerTickFrac).
+			** Returns false on end of song.
+			*/
+			if (!tickReplayer())
 			{
-				if (!intMusic())
+				if (--numLoops < 0)
+				{
 					renderDone = true; // this tick is the last tick
-
-				tickSampleCounter64 += audio.samplesPerTick64;
+				}
+				else
+				{
+					// clear the "last visisted rows" table and let the song continue playing (loop)
+					memset(editor.rowVisitTable, 0, 128 * MOD_ROWS);
+				}
 			}
 
-			int32_t remainingTick = (tickSampleCounter64 + UINT32_MAX) >> 32; // ceil (rounded upwards)
+			uint32_t samplesToMix = audio.samplesPerTickInt;
 
-			outputAudio(ptr16, remainingTick);
-			tickSampleCounter64 -= (int64_t)remainingTick << 32;
-
-			remainingTick *= 2; // stereo
-			samplesInChunk += remainingTick;
-			sampleCounter += remainingTick;
-
-			ptr16 += remainingTick;
-
-			if (++tickCounter >= 4)
+			samplesToMixFrac += audio.samplesPerTickFrac;
+			if (samplesToMixFrac >= BPM_FRAC_SCALE)
 			{
-				tickCounter = 0;
-				ui.updateMod2WavDialog = true;
+				samplesToMixFrac &= BPM_FRAC_MASK;
+				samplesToMix++;
 			}
+
+			outputAudio(ptr16, samplesToMix);
+			ptr16 += samplesToMix * 2; // *2 for stereo
+
+			samplesInChunk += samplesToMix;
+			sampleCounter += samplesToMix;
+
+			ui.updateMod2WavDialog = true;
 		}
 
 		// write buffer to disk
 		if (samplesInChunk > 0)
-			fwrite(mod2WavBuffer, sizeof (int16_t), samplesInChunk, f);
+			fwrite(mod2WavBuffer, sizeof (int16_t), samplesInChunk * 2, f);
 	}
 
-	free(mod2WavBuffer);
+	ui.updateMod2WavDialog = true;
 
-	if (sampleCounter & 1)
-		fputc(0, f); // pad align byte
+	uint32_t endOfDataOffset = ftell(f);
+
+	free(mod2WavBuffer);
 
 	uint32_t totalRiffChunkLen = (uint32_t)ftell(f) - 8;
 
@@ -106,147 +275,206 @@ static int32_t SDLCALL mod2WavThreadFunc(void *ptr)
 	wavHeader.subchunk1Size = 16;
 	wavHeader.audioFormat = 1;
 	wavHeader.numChannels = 2;
-	wavHeader.sampleRate = audio.outputRate;
+	wavHeader.sampleRate = config.mod2WavOutputFreq;
 	wavHeader.bitsPerSample = 16;
 	wavHeader.byteRate = (wavHeader.sampleRate * wavHeader.numChannels * wavHeader.bitsPerSample) / 8;
 	wavHeader.blockAlign = (wavHeader.numChannels * wavHeader.bitsPerSample) / 8;
 	wavHeader.subchunk2ID = 0x61746164; // "data"
-	wavHeader.subchunk2Size = sampleCounter * sizeof (int16_t);
+	wavHeader.subchunk2Size = sampleCounter * sizeof (int16_t) * 2;
 
 	// write main header
 	fwrite(&wavHeader, sizeof (wavHeader_t), 1, f);
 	fclose(f);
 
-	clearMixerDownsamplerStates();
+	// apply fadeout (if enabled)
+	if (editor.mod2WavFadeOut)
+	{
+		uint32_t numFadeOutSamples = config.mod2WavOutputFreq * editor.mod2WavFadeOutSeconds;
+		if (numFadeOutSamples > sampleCounter)
+			numFadeOutSamples = sampleCounter;
+
+		f = fopen(lastFilename, "r+b");
+
+		const double dFadeOutDelta = 1.0 / numFadeOutSamples;
+		double dFadeOutVal = 1.0;
+
+		fseek(f, endOfDataOffset - (numFadeOutSamples * sizeof (int16_t) * 2), SEEK_SET);
+
+		uint32_t samplesLeft = numFadeOutSamples;
+		while (samplesLeft > 0)
+		{
+			uint32_t samplesTodo = FADEOUT_CHUNK_SAMPLES;
+			if (samplesTodo > samplesLeft)
+				samplesTodo = samplesLeft;
+
+			fread(fadeOutBuffer, sizeof (int16_t), samplesTodo * 2, f);
+			fseek(f, 0 - (samplesTodo * sizeof (int16_t) * 2), SEEK_CUR);
+
+			// apply fadeout
+			for (uint32_t i = 0; i < samplesTodo; i++)
+			{
+				fadeOutBuffer[(i*2)+0] = (int16_t)(fadeOutBuffer[(i*2)+0] * dFadeOutVal); // L
+				fadeOutBuffer[(i*2)+1] = (int16_t)(fadeOutBuffer[(i*2)+1] * dFadeOutVal); // R
+				dFadeOutVal -= dFadeOutDelta;
+			}
+
+			fwrite(fadeOutBuffer, sizeof (int16_t), samplesTodo * 2, f);
+
+			samplesLeft -= samplesTodo;
+		}
+
+		fclose(f);
+	}
 
 	ui.mod2WavFinished = true;
 	ui.updateMod2WavDialog = true;
 
+	if (editor.abortMod2Wav)
+		editor.mod2WavOngoing = false;
+
 	return true;
 }
 
-bool renderToWav(char *fileName, bool checkIfFileExist)
+static void assureModulesDir(void)
 {
-	FILE *fOut;
+	// if we're in samples mode in Disk Op., set dir to current modules dir
+	if (diskop.mode == DISKOP_MODE_SMP && editor.modulesPathU != NULL)
+		UNICHAR_CHDIR(editor.modulesPathU);
+}
+
+static void setBackDirIfNeeded(void)
+{
+	// if we're in samples mode in Disk Op., set dir back to current samples dir
+	if (diskop.mode == DISKOP_MODE_SMP && editor.samplesPathU != NULL)
+		UNICHAR_CHDIR(editor.samplesPathU);
+}
+
+bool mod2WavRender(char *filename)
+{
 	struct stat statBuffer;
 
-	if (checkIfFileExist)
+	lastFilename[0] = '\0'; // for rendering-thread
+
+	assureModulesDir();
+
+	if (stat(filename, &statBuffer) == 0)
 	{
-		if (stat(fileName, &statBuffer) == 0)
+		if (!askBox(ASKBOX_YES_NO, "OVERWRITE FILE?"))
 		{
-			ui.askScreenShown = true;
-			ui.askScreenType = ASK_MOD2WAV_OVERWRITE;
-
-			pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-			setStatusMessage("OVERWRITE FILE?", NO_CARRY);
-
-			renderAskDialog();
-
+			setBackDirIfNeeded();
 			return false;
 		}
 	}
 
-	if (ui.askScreenShown)
-	{
-		ui.askScreenShown = false;
-		ui.answerNo = false;
-		ui.answerYes = false;
-	}
-
-	fOut = fopen(fileName, "wb");
+	FILE *fOut = fopen(filename, "wb");
 	if (fOut == NULL)
 	{
 		displayErrorMsg("FILE I/O ERROR");
+		setBackDirIfNeeded();
 		return false;
 	}
 
-	const int32_t lowestBPM = 32;
-	const int64_t maxSamplesToMix64 = audio.bpmTable[lowestBPM-32];
-	const int32_t maxSamplesToMix = ((TICKS_PER_RENDER_CHUNK * maxSamplesToMix64) + (1LL << 31)) >> 32; // ceil (rounded upwards)
+	setBackDirIfNeeded();
 
-	mod2WavBuffer = (int16_t *)malloc(maxSamplesToMix * (2 * sizeof (int16_t)));
+	strncpy(lastFilename, filename, PATH_MAX-1); // for rendering-thread
+
+	const int32_t paulaMixFrequency = config.mod2WavOutputFreq * 2; // *2 for oversampling (we always do oversampling in MOD2WAV)
+	int32_t maxSamplesPerTick = (int32_t)ceil(paulaMixFrequency / (MIN_BPM / 2.5)) + 1;
+
+	mod2WavBuffer = (int16_t *)malloc((TICKS_PER_RENDER_CHUNK * maxSamplesPerTick) * sizeof (int16_t) * 2);
 	if (mod2WavBuffer == NULL)
 	{
+		fclose(fOut);
 		statusOutOfMemory();
 		return false;
 	}
 
+	// wait for main audio callback to catch MOD2WAV flag
+	editor.mod2WavOngoing = true;
+	while (audio.callbackOngoing)
+		SDL_Delay(5);
+
+	// do some prep work
+	audio.oversamplingFlag = true;
+	generateBpmTable(config.mod2WavOutputFreq, editor.timingMode == TEMPO_MODE_VBLANK);
+	paulaSetup(paulaMixFrequency, audio.amigaModel);
 	storeTempVariables();
 	calcMod2WavTotalRows();
-	restartSong();
+	restartSong(); // this also updates BPM (samples per tick) with the MOD2WAV audio output rate
+	clearDownsample2xStates();
 
-	editor.blockMarkFlag = false;
+	drawMod2WavProgressDialog();
+	editor.abortMod2Wav = false;
 
 	pointerSetMode(POINTER_MODE_MSG2, NO_CARRY);
 	setStatusMessage("RENDERING MOD...", NO_CARRY);
 
-	ui.disableVisualizer = true;
-	editor.isWAVRendering = true;
-	renderMOD2WAVDialog();
-
-	editor.abortMod2Wav = false;
-
-	modSetTempo(song->currBPM, true); // update BPM with MOD2WAV audio output rate
-
-	editor.mod2WavThread = SDL_CreateThread(mod2WavThreadFunc, NULL, fOut);
-	if (editor.mod2WavThread != NULL)
+	editor.mod2WavThread = SDL_CreateThread(mod2WavThreadFunc, "MOD2WAV thread", fOut);
+	if (editor.mod2WavThread == NULL)
 	{
-		SDL_DetachThread(editor.mod2WavThread);
-	}
-	else
-	{
+		fclose(fOut);
 		free(mod2WavBuffer);
 
-		ui.disableVisualizer = false;
-		editor.isWAVRendering = false;
+		doStopIt(true);
 
-		displayErrorMsg("THREAD ERROR");
+		editor.mod2WavOngoing = false; // must be set before calling resetAudio()
+		resetAudio();
 
+		removeAskBox();
 		pointerSetMode(POINTER_MODE_IDLE, DO_CARRY);
-		statusAllRight();
 
+		displayErrorMsg("THREAD ERROR !");
 		return false;
 	}
 
+	SDL_DetachThread(editor.mod2WavThread);
 	return true;
+}
+
+#define CALC__END_OF_SONG \
+if (--numLoops < 0) \
+{ \
+	calcingRows = false; \
+	break; \
+} \
+else \
+{ \
+	memset(editor.rowVisitTable, 0, 128 * MOD_ROWS); \
 }
 
 // ONLY used for a visual percentage counter, so accuracy is not very important
 static void calcMod2WavTotalRows(void)
 {
-	bool pBreakFlag, posJumpAssert, calcingRows;
-	int8_t n_pattpos[AMIGA_VOICES], n_loopcount[AMIGA_VOICES];
-	uint8_t modRow, pBreakPosition, ch, pos;
-	int16_t modOrder;
-	uint16_t modPattern;
-	note_t *note;
+	int8_t n_pattpos[PAULA_VOICES], n_loopcount[PAULA_VOICES];
 
 	// for pattern loop
-	memset(n_pattpos, 0, sizeof (n_pattpos));
+	memset(n_pattpos,   0, sizeof (n_pattpos));
 	memset(n_loopcount, 0, sizeof (n_loopcount));
 
-	song->rowsCounter = 0;
-	song->rowsInTotal = 0;
+	song->rowsCounter = song->rowsInTotal  = 0;
 
-	modRow = 0;
-	modOrder = 0;
-	modPattern = song->header.order[0];
-	pBreakPosition = 0;
-	posJumpAssert = false;
-	pBreakFlag = false;
-	calcingRows = true;
+	uint8_t modRow = 0;
+	int16_t modPos = 0;
+	uint16_t modPattern = song->header.patternTable[0];
+	uint8_t pBreakPosition = 0;
+	bool posJumpAssert = false;
+	bool pBreakFlag = false;
 
-	memset(editor.rowVisitTable, 0, MOD_ORDERS * MOD_ROWS);
+	memset(editor.rowVisitTable, 0, 128 * MOD_ROWS);
+
+	int8_t numLoops = editor.mod2WavNumLoops; // make a copy
+
+	bool calcingRows = true;
 	while (calcingRows)
 	{
-		editor.rowVisitTable[(modOrder * MOD_ROWS) + modRow] = true;
+		editor.rowVisitTable[(modPos * MOD_ROWS) + modRow] = true;
 
-		for (ch = 0; ch < AMIGA_VOICES; ch++)
+		for (int32_t ch = 0; ch < PAULA_VOICES; ch++)
 		{
-			note = &song->patterns[modPattern][(modRow * AMIGA_VOICES) + ch];
+			note_t *note = &song->patterns[modPattern][(modRow * PAULA_VOICES) + ch];
 			if (note->command == 0x0B) // Bxx - Position Jump
 			{
-				modOrder = note->param - 1;
+				modPos = note->param - 1;
 				pBreakPosition = 0;
 				posJumpAssert = true;
 			}
@@ -260,12 +488,11 @@ static void calcMod2WavTotalRows(void)
 			}
 			else if (note->command == 0x0F && note->param == 0) // F00 - Set Speed 0 (stop)
 			{
-				calcingRows = false;
-				break;
+				CALC__END_OF_SONG
 			}
 			else if (note->command == 0x0E && (note->param >> 4) == 0x06) // E6x - Pattern Loop
 			{
-				pos = note->param & 0x0F;
+				uint8_t pos = note->param & 0x0F;
 				if (pos == 0)
 				{
 					n_pattpos[ch] = modRow;
@@ -278,7 +505,7 @@ static void calcMod2WavTotalRows(void)
 					pBreakFlag = true;
 
 					for (pos = pBreakPosition; pos <= modRow; pos++)
-						editor.rowVisitTable[(modOrder * MOD_ROWS) + pos] = false;
+						editor.rowVisitTable[(modPos * MOD_ROWS) + pos] = false;
 				}
 				else if (--n_loopcount[ch])
 				{
@@ -286,7 +513,7 @@ static void calcMod2WavTotalRows(void)
 					pBreakFlag = true;
 
 					for (pos = pBreakPosition; pos <= modRow; pos++)
-						editor.rowVisitTable[(modOrder * MOD_ROWS) + pos] = false;
+						editor.rowVisitTable[(modPos * MOD_ROWS) + pos] = false;
 				}
 			}
 		}
@@ -307,24 +534,22 @@ static void calcMod2WavTotalRows(void)
 			pBreakPosition = 0;
 			posJumpAssert = false;
 
-			modOrder = (modOrder + 1) & 0x7F;
-			if (modOrder >= song->header.numOrders)
+			modPos = (modPos + 1) & 127;
+			if (modPos >= song->header.songLength)
 			{
-				modOrder = 0;
-				calcingRows = false;
-				break;
+				modPos = 0;
+				CALC__END_OF_SONG
 			}
 
-			modPattern = song->header.order[modOrder];
+			modPattern = song->header.patternTable[modPos];
 			if (modPattern > MAX_PATTERNS-1)
 				modPattern = MAX_PATTERNS-1;
 		}
 
-		if (editor.rowVisitTable[(modOrder * MOD_ROWS) + modRow])
+		if (calcingRows && editor.rowVisitTable[(modPos * MOD_ROWS) + modRow])
 		{
 			// row has been visited before, we're now done!
-			calcingRows = false;
-			break;
+			CALC__END_OF_SONG
 		}
 	}
 }

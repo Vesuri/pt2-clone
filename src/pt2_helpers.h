@@ -2,17 +2,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <math.h>
-#include "pt2_header.h"
-
-// fast 32-bit -> 16-bit clamp
-#define CLAMP16(i) if ((int16_t)(i) != i) i = 0x7FFF ^ (i >> 31)
-
-// fast 16-bit -> 8-bit clamp
-#define CLAMP8(i) if ((int8_t)(i) != i) i = 0x7F ^ (i >> 15)
-
-#define ALIGN_PTR(p, x) (((uintptr_t)(p) + ((x)-1)) & ~((x)-1))
-#define MALLOC_PAD(size, pad) (malloc((size) + (pad)))
 
 #define SWAP16(value) \
 ( \
@@ -26,6 +15,18 @@
 	(((uint32_t)((value) & 0x0000FF00)) <<  8) | \
 	(((uint32_t)((value) & 0x00FF0000)) >>  8) | \
 	(((uint32_t)((value) & 0xFF000000)) >> 24)   \
+)
+
+#define SWAP64(x) \
+( \
+	(((x) << 56) & 0xFF00000000000000ULL) | \
+	(((x) << 40) & 0x00FF000000000000ULL) | \
+	(((x) << 24) & 0x0000FF0000000000ULL) | \
+	(((x) <<  8) & 0x000000FF00000000ULL) | \
+	(((x) >>  8) & 0x00000000FF000000ULL) | \
+	(((x) >> 24) & 0x0000000000FF0000ULL) | \
+	(((x) >> 40) & 0x000000000000FF00ULL) | \
+	(((x) >> 56) & 0x00000000000000FFULL)  \
 )
 
 #define SGN(x) (((x) >= 0) ? 1 : -1)

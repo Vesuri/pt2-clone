@@ -6,52 +6,97 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <ctype.h> // tolower()
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <unistd.h>
 #endif
-#include "pt2_textout.h"
 #include "pt2_header.h"
+#include "pt2_textout.h"
 #include "pt2_helpers.h"
 #include "pt2_visuals.h"
 #include "pt2_diskop.h"
 #include "pt2_edit.h"
 #include "pt2_sampler.h"
 #include "pt2_audio.h"
-#include "pt2_keyboard.h"
 #include "pt2_tables.h"
-#include "pt2_module_loader.h"
 #include "pt2_module_saver.h"
-#include "pt2_mouse.h"
-#include "pt2_unicode.h"
+#include "pt2_sample_saver.h"
 #include "pt2_config.h"
 #include "pt2_sampling.h"
 #include "pt2_chordmaker.h"
 #include "pt2_synth.h"
+#include "pt2_askbox.h"
+#include "pt2_replayer.h"
+#include "pt2_posed.h"
+#include "pt2_textedit_compat.h"
 
 #if defined _WIN32 && !defined _DEBUG
 extern bool windowsKeyIsDown;
 extern HHOOK g_hKeyboardHook;
 #endif
 
-void movePatCurPrevCh(void);
-void movePatCurNextCh(void);
-void movePatCurRight(void);
-void movePatCurLeft(void);
-
 static bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode);
-bool handleTextEditMode(SDL_Scancode scancode);
+static void movePatCurPrevCh(void);
+static void movePatCurNextCh(void);
+static void movePatCurRight(void);
+static void movePatCurLeft(void);
 
-void sampleUpButton(void); // pt2_mouse.c
-void sampleDownButton(void); // pt2_mouse.c
 
-void gotoNextMulti(void)
+static void textMarkerMoveLeft(void)
 {
-	cursor.channel = (editor.multiModeNext[cursor.channel] - 1) & 3;
-	cursor.pos = cursor.channel * 6;
-	updateCursorPos();
+	if (ui.dstPos > 0)
+	{
+		removeTextEditMarker();
+		ui.dstPos--;
+		ui.lineCurX -= FONT_CHAR_W;
+		renderTextEditMarker();
+	}
+	else
+	{
+		if (ui.dstOffset != NULL)
+		{
+			(*ui.dstOffset)--;
+			if (ui.editObject == PTB_DO_DATAPATH)
+				ui.updateDiskOpPathText = true;
+		}
+	}
+}
+
+static void textMarkerMoveRight(void)
+{
+	if (ui.editTextType == TEXT_EDIT_STRING)
+	{
+		if (ui.dstPos < ui.textLength-1)
+		{
+			removeTextEditMarker();
+			ui.dstPos++;
+			ui.lineCurX += FONT_CHAR_W;
+			renderTextEditMarker();
+		}
+		else
+		{
+			if (ui.dstOffset != NULL)
+			{
+				(*ui.dstOffset)++;
+				if (ui.editObject == PTB_DO_DATAPATH)
+					ui.updateDiskOpPathText = true;
+			}
+		}
+	}
+	else
+	{
+		if (ui.dstPos < ui.numLen)
+			removeTextEditMarker();
+
+		ui.dstPos++;
+		ui.lineCurX += FONT_CHAR_W;
+
+		if (ui.dstPos < ui.numLen)
+			renderTextEditMarker();
+	}
 }
 
 void readKeyModifiers(void)
@@ -113,170 +158,7 @@ LRESULT CALLBACK lowLevelKeyboardProc(int32_t nCode, WPARAM wParam, LPARAM lPara
 }
 #endif
 
-// these four functions are for the text edit cursor
-void textMarkerMoveLeft(void)
-{
-	if (ui.dstPos > 0)
-	{
-		removeTextEditMarker();
-		ui.dstPos--;
-		ui.lineCurX -= FONT_CHAR_W;
-		renderTextEditMarker();
-	}
-	else
-	{
-		if (ui.dstOffset != NULL)
-		{
-			(*ui.dstOffset)--;
-			if (ui.editObject == PTB_DO_DATAPATH)
-				ui.updateDiskOpPathText = true;
-		}
-	}
-}
-
-void textMarkerMoveRight(void)
-{
-	if (ui.editTextType == TEXT_EDIT_STRING)
-	{
-		if (ui.dstPos < ui.textLength-1)
-		{
-			removeTextEditMarker();
-			ui.dstPos++;
-			ui.lineCurX += FONT_CHAR_W;
-			renderTextEditMarker();
-		}
-		else
-		{
-			if (ui.dstOffset != NULL)
-			{
-				(*ui.dstOffset)++;
-				if (ui.editObject == PTB_DO_DATAPATH)
-					ui.updateDiskOpPathText = true;
-			}
-		}
-	}
-	else
-	{
-		// we end up here when entering a number/hex digit
-
-		if (ui.dstPos < ui.numLen)
-			removeTextEditMarker();
-
-		ui.dstPos++;
-		ui.lineCurX += FONT_CHAR_W;
-
-		if (ui.dstPos < ui.numLen)
-			renderTextEditMarker();
-
-		// don't clamp, dstPos is tested elsewhere to check if done editing a number
-	}
-}
-
-void textCharPrevious(void)
-{
-	if (ui.editTextType != TEXT_EDIT_STRING)
-	{
-		if (ui.dstPos > 0)
-		{
-			removeTextEditMarker();
-			ui.dstPos--;
-			ui.lineCurX -= FONT_CHAR_W;
-			renderTextEditMarker();
-		}
-
-		return;
-	}
-
-	if (editor.mixFlag && ui.dstPos <= 4)
-		return;
-
-	if (ui.editPos > ui.showTextPtr)
-	{
-		removeTextEditMarker();
-
-		ui.editPos--;
-		textMarkerMoveLeft();
-
-		if (editor.mixFlag) // special case for "Mix" input field in Edit. Op.
-		{
-			if (ui.dstPos == 12)
-			{
-				ui.editPos--; textMarkerMoveLeft();
-				ui.editPos--; textMarkerMoveLeft();
-				ui.editPos--; textMarkerMoveLeft();
-				ui.editPos--; textMarkerMoveLeft();
-			}
-			else if (ui.dstPos == 6)
-			{
-				ui.editPos--;
-				textMarkerMoveLeft();
-			}
-		}
-
-		renderTextEditMarker();
-	}
-
-	ui.dstOffsetEnd = false;
-}
-
-void textCharNext(void)
-{
-	if (ui.editTextType != TEXT_EDIT_STRING)
-	{
-		if (ui.dstPos < ui.numLen-1)
-		{
-			removeTextEditMarker();
-			ui.dstPos++;
-			ui.lineCurX += FONT_CHAR_W;
-			renderTextEditMarker();
-		}
-
-		return;
-	}
-
-	if (editor.mixFlag && ui.dstPos >= 14)
-		return;
-
-	if (ui.editPos < ui.textEndPtr)
-	{
-		if (*ui.editPos != '\0')
-		{
-			removeTextEditMarker();
-
-			ui.editPos++;
-			textMarkerMoveRight();
-
-			if (editor.mixFlag) // special case for "Mix" input field in Edit. Op.
-			{
-				if (ui.dstPos == 9)
-				{
-					ui.editPos++; textMarkerMoveRight();
-					ui.editPos++; textMarkerMoveRight();
-					ui.editPos++; textMarkerMoveRight();
-					ui.editPos++; textMarkerMoveRight();
-				}
-				else if (ui.dstPos == 6)
-				{
-					ui.editPos++;
-					textMarkerMoveRight();
-				}
-			}
-
-			renderTextEditMarker();
-		}
-		else
-		{
-			ui.dstOffsetEnd = true;
-		}
-	}
-	else
-	{
-		ui.dstOffsetEnd = true;
-	}
-}
-// --------------------------------
-
-void keyUpHandler(SDL_Scancode scancode, SDL_Keycode keycode)
+void keyUpHandler(SDL_Scancode scancode)
 {
 	if (scancode == SDL_SCANCODE_KP_PLUS)
 		keyb.keypadEnterPressed = false;
@@ -309,15 +191,13 @@ void keyUpHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		}
 		break;
 	}
-
-	(void)keycode;
 }
 
 static void incMulti(uint8_t slot)
 {
 	char str[32];
 
-	assert(slot < 4);
+	ASSERT(slot < 4);
 	if (editor.multiModeNext[slot] == 4)
 		editor.multiModeNext[slot] = 1;
 	else
@@ -330,23 +210,29 @@ static void incMulti(uint8_t slot)
 
 void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 {
-	uint8_t blockFrom, blockTo;
-	int16_t i, j;
-	note_t *patt, *noteSrc, *noteDst, noteTmp;
-	moduleSample_t *s;
-	moduleChannel_t *ch;
-
 	if (scancode == SDL_SCANCODE_CAPSLOCK)
 	{
 		editor.repeatKeyFlag ^= 1;
 		return;
 	}
 
+	// kludge: allow certain specific key combos to be repeated with the ctrl key
+	const bool nonRepeatAltKeys = keyb.leftAltPressed && scancode != SDL_SCANCODE_DELETE    && scancode != SDL_SCANCODE_RETURN
+	                                                  && scancode != SDL_SCANCODE_BACKSPACE && scancode != SDL_SCANCODE_BACKSLASH
+	                                                  && scancode != SDL_SCANCODE_EQUALS    && scancode != SDL_SCANCODE_MINUS
+	                                                  && scancode <  SDL_SCANCODE_1         && scancode >  SDL_SCANCODE_0;
+
+	// kludge: allow certain specific key combos to be repeated with the alt key
+	const bool nonRepeatCtrlKeys = keyb.leftCtrlPressed && scancode != SDL_SCANCODE_DELETE && scancode != SDL_SCANCODE_RETURN
+	                                                    && scancode != SDL_SCANCODE_BACKSPACE;
+
 	// these keys should not allow to be repeated in keyrepeat mode (caps lock)
-	const bool illegalKeys = keyb.leftAltPressed || keyb.leftAmigaPressed || keyb.leftCtrlPressed
+	const bool dontRepeatReturnAndBackspace = !ui.editTextFlag && (scancode == SDL_SCANCODE_RETURN || scancode == SDL_SCANCODE_BACKSPACE);
+	const bool nonRepeatKeys = keyb.leftAmigaPressed || nonRepeatAltKeys || nonRepeatCtrlKeys
 		|| scancode == SDL_SCANCODE_LEFT || scancode == SDL_SCANCODE_RIGHT
-		|| scancode == SDL_SCANCODE_UP   || scancode == SDL_SCANCODE_DOWN;
-	if (editor.repeatKeyFlag && keyb.repeatKey && scancode == keyb.lastRepKey && illegalKeys)
+		|| scancode == SDL_SCANCODE_UP   || scancode == SDL_SCANCODE_DOWN
+		|| dontRepeatReturnAndBackspace;
+	if (editor.repeatKeyFlag && scancode == keyb.lastRepKey && nonRepeatKeys)
 		return;
 
 	if (scancode == SDL_SCANCODE_KP_PLUS)
@@ -355,12 +241,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 	// TOGGLE FULLSCREEN (should always react)
 	if (scancode == SDL_SCANCODE_F11 && !keyb.leftAltPressed)
 	{
-		toggleFullScreen();
-
-		// prevent fullscreen toggle from firing twice on certain SDL2 Linux ports
-#ifdef __unix__
-		SDL_Delay(100);
-#endif
+		toggleFullscreen();
 		return;
 	}
 
@@ -391,8 +272,10 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 		keyb.repeatCounter = 0;
 		keyb.repeatFrac = 0;
+
 		keyb.lastRepKey = scancode;
 	}
+	
 
 	// ENTRY JUMPING IN DISK OP. FILELIST
 	if (ui.diskOpScreenShown && keyb.shiftPressed && !ui.editTextFlag)
@@ -443,7 +326,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			if (keyb.leftAltPressed)
 			{
 				if (handleSpecialKeys(scancode) && editor.currMode != MODE_RECORD)
-					modSetPos(DONT_SET_ORDER, (song->currRow + editor.editMoveAdd) & 0x3F);
+					modSetPos(DONT_SET_ORDER, (song->currRow + editor.editMoveAdd) & 63);
 			}
 			else
 			{
@@ -474,10 +357,10 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 #endif
 		{
 			// right Amiga key on Amiga keyb
-			if (!ui.askScreenShown)
+			if (!ui.askBoxShown)
 			{
 				editor.playMode = PLAY_MODE_NORMAL;
-				modPlay(DONT_SET_PATTERN, song->currOrder, DONT_SET_ROW);
+				modPlay(DONT_SET_PATTERN, song->currPos, DONT_SET_ROW);
 				editor.currMode = MODE_PLAY;
 				pointerSetMode(POINTER_MODE_PLAY, DO_CARRY);
 				statusAllRight();
@@ -492,7 +375,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 #endif
 		{
 			// right alt on Amiga keyb
-			if (!ui.askScreenShown)
+			if (!ui.askBoxShown)
 			{
 				editor.playMode = PLAY_MODE_PATTERN;
 				modPlay(song->currPattern, DONT_SET_ORDER, DONT_SET_ROW);
@@ -506,7 +389,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		case SDL_SCANCODE_RSHIFT:
 		{
 			// right shift on Amiga keyb
-			if (!ui.samplerScreenShown && !ui.askScreenShown)
+			if (!ui.samplerScreenShown && !ui.askBoxShown)
 			{
 				editor.playMode = PLAY_MODE_PATTERN;
 				modPlay(song->currPattern, DONT_SET_ORDER, DONT_SET_ROW);
@@ -540,13 +423,11 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else
 			{
-				ui.askScreenShown = true;
-				ui.askScreenType = ASK_QUIT;
-
-				pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-				setStatusMessage("REALLY QUIT ?", NO_CARRY);
-				renderAskDialog();
-				return;
+				if (askBox(ASKBOX_YES_NO, "REALLY QUIT ?"))
+				{
+					ui.throwExit = true;
+					return;
+				}
 			}
 
 			pointerSetPreviousMode();
@@ -568,13 +449,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		{
 			if (ui.posEdScreenShown)
 			{
-				if (song->currOrder > 0)
-				{
-					if (song->currOrder-(POSED_LIST_SIZE-1) > 0)
-						modSetPos(song->currOrder-(POSED_LIST_SIZE-1), DONT_SET_ROW);
-					else
-						modSetPos(0, DONT_SET_ROW);
-				}
+				posEdPageUp();
 			}
 			else if (ui.diskOpScreenShown)
 			{
@@ -609,13 +484,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		{
 			if (ui.posEdScreenShown)
 			{
-				if (song->currOrder != song->header.numOrders-1)
-				{
-					if (song->currOrder+(POSED_LIST_SIZE-1) <= song->header.numOrders-1)
-						modSetPos(song->currOrder+(POSED_LIST_SIZE-1), DONT_SET_ROW);
-					else
-						modSetPos(song->header.numOrders - 1, DONT_SET_ROW);
-				}
+				posEdPageDown();
 			}
 			else if (ui.diskOpScreenShown)
 			{
@@ -646,8 +515,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		{
 			if (ui.posEdScreenShown)
 			{
-				if (song->currOrder > 0)
-					modSetPos(0, DONT_SET_ROW);
+				posEdScrollToTop();
 			}
 			else if (ui.diskOpScreenShown)
 			{
@@ -669,7 +537,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		{
 			if (ui.posEdScreenShown)
 			{
-				modSetPos(song->header.numOrders - 1, DONT_SET_ROW);
+				posEdScrollToBottom();
 			}
 			else if (ui.diskOpScreenShown)
 			{
@@ -728,111 +596,109 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else
 			{
-				toggleFilterModel();
+				toggleAmigaFilterModel();
 			}
 		}
 		break;
 
 		case SDL_SCANCODE_RETURN:
 		{
-			if (ui.askScreenShown)
+			if (keyb.shiftPressed || keyb.leftAltPressed || keyb.leftCtrlPressed)
 			{
-				ui.answerNo = false;
-				ui.answerYes = true;
-				ui.askScreenShown = false;
-
-				handleAskYes();
-			}
-			else
-			{
-				if (keyb.shiftPressed || keyb.leftAltPressed || keyb.leftCtrlPressed)
+				saveUndo();
+				if (keyb.leftAltPressed && !keyb.leftCtrlPressed)
 				{
-					saveUndo();
-					if (keyb.leftAltPressed && !keyb.leftCtrlPressed)
+					if (song->currRow < 63)
 					{
-						if (song->currRow < 63)
+						for (int32_t i = 0; i < PAULA_VOICES; i++)
 						{
-							for (i = 0; i < AMIGA_VOICES; i++)
+							int32_t j;
+							for (j = 62; j >= song->currRow; j--)
 							{
-								for (j = 62; j >= song->currRow; j--)
-								{
-									noteSrc = &song->patterns[song->currPattern][(j * AMIGA_VOICES) + i];
-									song->patterns[song->currPattern][((j + 1) * AMIGA_VOICES) + i] = *noteSrc;
-								}
-
-								noteDst = &song->patterns[song->currPattern][((j + 1) * AMIGA_VOICES) + i];
-
-								noteDst->period = 0;
-								noteDst->sample = 0;
-								noteDst->command = 0;
-								noteDst->param = 0;
+								note_t *noteSrc = &song->patterns[song->currPattern][(j * PAULA_VOICES) + i];
+								song->patterns[song->currPattern][((j + 1) * PAULA_VOICES) + i] = *noteSrc;
 							}
 
-							song->currRow++;
+							note_t *noteDst = &song->patterns[song->currPattern][((j + 1) * PAULA_VOICES) + i];
 
-							updateWindowTitle(MOD_IS_MODIFIED);
-							ui.updatePatternData = true;
-						}
-					}
-					else
-					{
-						if (song->currRow < 63)
-						{
-							for (i = 62; i >= song->currRow; i--)
-							{
-								noteSrc = &song->patterns[song->currPattern][((i + 0) * AMIGA_VOICES) + cursor.channel];
-								noteDst = &song->patterns[song->currPattern][((i + 1) * AMIGA_VOICES) + cursor.channel];
-
-								if (keyb.leftCtrlPressed)
-								{
-									noteDst->command = noteSrc->command;
-									noteDst->param = noteSrc->param;
-								}
-								else
-								{
-									*noteDst = *noteSrc;
-								}
-							}
-
-							noteDst = &song->patterns[song->currPattern][((i + 1) * AMIGA_VOICES) + cursor.channel];
-
-							if (!keyb.leftCtrlPressed)
-							{
-								noteDst->period = 0;
-								noteDst->sample = 0;
-							}
-
+							noteDst->period = 0;
+							noteDst->sample = 0;
 							noteDst->command = 0;
 							noteDst->param = 0;
-
-							song->currRow++;
-
-							updateWindowTitle(MOD_IS_MODIFIED);
-							ui.updatePatternData = true;
 						}
+
+						song->currRow++;
+
+						updateWindowTitle(MOD_IS_MODIFIED);
+						ui.updatePatternData = true;
 					}
 				}
 				else
 				{
-					editor.stepPlayEnabled = true;
-					editor.stepPlayBackwards = false;
-
-					editor.stepPlayLastMode = editor.currMode;
-
-					if (config.keepEditModeAfterStepPlay && editor.stepPlayLastMode == MODE_EDIT)
-						doStopIt(false);
-					else
-						doStopIt(true);
-
-					playPattern(song->currRow);
-
-					if (config.keepEditModeAfterStepPlay && editor.stepPlayLastMode == MODE_EDIT)
+					if (song->currRow < 63)
 					{
-						pointerSetMode(POINTER_MODE_EDIT, DO_CARRY);
-						editor.playMode = PLAY_MODE_NORMAL;
-						editor.currMode = MODE_EDIT;
+						int32_t i;
+						for (i = 62; i >= song->currRow; i--)
+						{
+							note_t *noteSrc = &song->patterns[song->currPattern][((i + 0) * PAULA_VOICES) + cursor.channel];
+							note_t *noteDst = &song->patterns[song->currPattern][((i + 1) * PAULA_VOICES) + cursor.channel];
+
+							if (keyb.leftCtrlPressed)
+							{
+								noteDst->command = noteSrc->command;
+								noteDst->param = noteSrc->param;
+							}
+							else
+							{
+								*noteDst = *noteSrc;
+							}
+						}
+
+						note_t *noteDst = &song->patterns[song->currPattern][((i + 1) * PAULA_VOICES) + cursor.channel];
+
+						if (!keyb.leftCtrlPressed)
+						{
+							noteDst->period = 0;
+							noteDst->sample = 0;
+						}
+
+						noteDst->command = 0;
+						noteDst->param = 0;
+
+						song->currRow++;
+
+						updateWindowTitle(MOD_IS_MODIFIED);
+						ui.updatePatternData = true;
 					}
 				}
+			}
+			else
+			{
+				const bool audioWasntLocked = !audio.locked;
+				if (audioWasntLocked)
+					lockAudio();
+
+				editor.stepPlayEnabled = true;
+				editor.stepPlayBackwards = false;
+
+				editor.stepPlayLastMode = editor.currMode;
+
+				if (config.keepEditModeAfterStepPlay && editor.stepPlayLastMode == MODE_EDIT)
+					doStopIt(false);
+				else
+					doStopIt(true);
+
+				playPattern(song->currRow);
+
+				if (config.keepEditModeAfterStepPlay && editor.stepPlayLastMode == MODE_EDIT)
+				{
+					pointerSetMode(POINTER_MODE_EDIT, DO_CARRY);
+					editor.playMode = PLAY_MODE_NORMAL;
+					editor.currMode = MODE_EDIT;
+				}
+
+				if (audioWasntLocked)
+					unlockAudio();
 			}
 		}
 		break;
@@ -886,10 +752,10 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					// cut channel and put in buffer
 					saveUndo();
 
-					noteDst = editor.trackBuffer;
-					for (i = 0; i < MOD_ROWS; i++)
+					note_t *noteDst = editor.trackBuffer;
+					for (int32_t i = 0; i < MOD_ROWS; i++)
 					{
-						noteSrc = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+						note_t *noteSrc = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 						*noteDst++ = *noteSrc;
 
 						noteSrc->period = 0;
@@ -907,10 +773,10 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					saveUndo();
 
 					memcpy(editor.patternBuffer, song->patterns[song->currPattern],
-						sizeof (note_t) * (AMIGA_VOICES * MOD_ROWS));
+						sizeof (note_t) * (PAULA_VOICES * MOD_ROWS));
 
 					memset(song->patterns[song->currPattern], 0,
-						sizeof (note_t) * (AMIGA_VOICES * MOD_ROWS));
+						sizeof (note_t) * (PAULA_VOICES * MOD_ROWS));
 
 					updateWindowTitle(MOD_IS_MODIFIED);
 					ui.updatePatternData = true;
@@ -920,10 +786,10 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					// cut channel commands and put in buffer
 					saveUndo();
 
-					noteDst = editor.cmdsBuffer;
-					for (i = 0; i < MOD_ROWS; i++)
+					note_t *noteDst = editor.cmdsBuffer;
+					for (int32_t i = 0; i < MOD_ROWS; i++)
 					{
-						noteSrc = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+						note_t *noteSrc = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 						*noteDst++ = *noteSrc;
 
 						noteSrc->command = 0;
@@ -949,25 +815,25 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				{
 					// copy channel to buffer
 
-					noteDst = editor.trackBuffer;
-					for (i = 0; i < MOD_ROWS; i++)
-						*noteDst++ = song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+					note_t *noteDst = editor.trackBuffer;
+					for (int32_t i = 0; i < MOD_ROWS; i++)
+						*noteDst++ = song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 				}
 				else if (keyb.leftAltPressed)
 				{
 					// copy pattern to buffer
 
 					memcpy(editor.patternBuffer, song->patterns[song->currPattern],
-						sizeof (note_t) * (AMIGA_VOICES * MOD_ROWS));
+						sizeof (note_t) * (PAULA_VOICES * MOD_ROWS));
 				}
 				else if (keyb.leftCtrlPressed)
 				{
 					// copy channel commands to buffer
 
-					noteDst = editor.cmdsBuffer;
-					for (i = 0; i < MOD_ROWS; i++)
+					note_t *noteDst = editor.cmdsBuffer;
+					for (int32_t i = 0; i < MOD_ROWS; i++)
 					{
-						noteSrc = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+						note_t *noteSrc = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 						noteDst->command = noteSrc->command;
 						noteDst->param = noteSrc->param;
 
@@ -991,9 +857,9 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					// paste channel buffer to channel
 					saveUndo();
 
-					noteSrc = editor.trackBuffer;
-					for (i = 0; i < MOD_ROWS; i++)
-						song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel] = *noteSrc++;
+					note_t *noteSrc = editor.trackBuffer;
+					for (int32_t i = 0; i < MOD_ROWS; i++)
+						song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel] = *noteSrc++;
 
 					updateWindowTitle(MOD_IS_MODIFIED);
 					ui.updatePatternData = true;
@@ -1004,7 +870,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					saveUndo();
 
 					memcpy(song->patterns[song->currPattern],
-						editor.patternBuffer, sizeof (note_t) * (AMIGA_VOICES * MOD_ROWS));
+						editor.patternBuffer, sizeof (note_t) * (PAULA_VOICES * MOD_ROWS));
 
 					updateWindowTitle(MOD_IS_MODIFIED);
 					ui.updatePatternData = true;
@@ -1014,10 +880,10 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					// paste channel commands buffer to channel
 					saveUndo();
 
-					noteSrc = editor.cmdsBuffer;
-					for (i = 0; i < MOD_ROWS; i++)
+					note_t *noteSrc = editor.cmdsBuffer;
+					for (int32_t i = 0; i < MOD_ROWS; i++)
 					{
-						noteDst = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+						note_t *noteDst = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 						noteDst->command = noteSrc->command;
 						noteDst->param = noteSrc->param;
 
@@ -1064,7 +930,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				else if (keyb.leftAmigaPressed)
 				{
 					editor.playMode = PLAY_MODE_NORMAL;
-					modPlay(DONT_SET_PATTERN, song->currOrder, editor.f6Pos);
+					modPlay(DONT_SET_PATTERN, song->currPos, editor.f6Pos);
 
 					editor.currMode = MODE_PLAY;
 					pointerSetMode(POINTER_MODE_PLAY, DO_CARRY);
@@ -1111,7 +977,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				else if (keyb.leftAmigaPressed)
 				{
 					editor.playMode = PLAY_MODE_NORMAL;
-					modPlay(DONT_SET_PATTERN, song->currOrder, editor.f7Pos);
+					modPlay(DONT_SET_PATTERN, song->currPos, editor.f7Pos);
 
 					editor.currMode = MODE_PLAY;
 					pointerSetMode(POINTER_MODE_PLAY, DO_CARRY);
@@ -1158,7 +1024,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				else if (keyb.leftAmigaPressed)
 				{
 					editor.playMode = PLAY_MODE_NORMAL;
-					modPlay(DONT_SET_PATTERN, song->currOrder, editor.f8Pos);
+					modPlay(DONT_SET_PATTERN, song->currPos, editor.f8Pos);
 
 					editor.currMode = MODE_PLAY;
 					pointerSetMode(POINTER_MODE_PLAY, DO_CARRY);
@@ -1205,7 +1071,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				else if (keyb.leftAmigaPressed)
 				{
 					editor.playMode = PLAY_MODE_NORMAL;
-					modPlay(DONT_SET_PATTERN, song->currOrder, editor.f9Pos);
+					modPlay(DONT_SET_PATTERN, song->currPos, editor.f9Pos);
 
 					editor.currMode = MODE_PLAY;
 					pointerSetMode(POINTER_MODE_PLAY, DO_CARRY);
@@ -1252,7 +1118,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				else if (keyb.leftAmigaPressed)
 				{
 					editor.playMode = PLAY_MODE_NORMAL;
-					modPlay(DONT_SET_PATTERN, song->currOrder, editor.f10Pos);
+					modPlay(DONT_SET_PATTERN, song->currPos, editor.f10Pos);
 
 					editor.currMode = MODE_PLAY;
 					pointerSetMode(POINTER_MODE_PLAY, DO_CARRY);
@@ -1295,7 +1161,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[9] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1320,7 +1186,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[0] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1349,7 +1215,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[1] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1378,7 +1244,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[2] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1407,7 +1273,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[3] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1432,7 +1298,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[4] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1453,7 +1319,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[5] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1474,7 +1340,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[6] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1495,7 +1361,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[7] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1516,7 +1382,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.shiftPressed)
 			{
-				noteSrc = &song->patterns[song->currPattern][(song->currRow * AMIGA_VOICES) + cursor.channel];
+				note_t *noteSrc = &song->patterns[song->currPattern][(song->currRow * PAULA_VOICES) + cursor.channel];
 				editor.effectMacros[8] = (noteSrc->command << 8) | noteSrc->param;
 				displayMsg("COMMAND STORED!");
 			}
@@ -1717,45 +1583,35 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 		case SDL_SCANCODE_KP_ENTER:
 		{
-			if (ui.askScreenShown)
+			editor.hiLowInstr ^= 0x10;
+
+			if (editor.sampleZero)
 			{
-				ui.answerNo = false;
-				ui.answerYes = true;
-				ui.askScreenShown = false;
-				handleAskYes();
+				editor.currSample = 15;
+				editor.sampleZero = false;
 			}
 			else
 			{
-				editor.hiLowInstr ^= 0x10;
-
-				if (editor.sampleZero)
-				{
-					editor.currSample = 15;
-					editor.sampleZero = false;
-				}
-				else
-				{
-					editor.currSample ^= 0x10;
-				}
-
-				if (editor.currSample == 31) // kludge if sample was 15 (0010 in UI) before key press
-				{
-					editor.currSample = 15;
-					editor.sampleZero ^= 1;
-				}
-
-				updateCurrSample();
-				if (keyb.leftAltPressed && editor.pNoteFlag > 0)
-				{
-					ui.changingDrumPadNote = true;
-					setStatusMessage("SELECT NOTE", NO_CARRY);
-					pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-					break;
-				}
-
-				if (editor.pNoteFlag > 0)
-					handleEditKeys(scancode, EDIT_SPECIAL);
+				editor.currSample ^= 0x10;
 			}
+
+			if (editor.currSample == 31) // kludge if sample was 15 (0010 in UI) before key press
+			{
+				editor.currSample = 15;
+				editor.sampleZero ^= 1;
+			}
+
+			updateCurrSample();
+			if (keyb.leftAltPressed && editor.pNoteFlag > 0)
+			{
+				ui.changingDrumPadNote = true;
+				setStatusMessage("SELECT NOTE", NO_CARRY);
+				pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
+				break;
+			}
+
+			if (editor.pNoteFlag > 0)
+				handleEditKeys(scancode, EDIT_SPECIAL);
 		}
 		break;
 
@@ -1857,11 +1713,8 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 		case SDL_SCANCODE_KP_PERIOD:
 		{
-			ui.askScreenShown = true;
-			ui.askScreenType = ASK_KILL_SAMPLE;
-			pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-			setStatusMessage("KILL SAMPLE ?", NO_CARRY);
-			renderAskDialog();
+			if (askBox(ASKBOX_YES_NO, "KILL SAMPLE ?"))
+				killSample();
 		}
 		break;
 
@@ -1869,50 +1722,74 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		{
 			keyb.delayKey = false;
 			keyb.repeatKey = false;
-
-			if (ui.diskOpScreenShown)
+			
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				if (diskop.numEntries > DISKOP_LINES)
+				if (editor.markStartOfs >= 0 && (keyb.leftCtrlPressed || keyb.leftAltPressed))
 				{
-					diskop.scrollOffset++;
-					if (mouse.rightButtonPressed) // PT quirk: right mouse button speeds up scrolling even on keyb UP/DOWN
-						diskop.scrollOffset += 3;
+					int32_t end = smpPos2Scr(editor.markEndOfs);
+					if (end > 0)
+					{
+						end--;
+						invertRange();
+						editor.markEndOfs = scr2SmpPos(end);
 
-					if (diskop.scrollOffset > diskop.numEntries-DISKOP_LINES)
-						diskop.scrollOffset = diskop.numEntries-DISKOP_LINES;
+						if (editor.markStartOfs > editor.markEndOfs)
+						{
+							int32_t tmp = editor.markEndOfs;
+							editor.markEndOfs = editor.markStartOfs;
+							editor.markStartOfs = tmp;
+						}
 
-					ui.updateDiskOpFileList = true;
+						invertRange();
+					}
+
+					if (editor.repeatKeyFlag)
+					{
+						keyb.delayKey = true;
+						keyb.repeatKey = true;
+					}
 				}
-
-				if (!keyb.repeatKey)
-					keyb.delayCounter = 0;
-
-				keyb.repeatKey = true;
-				keyb.delayKey = false;
 			}
-			else if (ui.posEdScreenShown)
+			else
 			{
-				if (song->currOrder != song->header.numOrders-1)
+				if (ui.diskOpScreenShown)
 				{
-					if (++song->currOrder > song->header.numOrders-1)
-						song->currOrder = song->header.numOrders-1;
+					if (diskop.numEntries > DISKOP_LINES)
+					{
+						diskop.scrollOffset++;
+						if (mouse.rightButtonPressed) // PT quirk: right mouse button speeds up scrolling even on keyb UP/DOWN
+							diskop.scrollOffset += 3;
 
-					modSetPos(song->currOrder, DONT_SET_ROW);
-					ui.updatePosEd = true;
+						if (diskop.scrollOffset > diskop.numEntries-DISKOP_LINES)
+							diskop.scrollOffset = diskop.numEntries-DISKOP_LINES;
+
+						ui.updateDiskOpFileList = true;
+					}
+
+					if (!keyb.repeatKey)
+						keyb.delayCounter = 0;
+
+					keyb.repeatKey = true;
+					keyb.delayKey = false;
 				}
+				else if (ui.posEdScreenShown)
+				{
+					posEdScrollDown();
 
-				if (!keyb.repeatKey)
-					keyb.delayCounter = 0;
+					if (!keyb.repeatKey)
+						keyb.delayCounter = 0;
 
-				keyb.repeatKey = true;
-				keyb.delayKey = true;
-			}
-			else if (!ui.samplerScreenShown)
-			{
-				if (editor.currMode != MODE_PLAY && editor.currMode != MODE_RECORD)
-					modSetPos(DONT_SET_ORDER, (song->currRow + 1) & 0x3F);
+					keyb.repeatKey = true;
+					keyb.delayKey = true;
+				}
+				else if (!ui.samplerScreenShown)
+				{
+					if (editor.currMode != MODE_PLAY && editor.currMode != MODE_RECORD)
+						modSetPos(DONT_SET_ORDER, (song->currRow + 1) & 63);
 
-				keyb.repeatKey = true;
+					keyb.repeatKey = true;
+				}
 			}
 		}
 		break;
@@ -1922,43 +1799,70 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			keyb.delayKey  = false;
 			keyb.repeatKey = false;
 
-			if (ui.diskOpScreenShown)
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				diskop.scrollOffset--;
-				if (mouse.rightButtonPressed) // PT quirk: right mouse button speeds up scrolling even on keyb UP/DOWN
-					diskop.scrollOffset -= 3;
-
-				if (diskop.scrollOffset < 0)
-					diskop.scrollOffset = 0;
-
-				ui.updateDiskOpFileList = true;
-
-				if (!keyb.repeatKey)
-					keyb.delayCounter = 0;
-
-				keyb.repeatKey = true;
-				keyb.delayKey = false;
-			}
-			else if (ui.posEdScreenShown)
-			{
-				if (song->currOrder > 0)
+				if (editor.markStartOfs >= 0 && (keyb.leftCtrlPressed || keyb.leftAltPressed))
 				{
-					modSetPos(song->currOrder - 1, DONT_SET_ROW);
-					ui.updatePosEd = true;
+					int32_t end = smpPos2Scr(editor.markEndOfs);
+					if (end < 313)
+					{
+						end++;
+						invertRange();
+						editor.markEndOfs = scr2SmpPos(end);
+
+						if (editor.markStartOfs > editor.markEndOfs)
+						{
+							int32_t tmp = editor.markEndOfs;
+							editor.markEndOfs = editor.markStartOfs;
+							editor.markStartOfs = tmp;
+						}
+
+						invertRange();
+					}
+
+					if (editor.repeatKeyFlag)
+					{
+						keyb.delayKey = true;
+						keyb.repeatKey = true;
+					}
 				}
-
-				if (!keyb.repeatKey)
-					keyb.delayCounter = 0;
-
-				keyb.repeatKey = true;
-				keyb.delayKey = true;
 			}
-			else if (!ui.samplerScreenShown)
+			else
 			{
-				if ((editor.currMode != MODE_PLAY) && (editor.currMode != MODE_RECORD))
-					modSetPos(DONT_SET_ORDER, (song->currRow - 1) & 0x3F);
+				if (ui.diskOpScreenShown)
+				{
+					diskop.scrollOffset--;
+					if (mouse.rightButtonPressed) // PT quirk: right mouse button speeds up scrolling even on keyb UP/DOWN
+						diskop.scrollOffset -= 3;
 
-				keyb.repeatKey = true;
+					if (diskop.scrollOffset < 0)
+						diskop.scrollOffset = 0;
+
+					ui.updateDiskOpFileList = true;
+
+					if (!keyb.repeatKey)
+						keyb.delayCounter = 0;
+
+					keyb.repeatKey = true;
+					keyb.delayKey = false;
+				}
+				else if (ui.posEdScreenShown)
+				{
+					posEdScrollUp();
+
+					if (!keyb.repeatKey)
+						keyb.delayCounter = 0;
+
+					keyb.repeatKey = true;
+					keyb.delayKey = true;
+				}
+				else if (!ui.samplerScreenShown)
+				{
+					if ((editor.currMode != MODE_PLAY) && (editor.currMode != MODE_RECORD))
+						modSetPos(DONT_SET_ORDER, (song->currRow - 1) & 63);
+
+					keyb.repeatKey = true;
+				}
 			}
 		}
 		break;
@@ -1968,20 +1872,19 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			keyb.delayKey = false;
 			keyb.repeatKey = false;
 
-			if (keyb.leftCtrlPressed)
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				sampleDownButton();
-				if (editor.repeatKeyFlag)
+				if (editor.markStartOfs >= 0 && (keyb.leftCtrlPressed || keyb.leftAltPressed))
 				{
-					keyb.delayKey = true;
-					keyb.repeatKey = true;
-				}
-			}
-			else if (keyb.shiftPressed)
-			{
-				if (song->currOrder > 0)
-				{
-					modSetPos(song->currOrder - 1, DONT_SET_ROW);
+					int32_t start = smpPos2Scr(editor.markStartOfs);
+					if (start > 0)
+					{
+						start--;
+						invertRange();
+						editor.markStartOfs = scr2SmpPos(start);
+						invertRange();
+					}
+
 					if (editor.repeatKeyFlag)
 					{
 						keyb.delayKey = true;
@@ -1989,19 +1892,43 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					}
 				}
 			}
-			else if (keyb.leftAltPressed)
-			{
-				decPatt();
-				if (editor.repeatKeyFlag)
-				{
-					keyb.delayKey = true;
-					keyb.repeatKey = true;
-				}
-			}
 			else
 			{
-				movePatCurLeft();
-				keyb.repeatKey = true;
+				if (keyb.leftCtrlPressed)
+				{
+					sampleDownButton();
+					if (editor.repeatKeyFlag)
+					{
+						keyb.delayKey = true;
+						keyb.repeatKey = true;
+					}
+				}
+				else if (keyb.shiftPressed)
+				{
+					if (song->currPos > 0)
+					{
+						modSetPos(song->currPos - 1, DONT_SET_ROW);
+						if (editor.repeatKeyFlag)
+						{
+							keyb.delayKey = true;
+							keyb.repeatKey = true;
+						}
+					}
+				}
+				else if (keyb.leftAltPressed)
+				{
+					decPatt();
+					if (editor.repeatKeyFlag)
+					{
+						keyb.delayKey = true;
+						keyb.repeatKey = true;
+					}
+				}
+				else
+				{
+					movePatCurLeft();
+					keyb.repeatKey = true;
+				}
 			}
 		}
 		break;
@@ -2011,20 +1938,27 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			keyb.delayKey = false;
 			keyb.repeatKey = false;
 
-			if (keyb.leftCtrlPressed)
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				sampleUpButton();
-				if (editor.repeatKeyFlag)
+				if (editor.markStartOfs >= 0 && (keyb.leftCtrlPressed || keyb.leftAltPressed))
 				{
-					keyb.delayKey = true;
-					keyb.repeatKey = true;
-				}
-			}
-			else if (keyb.shiftPressed)
-			{
-				if (song->currOrder < 126)
-				{
-					modSetPos(song->currOrder + 1, DONT_SET_ROW);
+					int32_t start = smpPos2Scr(editor.markStartOfs);
+					if (start < 313)
+					{
+						start++;
+						invertRange();
+						editor.markStartOfs = scr2SmpPos(start);
+
+						if (editor.markStartOfs > editor.markEndOfs)
+						{
+							int32_t tmp = editor.markEndOfs;
+							editor.markEndOfs = editor.markStartOfs;
+							editor.markStartOfs = tmp;
+						}
+
+						invertRange();
+					}
+
 					if (editor.repeatKeyFlag)
 					{
 						keyb.delayKey = true;
@@ -2032,19 +1966,43 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					}
 				}
 			}
-			else if (keyb.leftAltPressed)
-			{
-				incPatt();
-				if (editor.repeatKeyFlag)
-				{
-					keyb.delayKey = true;
-					keyb.repeatKey = true;
-				}
-			}
 			else
 			{
-				movePatCurRight();
-				keyb.repeatKey = true;
+				if (keyb.leftCtrlPressed)
+				{
+					sampleUpButton();
+					if (editor.repeatKeyFlag)
+					{
+						keyb.delayKey = true;
+						keyb.repeatKey = true;
+					}
+				}
+				else if (keyb.shiftPressed)
+				{
+					if (song->currPos < 126)
+					{
+						modSetPos(song->currPos + 1, DONT_SET_ROW);
+						if (editor.repeatKeyFlag)
+						{
+							keyb.delayKey = true;
+							keyb.repeatKey = true;
+						}
+					}
+				}
+				else if (keyb.leftAltPressed)
+				{
+					incPatt();
+					if (editor.repeatKeyFlag)
+					{
+						keyb.delayKey = true;
+						keyb.repeatKey = true;
+					}
+				}
+				else
+				{
+					movePatCurRight();
+					keyb.repeatKey = true;
+				}
 			}
 		}
 		break;
@@ -2090,13 +2048,6 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		{
 			if (keyb.leftCtrlPressed)
 			{
-				// CTRL+B doesn't change the status message back, so do this:
-				if (ui.introScreenShown)
-				{
-					ui.introScreenShown = false;
-					statusAllRight();
-				}
-
 				if (editor.blockMarkFlag)
 				{
 					editor.blockMarkFlag = false;
@@ -2112,7 +2063,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.leftAltPressed)
 			{
-				s = &song->samples[editor.currSample];
+				moduleSample_t *s = &song->samples[editor.currSample];
 				if (s->length == 0)
 				{
 					statusSampleIsEmpty();
@@ -2154,8 +2105,8 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				editor.blockMarkFlag = false;
 				editor.blockBufferFlag = true;
 
-				for (i = 0; i < MOD_ROWS; i++)
-					editor.blockBuffer[i] = song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+				for (int32_t i = 0; i < MOD_ROWS; i++)
+					editor.blockBuffer[i] = song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 
 				if (editor.blockFromPos > editor.blockToPos)
 				{
@@ -2247,16 +2198,17 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			{
 				saveUndo();
 
-				j = song->currRow + 1;
+				int32_t j = song->currRow + 1;
 				while (j < MOD_ROWS)
 				{
+					int32_t i;
 					for (i = 62; i >= j; i--)
 					{
-						noteSrc = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
-						song->patterns[song->currPattern][((i + 1) * AMIGA_VOICES) + cursor.channel] = *noteSrc;
+						note_t *noteSrc = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
+						song->patterns[song->currPattern][((i + 1) * PAULA_VOICES) + cursor.channel] = *noteSrc;
 					}
 
-					noteDst = &song->patterns[song->currPattern][((i + 1) * AMIGA_VOICES) + cursor.channel];
+					note_t *noteDst = &song->patterns[song->currPattern][((i + 1) * PAULA_VOICES) + cursor.channel];
 					noteDst->period = 0;
 					noteDst->sample = 0;
 					noteDst->command = 0;
@@ -2280,7 +2232,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 #ifdef __APPLE__
 			if (keyb.leftCommandPressed && keyb.leftCtrlPressed)
 			{
-				toggleFullScreen();
+				toggleFullscreen();
 			}
 			else
 #endif
@@ -2290,16 +2242,27 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.leftCtrlPressed)
 			{
-				toggleLEDFilter();
+				if (keyb.shiftPressed)
+				{
+					resetFPSCounter();
 
-				if (editor.useLEDFilter)
-					displayMsg("LED FILTER ON");
+					video.debug ^= 1;
+					if (!video.debug)
+						displayMainScreen();
+				}
 				else
-					displayMsg("LED FILTER OFF");
+				{
+					toggleLEDFilter();
+
+					if (audio.ledFilterEnabled)
+						displayMsg("LED FILTER ON");
+					else
+						displayMsg("LED FILTER OFF");
+				}
 			}
 			else if (keyb.leftAltPressed)
 			{
-				s = &song->samples[editor.currSample];
+				moduleSample_t *s = &song->samples[editor.currSample];
 				if (s->length == 0)
 				{
 					statusSampleIsEmpty();
@@ -2319,15 +2282,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 		case SDL_SCANCODE_G:
 		{
-			if (keyb.leftCtrlPressed)
-			{
-				ui.askScreenShown = true;
-				ui.askScreenType = ASK_BOOST_ALL_SAMPLES;
-				pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-				setStatusMessage("BOOST ALL SAMPLES", NO_CARRY);
-				renderAskDialog();
-			}
-			else if (keyb.leftAltPressed) // toggle record mode (PT clone and PT2.3E only)
+			if (keyb.leftAltPressed) // toggle record mode (PT clone and PT2.3E only)
 			{
 				editor.recordMode ^= 1;
 				if (editor.recordMode == 0)
@@ -2376,23 +2331,25 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 				if (song->currRow < 63)
 				{
-					for (i = 0; i <= editor.buffToPos-editor.buffFromPos; i++)
+					for (int32_t i = 0; i <= editor.buffToPos-editor.buffFromPos; i++)
 					{
-						for (j = 62; j >= song->currRow; j--)
+						for (int32_t j = 62; j >= song->currRow; j--)
 						{
-							noteSrc = &song->patterns[song->currPattern][(j * AMIGA_VOICES) + cursor.channel];
-							song->patterns[song->currPattern][((j + 1) * AMIGA_VOICES) + cursor.channel] = *noteSrc;
+							note_t *noteSrc = &song->patterns[song->currPattern][(j * PAULA_VOICES) + cursor.channel];
+							song->patterns[song->currPattern][((j + 1) * PAULA_VOICES) + cursor.channel] = *noteSrc;
 						}
 					}
 				}
 
 				saveUndo();
+
+				int32_t i;
 				for (i = 0; i <= editor.buffToPos-editor.buffFromPos; i++)
 				{
 					if (song->currRow+i > 63)
 						break;
 
-					song->patterns[song->currPattern][((song->currRow + i) * AMIGA_VOICES) + cursor.channel]
+					song->patterns[song->currPattern][((song->currRow + i) * PAULA_VOICES) + cursor.channel]
 						= editor.blockBuffer[editor.buffFromPos + i];
 				}
 
@@ -2430,12 +2387,13 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 				saveUndo();
 
-				i = editor.buffFromPos;
-				j = song->currRow;
-				patt = song->patterns[song->currPattern];
+				int32_t i = editor.buffFromPos;
+				int32_t j = song->currRow;
+				note_t *patt = song->patterns[song->currPattern];
+
 				while (true)
 				{
-					noteDst = &patt[(j * AMIGA_VOICES) + cursor.channel];
+					note_t *noteDst = &patt[(j * PAULA_VOICES) + cursor.channel];
 
 					if (editor.blockBuffer[i].period == 0 && editor.blockBuffer[i].sample == 0)
 					{
@@ -2475,9 +2433,9 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 		{
 			if (keyb.leftAltPressed)
 			{
-				for (i = 0; i < MOD_ROWS; i++)
+				for (int32_t i = 0; i < MOD_ROWS; i++)
 				{
-					noteSrc = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+					note_t *noteSrc = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 					if (noteSrc->sample == editor.currSample+1)
 					{
 						noteSrc->period = 0;
@@ -2494,13 +2452,13 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			{
 				saveUndo();
 
-				i = song->currRow;
+				int32_t i = song->currRow;
 				if (keyb.shiftPressed)
 				{
 					// kill to start
 					while (i >= 0)
 					{
-						noteDst = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+						note_t *noteDst = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 						noteDst->period = 0;
 						noteDst->sample = 0;
 						noteDst->command = 0;
@@ -2514,7 +2472,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					// kill to end
 					while (i < MOD_ROWS)
 					{
-						noteDst = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+						note_t *noteDst = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 						noteDst->period = 0;
 						noteDst->sample = 0;
 						noteDst->command = 0;
@@ -2564,11 +2522,17 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			else if (keyb.leftAltPressed)
 			{
 				if (keyb.shiftPressed)
+				{
 					editor.metroChannel = cursor.channel + 1;
-				else
-					editor.metroFlag ^= 1;
 
-				ui.updateTrackerFlags = true;
+					if (ui.editOpScreenShown && ui.editOpScreen == 1)
+						ui.updateMetro2Text = true;
+				}
+				else
+				{
+					editor.metroFlag ^= 1;
+					ui.updateTrackerFlags = true;
+				}
 			}
 			else
 			{
@@ -2599,17 +2563,17 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 				saveUndo();
 
-				j = song->currRow + 1;
+				int32_t j = song->currRow + 1;
 				while (j < MOD_ROWS)
 				{
-					for (i = j; i < MOD_ROWS-1; i++)
+					for (int32_t i = j; i < MOD_ROWS-1; i++)
 					{
-						noteSrc = &song->patterns[song->currPattern][((i + 1) * AMIGA_VOICES) + cursor.channel];
-						song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel] = *noteSrc;
+						note_t *noteSrc = &song->patterns[song->currPattern][((i + 1) * PAULA_VOICES) + cursor.channel];
+						song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel] = *noteSrc;
 					}
 
 					// clear newly made row on very bottom
-					noteDst = &song->patterns[song->currPattern][(63 * AMIGA_VOICES) + cursor.channel];
+					note_t *noteDst = &song->patterns[song->currPattern][(63 * PAULA_VOICES) + cursor.channel];
 					noteDst->period = 0;
 					noteDst->sample = 0;
 					noteDst->command = 0;
@@ -2640,12 +2604,13 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 				saveUndo();
 
-				i = editor.buffFromPos;
-				j = song->currRow;
-				patt = song->patterns[song->currPattern];
+				int32_t i = editor.buffFromPos;
+				int32_t j = song->currRow;
+				note_t *patt = song->patterns[song->currPattern];
+
 				while (true)
 				{
-					noteDst = &patt[(j * AMIGA_VOICES) + cursor.channel];
+					note_t *noteDst = &patt[(j * PAULA_VOICES) + cursor.channel];
 					*noteDst = editor.blockBuffer[i];
 
 					if (i == editor.buffToPos || i == 63 || j == 63)
@@ -2668,18 +2633,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			else if (keyb.leftAltPressed)
 			{
 				if (!ui.diskOpScreenShown)
-				{
-					ui.posEdScreenShown ^= 1;
-					if (ui.posEdScreenShown)
-					{
-						renderPosEdScreen();
-						ui.updatePosEd = true;
-					}
-					else
-					{
-						displayMainScreen();
-					}
-				}
+					posEdToggle();
 			}
 			else
 			{
@@ -2693,6 +2647,13 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			if (keyb.leftAmigaPressed)
 			{
 				trackNoteDown(TRANSPOSE_ALL, 0, MOD_ROWS - 1);
+#ifdef __APPLE__
+				/* On Mac, command+Q sends a quit signal to the program.
+				** However, command+Q is also one of the transpose keys in this ProTracker port.
+				** Ignore the signal if command+Q was pressed.
+				*/
+				editor.macCmdQIssued = true;
+#endif
 			}
 			else if (keyb.leftCtrlPressed)
 			{
@@ -2704,12 +2665,8 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.leftAltPressed)
 			{
-				ui.askScreenShown = true;
-				ui.askScreenType = ASK_QUIT;
-
-				pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-				setStatusMessage("REALLY QUIT ?", NO_CARRY);
-				renderAskDialog();
+				if (askBox(ASKBOX_YES_NO, "REALLY QUIT ?"))
+					ui.throwExit = true;
 			}
 			else
 			{
@@ -2736,11 +2693,8 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.leftAltPressed)
 			{
-				ui.askScreenShown = true;
-				ui.askScreenType = ASK_RESAMPLE;
-				pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-				setStatusMessage("RESAMPLE?", NO_CARRY);
-				renderAskDialog();
+				if (askBox(ASKBOX_YES_NO, "RESAMPLE?"))
+					samplerResample();
 			}
 			else
 			{
@@ -2818,15 +2772,6 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				{
 					samplerSamPaste();
 				}
-				else
-				{
-					ui.askScreenShown = true;
-					ui.askScreenType = ASK_FILTER_ALL_SAMPLES;
-
-					pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-					setStatusMessage("FILTER ALL SAMPLS", NO_CARRY);
-					renderAskDialog();
-				}
 			}
 			else if (keyb.leftAltPressed)
 			{
@@ -2857,12 +2802,13 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 				saveUndo();
 
-				i = editor.buffFromPos;
-				j = song->currRow;
-				patt = song->patterns[song->currPattern];
+				int32_t i = editor.buffFromPos;
+				int32_t j = song->currRow;
+				note_t *patt = song->patterns[song->currPattern];
+
 				while (true)
 				{
-					noteDst = &patt[(j * AMIGA_VOICES) + cursor.channel];
+					note_t *noteDst = &patt[(j * PAULA_VOICES) + cursor.channel];
 					if (editor.blockBuffer[i].period == 0 && editor.blockBuffer[i].sample == 0)
 					{
 						noteDst->command = editor.blockBuffer[i].command;
@@ -2922,8 +2868,8 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 				saveUndo();
 				editor.blockBufferFlag = true;
 
-				for (i = 0; i < MOD_ROWS; i++)
-					editor.blockBuffer[i] = song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+				for (int32_t i = 0; i < MOD_ROWS; i++)
+					editor.blockBuffer[i] = song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 
 				if (editor.blockFromPos > editor.blockToPos)
 				{
@@ -2936,9 +2882,9 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 					editor.buffToPos = editor.blockToPos;
 				}
 
-				for (i = editor.buffFromPos; i <= editor.buffToPos; i++)
+				for (int32_t i = editor.buffFromPos; i <= editor.buffToPos; i++)
 				{
-					noteDst = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
+					note_t *noteDst = &song->patterns[song->currPattern][(i * PAULA_VOICES) + cursor.channel];
 					noteDst->period = 0;
 					noteDst->sample = 0;
 					noteDst->command = 0;
@@ -2966,6 +2912,8 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 		case SDL_SCANCODE_Y:
 		{
+			uint8_t blockFrom, blockTo;
+
 			if (keyb.leftCtrlPressed)
 			{
 				if (!editor.blockMarkFlag)
@@ -2991,10 +2939,10 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 				while (blockFrom < blockTo)
 				{
-					noteDst = &song->patterns[song->currPattern][(blockFrom * AMIGA_VOICES) + cursor.channel];
-					noteSrc = &song->patterns[song->currPattern][(blockTo * AMIGA_VOICES) + cursor.channel];
+					note_t *noteDst = &song->patterns[song->currPattern][(blockFrom * PAULA_VOICES) + cursor.channel];
+					note_t *noteSrc = &song->patterns[song->currPattern][(blockTo * PAULA_VOICES) + cursor.channel];
 
-					noteTmp = *noteDst;
+					note_t noteTmp = *noteDst;
 					*noteDst = *noteSrc;
 					*noteSrc = noteTmp;
 
@@ -3008,11 +2956,20 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 			}
 			else if (keyb.leftAltPressed)
 			{
-				ui.askScreenShown = true;
-				ui.askScreenType = ASK_SAVE_ALL_SAMPLES;
-				pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-				setStatusMessage("SAVE ALL SAMPLES?", NO_CARRY);
-				renderAskDialog();
+				if (askBox(ASKBOX_YES_NO, "SAVE ALL SAMPLES?"))
+				{
+					int8_t oldSample = editor.currSample;
+					for (int32_t i = 0; i < MOD_SAMPLES; i++)
+					{
+						editor.currSample = (int8_t)i;
+						if (song->samples[i].length > 2)
+							saveSample(DONT_CHECK_IF_FILE_EXIST, GIVE_NEW_FILENAME);
+					}
+					editor.currSample = oldSample;
+
+					displayMsg("SAMPLES SAVED !");
+					setMsgPointer();
+				}
 			}
 			else
 			{
@@ -3023,46 +2980,50 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 
 		case SDL_SCANCODE_Z:
 		{
-			if (keyb.leftAmigaPressed)
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				trackOctaDown(TRANSPOSE_ALL, 0, MOD_ROWS - 1);
-			}
-			else if (keyb.leftCtrlPressed)
-			{
-				if (ui.samplerScreenShown)
-				{
-					ui.askScreenShown = true;
-					ui.askScreenType = ASK_RESTORE_SAMPLE;
-
-					pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-					setStatusMessage("RESTORE SAMPLE ?", NO_CARRY);
-					renderAskDialog();
-				}
-				else
-				{
-					modSetTempo(125, true);
-					modSetSpeed(6);
-
-					for (i = 0; i < AMIGA_VOICES; i++)
-					{
-						ch = &song->channels[i];
-						ch->n_wavecontrol = 0;
-						ch->n_glissfunk = 0;
-						ch->n_finetune = 0;
-						ch->n_loopcount = 0;
-					}
-
-					displayMsg("EFX RESTORED !");
-				}
-			}
-			else if (keyb.leftAltPressed)
-			{
-				editor.muted[0] ^= 1; // toggle channel 1
-				renderMuteButtons();
+				if (keyb.leftCtrlPressed || keyb.leftAltPressed)
+					samplerPlayRange();
 			}
 			else
 			{
-				handleEditKeys(scancode, EDIT_NORMAL);
+				if (keyb.leftAmigaPressed)
+				{
+					trackOctaDown(TRANSPOSE_ALL, 0, MOD_ROWS - 1);
+				}
+				else if (keyb.leftCtrlPressed)
+				{
+					if (ui.samplerScreenShown)
+					{
+						if (askBox(ASKBOX_YES_NO, "RESTORE SAMPLE?"))
+							redoSampleData(editor.currSample);
+					}
+					else
+					{
+						modSetTempo(125, true);
+						modSetSpeed(6);
+
+						moduleChannel_t *ch = song->channels;
+						for (int32_t i = 0; i < PAULA_VOICES; i++, ch++)
+						{
+							ch->n_wavecontrol = 0;
+							ch->n_glissfunk = 0;
+							ch->n_finetune = 0;
+							ch->n_loopcount = 0;
+						}
+
+						displayMsg("EFX RESTORED !");
+					}
+				}
+				else if (keyb.leftAltPressed)
+				{
+					editor.muted[0] ^= 1; // toggle channel 1
+					renderMuteButtons();
+				}
+				else
+				{
+					handleEditKeys(scancode, EDIT_NORMAL);
+				}
 			}
 		}
 		break;
@@ -3073,7 +3034,7 @@ void keyDownHandler(SDL_Scancode scancode, SDL_Keycode keycode)
 	}
 }
 
-void movePatCurPrevCh(void)
+static void movePatCurPrevCh(void)
 {
 	int8_t pos = ((cursor.pos + 5) / 6) - 1;
 
@@ -3088,7 +3049,7 @@ void movePatCurPrevCh(void)
 	updateCursorPos();
 }
 
-void movePatCurNextCh(void)
+static void movePatCurNextCh(void)
 {
 	int8_t pos = (cursor.pos / 6) + 1;
 
@@ -3103,7 +3064,7 @@ void movePatCurNextCh(void)
 	updateCursorPos();
 }
 
-void movePatCurRight(void)
+static void movePatCurRight(void)
 {
 	cursor.pos = (cursor.pos == 23) ? 0 : (cursor.pos + 1);
 
@@ -3116,7 +3077,7 @@ void movePatCurRight(void)
 	updateCursorPos();
 }
 
-void movePatCurLeft(void)
+static void movePatCurLeft(void)
 {
 	cursor.pos = (cursor.pos == 0) ? 23 : (cursor.pos - 1);
 
@@ -3131,9 +3092,10 @@ void movePatCurLeft(void)
 
 void handleKeyRepeat(SDL_Scancode scancode)
 {
-	uint8_t repeatNum;
+	if (keyb.lastRepKey == 0)
+		return;
 
-	if (!keyb.repeatKey || (ui.clearScreenShown || ui.askScreenShown))
+	if (!keyb.repeatKey || ui.askBoxShown)
 	{
 		keyb.repeatFrac = 0;
 		keyb.repeatCounter = 0;
@@ -3156,10 +3118,7 @@ void handleKeyRepeat(SDL_Scancode scancode)
 
 				if (ui.posEdScreenShown)
 				{
-					if (song->currOrder-(POSED_LIST_SIZE-1) > 0)
-						modSetPos(song->currOrder-(POSED_LIST_SIZE-1), DONT_SET_ROW);
-					else
-						modSetPos(0, DONT_SET_ROW);
+					posEdPageUp();
 				}
 				else if (ui.diskOpScreenShown)
 				{
@@ -3193,10 +3152,7 @@ void handleKeyRepeat(SDL_Scancode scancode)
 
 				if (ui.posEdScreenShown)
 				{
-					if (song->currOrder+(POSED_LIST_SIZE-1) <= song->header.numOrders-1)
-						modSetPos(song->currOrder+(POSED_LIST_SIZE-1), DONT_SET_ROW);
-					else
-						modSetPos(song->header.numOrders - 1, DONT_SET_ROW);
+					posEdPageDown();
 				}
 				else if (ui.diskOpScreenShown)
 				{
@@ -3219,55 +3175,83 @@ void handleKeyRepeat(SDL_Scancode scancode)
 
 		case SDL_SCANCODE_LEFT:
 		{
-			if (ui.editTextFlag)
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				if (keyb.delayCounter >= KEYB_REPEAT_DELAY)
+				if (editor.markStartOfs >= 0 && (keyb.leftCtrlPressed || keyb.leftAltPressed))
 				{
-					if (keyb.repeatCounter >= 3)
+					if (keyb.delayCounter >= 6)
 					{
-						keyb.repeatCounter = 0;
-						textCharPrevious();
+						if (keyb.repeatCounter >= 2)
+						{
+							keyb.repeatCounter = 0;
+							int32_t start = smpPos2Scr(editor.markStartOfs);
+							if (start > 0)
+							{
+								start--;
+								invertRange();
+								editor.markStartOfs = scr2SmpPos(start);
+								invertRange();
+							}
+						}
 					}
-				}
-				else
-				{
-					keyb.delayCounter++;
+					else
+					{
+						keyb.delayCounter++;
+					}
 				}
 			}
 			else
 			{
-				if (keyb.leftCtrlPressed)
+				if (ui.editTextFlag)
 				{
-					if (keyb.repeatCounter >= 6)
+					if (keyb.delayCounter >= 6)
 					{
-						keyb.repeatCounter = 0;
-						sampleDownButton();
+						if (keyb.repeatCounter >= 3)
+						{
+							keyb.repeatCounter = 0;
+							editTextPrevChar();
+						}
 					}
-				}
-				else if (keyb.shiftPressed)
-				{
-					if (keyb.repeatCounter >= 6)
+					else
 					{
-						keyb.repeatCounter = 0;
-						if (song->currOrder > 0)
-							modSetPos(song->currOrder - 1, DONT_SET_ROW);
-					}
-				}
-				else if (keyb.leftAltPressed)
-				{
-					if (keyb.repeatCounter >= 4)
-					{
-						keyb.repeatCounter = 0;
-						decPatt();
+						keyb.delayCounter++;
 					}
 				}
 				else
 				{
-					if (keyb.repeatCounter >= 6)
+					if (keyb.leftCtrlPressed)
 					{
-						keyb.repeatCounter = 0;
-						if (!keyb.shiftPressed && !keyb.leftAltPressed && !keyb.leftCtrlPressed)
-							movePatCurLeft();
+						if (keyb.repeatCounter >= 6)
+						{
+							keyb.repeatCounter = 0;
+							sampleDownButton();
+						}
+					}
+					else if (keyb.shiftPressed)
+					{
+						if (keyb.repeatCounter >= 6)
+						{
+							keyb.repeatCounter = 0;
+							if (song->currPos > 0)
+								modSetPos(song->currPos - 1, DONT_SET_ROW);
+						}
+					}
+					else if (keyb.leftAltPressed)
+					{
+						if (keyb.repeatCounter >= 4)
+						{
+							keyb.repeatCounter = 0;
+							decPatt();
+						}
+					}
+					else
+					{
+						if (keyb.repeatCounter >= 6)
+						{
+							keyb.repeatCounter = 0;
+							if (!keyb.shiftPressed && !keyb.leftAltPressed && !keyb.leftCtrlPressed)
+								movePatCurLeft();
+						}
 					}
 				}
 			}
@@ -3276,55 +3260,87 @@ void handleKeyRepeat(SDL_Scancode scancode)
 
 		case SDL_SCANCODE_RIGHT:
 		{
-			if (ui.editTextFlag)
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				if (keyb.delayCounter >= KEYB_REPEAT_DELAY)
+				if (editor.markStartOfs >= 0 && (keyb.leftCtrlPressed || keyb.leftAltPressed))
 				{
-					if (keyb.repeatCounter >= 3)
+					if (keyb.delayCounter >= KEYB_REPEAT_DELAY)
 					{
-						keyb.repeatCounter = 0;
-						textCharNext();
+						if (keyb.repeatCounter >= 2)
+						{
+							keyb.repeatCounter = 0;
+							int32_t start = smpPos2Scr(editor.markStartOfs);
+							if (start < 313)
+							{
+								start++;
+								invertRange();
+								editor.markStartOfs = scr2SmpPos(start);
+
+								if (editor.markStartOfs > editor.markEndOfs)
+								{
+									int32_t tmp = editor.markEndOfs;
+									editor.markEndOfs = editor.markStartOfs;
+									editor.markStartOfs = tmp;
+								}
+
+								invertRange();
+							}
+						}
 					}
-				}
-				else
-				{
-					keyb.delayCounter++;
 				}
 			}
 			else
 			{
-				if (keyb.leftCtrlPressed)
+				if (ui.editTextFlag)
 				{
-					if (keyb.repeatCounter >= 6)
+					if (keyb.delayCounter >= KEYB_REPEAT_DELAY)
 					{
-						keyb.repeatCounter = 0;
-						sampleUpButton();
+						if (keyb.repeatCounter >= 6)
+						{
+							keyb.repeatCounter = 0;
+							editTextNextChar();
+						}
 					}
-				}
-				else if (keyb.shiftPressed)
-				{
-					if (keyb.repeatCounter >= 6)
+					else
 					{
-						keyb.repeatCounter = 0;
-						if (song->currOrder < 126)
-							modSetPos(song->currOrder + 1, DONT_SET_ROW);
-					}
-				}
-				else if (keyb.leftAltPressed)
-				{
-					if (keyb.repeatCounter >= 4)
-					{
-						keyb.repeatCounter = 0;
-						incPatt();
+						keyb.delayCounter++;
 					}
 				}
 				else
 				{
-					if (keyb.repeatCounter >= 6)
+					if (keyb.leftCtrlPressed)
 					{
-						keyb.repeatCounter = 0;
-						if (!keyb.shiftPressed && !keyb.leftAltPressed && !keyb.leftCtrlPressed)
-							movePatCurRight();
+						if (keyb.repeatCounter >= 6)
+						{
+							keyb.repeatCounter = 0;
+							sampleUpButton();
+						}
+					}
+					else if (keyb.shiftPressed)
+					{
+						if (keyb.repeatCounter >= 6)
+						{
+							keyb.repeatCounter = 0;
+							if (song->currPos < 126)
+								modSetPos(song->currPos + 1, DONT_SET_ROW);
+						}
+					}
+					else if (keyb.leftAltPressed)
+					{
+						if (keyb.repeatCounter >= 4)
+						{
+							keyb.repeatCounter = 0;
+							incPatt();
+						}
+					}
+					else
+					{
+						if (keyb.repeatCounter >= 6)
+						{
+							keyb.repeatCounter = 0;
+							if (!keyb.shiftPressed && !keyb.leftAltPressed && !keyb.leftCtrlPressed)
+								movePatCurRight();
+						}
 					}
 				}
 			}
@@ -3333,48 +3349,76 @@ void handleKeyRepeat(SDL_Scancode scancode)
 
 		case SDL_SCANCODE_UP:
 		{
-			if (ui.diskOpScreenShown)
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				if (keyb.repeatCounter >= 1)
+				if (editor.markStartOfs >= 0 && (keyb.leftCtrlPressed || keyb.leftAltPressed))
 				{
-					keyb.repeatCounter = 0;
-
-					diskop.scrollOffset--;
-					if (mouse.rightButtonPressed) // PT quirk: right mouse button speeds up scrolling even on keyb UP/DOWN
-						diskop.scrollOffset -= 3;
-
-					if (diskop.scrollOffset < 0)
-						diskop.scrollOffset = 0;
-
-					ui.updateDiskOpFileList = true;
-				}
-			}
-			else if (ui.posEdScreenShown)
-			{
-				if (keyb.repeatCounter >= 3)
-				{
-					keyb.repeatCounter = 0;
-					if (song->currOrder > 0)
+					if (keyb.delayCounter >= KEYB_REPEAT_DELAY)
 					{
-						modSetPos(song->currOrder - 1, DONT_SET_ROW);
-						ui.updatePosEd = true;
+						if (keyb.repeatCounter >= 2)
+						{
+							keyb.repeatCounter = 0;
+							int32_t end = smpPos2Scr(editor.markEndOfs);
+							if (end < 313)
+							{
+								end++;
+								invertRange();
+								editor.markEndOfs = scr2SmpPos(end);
+
+								if (editor.markStartOfs > editor.markEndOfs)
+								{
+									int32_t tmp = editor.markEndOfs;
+									editor.markEndOfs = editor.markStartOfs;
+									editor.markStartOfs = tmp;
+								}
+
+								invertRange();
+							}
+						}
 					}
 				}
 			}
-			else if (!ui.samplerScreenShown)
+			else
 			{
-				if (editor.currMode != MODE_PLAY && editor.currMode != MODE_RECORD)
+				if (ui.diskOpScreenShown)
 				{
-					repeatNum = 6;
-					if (keyb.leftAltPressed)
-						repeatNum = 1;
-					else if (keyb.shiftPressed)
-						repeatNum = 3;
-
-					if (keyb.repeatCounter >= repeatNum)
+					if (keyb.repeatCounter >= 1)
 					{
 						keyb.repeatCounter = 0;
-						modSetPos(DONT_SET_ORDER, (song->currRow - 1) & 0x3F);
+
+						diskop.scrollOffset--;
+						if (mouse.rightButtonPressed) // PT quirk: right mouse button speeds up scrolling even on keyb UP/DOWN
+							diskop.scrollOffset -= 3;
+
+						if (diskop.scrollOffset < 0)
+							diskop.scrollOffset = 0;
+
+						ui.updateDiskOpFileList = true;
+					}
+				}
+				else if (ui.posEdScreenShown)
+				{
+					if (keyb.repeatCounter >= 3)
+					{
+						keyb.repeatCounter = 0;
+						posEdScrollUp();
+					}
+				}
+				else if (!ui.samplerScreenShown)
+				{
+					if (editor.currMode != MODE_PLAY && editor.currMode != MODE_RECORD)
+					{
+						uint8_t repeatNum = 6;
+						if (keyb.leftAltPressed)
+							repeatNum = 1;
+						else if (keyb.shiftPressed)
+							repeatNum = 3;
+
+						if (keyb.repeatCounter >= repeatNum)
+						{
+							keyb.repeatCounter = 0;
+							modSetPos(DONT_SET_ORDER, (song->currRow - 1) & 63);
+						}
 					}
 				}
 			}
@@ -3383,55 +3427,79 @@ void handleKeyRepeat(SDL_Scancode scancode)
 
 		case SDL_SCANCODE_DOWN:
 		{
-			if (ui.diskOpScreenShown)
+			if (ui.samplerScreenShown && keyb.shiftPressed)
 			{
-				if (keyb.repeatCounter >= 1)
+				if (editor.markStartOfs >= 0 && (keyb.leftCtrlPressed || keyb.leftAltPressed))
 				{
-					keyb.repeatCounter = 0;
-
-					if (diskop.numEntries > DISKOP_LINES)
+					if (keyb.delayCounter >= KEYB_REPEAT_DELAY)
 					{
-						diskop.scrollOffset++;
-						if (mouse.rightButtonPressed) // PT quirk: right mouse button speeds up scrolling even on keyb UP/DOWN
-							diskop.scrollOffset += 3;
+						if (keyb.repeatCounter >= 2)
+						{
+							keyb.repeatCounter = 0;
+							int32_t end = smpPos2Scr(editor.markEndOfs);
+							if (end > 0)
+							{
+								end--;
+								invertRange();
+								editor.markEndOfs = scr2SmpPos(end);
 
-						if (diskop.scrollOffset > diskop.numEntries-DISKOP_LINES)
-							diskop.scrollOffset = diskop.numEntries-DISKOP_LINES;
+								if (editor.markStartOfs > editor.markEndOfs)
+								{
+									int32_t tmp = editor.markEndOfs;
+									editor.markEndOfs = editor.markStartOfs;
+									editor.markStartOfs = tmp;
+								}
 
-						ui.updateDiskOpFileList = true;
+								invertRange();
+							}
+						}
 					}
 				}
 			}
-			else if (ui.posEdScreenShown)
+			else
 			{
-				if (keyb.repeatCounter >= 3)
+				if (ui.diskOpScreenShown)
 				{
-					keyb.repeatCounter = 0;
-
-					if (song->currOrder != song->header.numOrders-1)
-					{
-						if (++song->currOrder > song->header.numOrders-1)
-							song->currOrder = song->header.numOrders-1;
-
-						modSetPos(song->currOrder, DONT_SET_ROW);
-						ui.updatePosEd = true;
-					}
-				}
-			}
-			else if (!ui.samplerScreenShown)
-			{
-				if (editor.currMode != MODE_PLAY && editor.currMode != MODE_RECORD)
-				{
-					repeatNum = 6;
-					if (keyb.leftAltPressed)
-						repeatNum = 1;
-					else if (keyb.shiftPressed)
-						repeatNum = 3;
-
-					if (keyb.repeatCounter >= repeatNum)
+					if (keyb.repeatCounter >= 1)
 					{
 						keyb.repeatCounter = 0;
-						modSetPos(DONT_SET_ORDER, (song->currRow + 1) & 0x3F);
+
+						if (diskop.numEntries > DISKOP_LINES)
+						{
+							diskop.scrollOffset++;
+							if (mouse.rightButtonPressed) // PT quirk: right mouse button speeds up scrolling even on keyb UP/DOWN
+								diskop.scrollOffset += 3;
+
+							if (diskop.scrollOffset > diskop.numEntries-DISKOP_LINES)
+								diskop.scrollOffset = diskop.numEntries-DISKOP_LINES;
+
+							ui.updateDiskOpFileList = true;
+						}
+					}
+				}
+				else if (ui.posEdScreenShown)
+				{
+					if (keyb.repeatCounter >= 3)
+					{
+						keyb.repeatCounter = 0;
+						posEdScrollDown();
+					}
+				}
+				else if (!ui.samplerScreenShown)
+				{
+					if (editor.currMode != MODE_PLAY && editor.currMode != MODE_RECORD)
+					{
+						uint8_t repeatNum = 6;
+						if (keyb.leftAltPressed)
+							repeatNum = 1;
+						else if (keyb.shiftPressed)
+							repeatNum = 3;
+
+						if (keyb.repeatCounter >= repeatNum)
+						{
+							keyb.repeatCounter = 0;
+							modSetPos(DONT_SET_ORDER, (song->currRow + 1) & 63);
+						}
 					}
 				}
 			}
@@ -3475,10 +3543,10 @@ void handleKeyRepeat(SDL_Scancode scancode)
 		break;
 	}
 
-	keyb.repeatFrac += keyb.repeatDelta; // 32.32 fixed-point counter
-	if (keyb.repeatFrac > 0xFFFFFFFF)
+	keyb.repeatFrac += video.amigaVblankDelta;  // 0.52 fixed-point
+	if (keyb.repeatFrac > 1ULL<<52)
 	{
-		keyb.repeatFrac &= 0xFFFFFFFF;
+		keyb.repeatFrac &= (1ULL<<52)-1;
 		keyb.repeatCounter++;
 	}
 }
@@ -3490,10 +3558,10 @@ static void swapChannel(uint8_t srcCh, uint8_t dstCh)
 
 	for (int32_t i = 0; i < MOD_ROWS; i++)
 	{
-		note_t *noteSrc = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + dstCh];
-		note_t noteTmp = song->patterns[song->currPattern][(i * AMIGA_VOICES) + srcCh];
+		note_t *noteSrc = &song->patterns[song->currPattern][(i * PAULA_VOICES) + dstCh];
+		note_t noteTmp = song->patterns[song->currPattern][(i * PAULA_VOICES) + srcCh];
 
-		song->patterns[song->currPattern][(i * AMIGA_VOICES) + srcCh] = *noteSrc;
+		song->patterns[song->currPattern][(i * PAULA_VOICES) + srcCh] = *noteSrc;
 		*noteSrc = noteTmp;
 	}
 
@@ -3501,9 +3569,16 @@ static void swapChannel(uint8_t srcCh, uint8_t dstCh)
 	ui.updatePatternData = true;
 }
 
-bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
+static bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 {
-	int8_t rawKey;
+	// if MOD2WAV is ongoing, only check for ESC key
+	if (editor.mod2WavOngoing)
+	{
+		if (scancode == SDL_SCANCODE_ESCAPE)
+			editor.abortMod2Wav = true;
+
+		return false; // don't handle other keys
+	}
 
 	// SAMPLER SCREEN (volume box)
 	if (ui.samplerVolBoxShown && !ui.editTextFlag && scancode == SDL_SCANCODE_ESCAPE)
@@ -3530,7 +3605,6 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 			return false;
 		}
 
-
 		if (scancode == SDL_SCANCODE_F1)
 			editor.keyOctave = OCTAVE_LOW;
 		else if (scancode == SDL_SCANCODE_F2)
@@ -3545,7 +3619,7 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 				pointerSetPreviousMode();
 			}
 
-			rawKey = keyToNote(scancode);
+			int8_t rawKey = keyToNote(scancode);
 			if (rawKey >= 0)
 			{
 				ui.changingSamplingNote = false;
@@ -3588,7 +3662,7 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 	// EDIT OP. SCREEN #3
 	if (editor.mixFlag && scancode == SDL_SCANCODE_ESCAPE)
 	{
-		exitGetTextLine(EDIT_TEXT_UPDATE);
+		leaveTextEditMode(EDIT_TEXT_UPDATE);
 		editor.mixFlag = false;
 		ui.updateMixText = true;
 		return false;
@@ -3610,7 +3684,7 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 		else if (scancode == SDL_SCANCODE_F2)
 			editor.keyOctave = OCTAVE_HIGH;
 
-		rawKey = keyToNote(scancode);
+		int8_t rawKey = keyToNote(scancode);
 		if (rawKey >= 0)
 		{
 			if (ui.changingChordNote == 1)
@@ -3660,7 +3734,7 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 		else if (scancode == SDL_SCANCODE_F2)
 			editor.keyOctave = OCTAVE_HIGH;
 
-		rawKey = keyToNote(scancode);
+		int8_t rawKey = keyToNote(scancode);
 		if (rawKey >= 0)
 		{
 			pNoteTable[editor.currSample] = rawKey;
@@ -3689,7 +3763,7 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 		else if (scancode == SDL_SCANCODE_F2)
 			editor.keyOctave = OCTAVE_HIGH;
 
-		rawKey = keyToNote(scancode);
+		int8_t rawKey = keyToNote(scancode);
 		if (rawKey >= 0)
 		{
 			editor.resampleNote = rawKey;
@@ -3697,66 +3771,6 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 			ui.updateResampleNote = true;
 			setPrevStatusMessage();
 			pointerSetPreviousMode();
-		}
-
-		return false;
-	}
-
-	// DISK OP. SCREEN
-	if (diskop.isFilling)
-	{
-		if (ui.askScreenShown && ui.askScreenType == ASK_QUIT)
-		{
-			if (keycode == SDLK_y || keycode == SDLK_RETURN)
-			{
-				ui.askScreenShown = false;
-				ui.answerNo = false;
-				ui.answerYes = true;
-				handleAskYes();
-			}
-			else if (keycode == SDLK_n || keycode == SDLK_ESCAPE)
-			{
-				ui.askScreenShown = false;
-				ui.answerNo = true;
-				ui.answerYes = false;
-				handleAskNo();
-			}
-		}
-
-		return false;
-	}
-
-	// if MOD2WAV is ongoing, only react to ESC and Y/N on exit ask dialog
-	if (editor.isWAVRendering)
-	{
-		if (ui.askScreenShown && ui.askScreenType == ASK_QUIT)
-		{
-			if (keycode == SDLK_y)
-			{
-				editor.isWAVRendering = false;
-				SDL_WaitThread(editor.mod2WavThread, NULL);
-
-				ui.askScreenShown = false;
-				ui.answerNo = false;
-				ui.answerYes = true;
-
-				handleAskYes();
-			}
-			else if (keycode == SDLK_n)
-			{
-				ui.askScreenShown = false;
-				ui.answerNo = true;
-				ui.answerYes = false;
-
-				handleAskNo();
-
-				pointerSetMode(POINTER_MODE_MSG2, NO_CARRY);
-				setStatusMessage("RENDERING MOD...", NO_CARRY);
-			}
-		}
-		else if (scancode == SDL_SCANCODE_ESCAPE)
-		{
-			editor.abortMod2Wav = true;
 		}
 
 		return false;
@@ -3983,7 +3997,7 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 			ui.updateSynth = true;
 		}
 
-		rawKey = keyToNote(scancode);
+		int8_t rawKey = keyToNote(scancode);
 		if (rawKey >= 0)
 		{
 			ui.changingSynthNote = false;
@@ -4006,441 +4020,3 @@ bool handleGeneralModes(SDL_Keycode keycode, SDL_Scancode scancode)
 	return true;
 }
 
-void handleTextEditInputChar(char textChar)
-{
-	char *readTmp;
-	int8_t readTmpPrev;
-	uint8_t digit1, digit2, digit3, digit4;
-	uint32_t i, number;
-
-	// we only want certain keys
-	if (textChar < ' ' || textChar > '~')
-		return;
-
-	// A..Z -> a..z
-	if (textChar >= 'A' && textChar <= 'Z')
-		textChar = (char)tolower(textChar);
-
-	if (ui.editTextType == TEXT_EDIT_STRING)
-	{
-		if (ui.editPos < ui.textEndPtr)
-		{
-			if (!editor.mixFlag)
-			{
-				readTmp = ui.textEndPtr;
-				while (readTmp > ui.editPos)
-				{
-					readTmpPrev = *--readTmp;
-					*(readTmp + 1) = readTmpPrev;
-				}
-
-				*ui.textEndPtr = '\0';
-				*ui.editPos++ = textChar;
-
-				textMarkerMoveRight();
-			}
-			else if ((textChar >= '0' && textChar <= '9') || (textChar >= 'a' && textChar <= 'f'))
-			{
-				if (ui.dstPos == 14) // hack for sample mix text
-				{
-					*ui.editPos = textChar;
-				}
-				else
-				{
-					*ui.editPos++ = textChar;
-					textMarkerMoveRight();
-
-					if (ui.dstPos == 9) // hack for sample mix text
-					{
-						for (i = 0; i < 4; i++)
-						{
-							ui.editPos++;
-							textMarkerMoveRight();
-						}
-					}
-					else if (ui.dstPos == 6) // hack for sample mix text
-					{
-						ui.editPos++;
-						textMarkerMoveRight();
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		if (ui.editTextType == TEXT_EDIT_DECIMAL)
-		{
-			if (textChar >= '0' && textChar <= '9')
-			{
-				textChar -= '0';
-
-				if (ui.numLen == 4)
-				{
-					number = *ui.numPtr16;
-					digit4 = number % 10; number /= 10;
-					digit3 = number % 10; number /= 10;
-					digit2 = number % 10; number /= 10;
-					digit1 = (uint8_t)number;
-
-					     if (ui.dstPos == 0) *ui.numPtr16 = (textChar * 1000) + (digit2 * 100) + (digit3 * 10) + digit4;
-					else if (ui.dstPos == 1) *ui.numPtr16 = (digit1 * 1000) + (textChar * 100) + (digit3 * 10) + digit4;
-					else if (ui.dstPos == 2) *ui.numPtr16 = (digit1 * 1000) + (digit2 * 100) + (textChar * 10) + digit4;
-					else if (ui.dstPos == 3) *ui.numPtr16 = (digit1 * 1000) + (digit2 * 100) + (digit3 * 10) + textChar;
-				}
-				else if (ui.numLen == 3)
-				{
-					number = *ui.numPtr16;
-					digit3 = number % 10; number /= 10;
-					digit2 = number % 10; number /= 10;
-					digit1 = (uint8_t)number;
-
-					     if (ui.dstPos == 0) *ui.numPtr16 = (textChar * 100) + (digit2 * 10) + digit3;
-					else if (ui.dstPos == 1) *ui.numPtr16 = (digit1 * 100) + (textChar * 10) + digit3;
-					else if (ui.dstPos == 2) *ui.numPtr16 = (digit1 * 100) + (digit2 * 10) + textChar;
-				}
-				else if (ui.numLen == 2)
-				{
-					number = *ui.numPtr16;
-					digit2 = number % 10; number /= 10;
-					digit1 = (uint8_t)number;
-
-					     if (ui.dstPos == 0) *ui.numPtr16 = (textChar * 10) + digit2;
-					else if (ui.dstPos == 1) *ui.numPtr16 = (digit1 * 10) + textChar;
-				}
-
-				textMarkerMoveRight();
-				if (ui.dstPos >= ui.numLen)
-					exitGetTextLine(EDIT_TEXT_UPDATE);
-			}
-		}
-		else
-		{
-			if ((textChar >= '0' && textChar <= '9') || (textChar >= 'a' && textChar <= 'f'))
-			{
-				if (textChar <= '9')
-					textChar -= '0';
-				else if (textChar <= 'f')
-					textChar -= 'a'-10;
-
-				if (ui.numBits == 17)
-				{
-					*ui.numPtr32 &= ~(0xF0000 >> (ui.dstPos << 2));
-					*ui.numPtr32 |= textChar << (16 - (ui.dstPos << 2));
-				}
-				else if (ui.numBits == 16)
-				{
-					if (ui.force32BitNumPtr)
-					{
-						*ui.numPtr32 &= ~(0xF000 >> (ui.dstPos << 2));
-						*ui.numPtr32 |= textChar << (12 - (ui.dstPos << 2));
-					}
-					else
-					{
-						*ui.numPtr16 &= ~(0xF000 >> (ui.dstPos << 2));
-						*ui.numPtr16 |= textChar << (12 - (ui.dstPos << 2));
-					}
-				}
-				else if (ui.numBits == 12)
-				{
-					if (ui.force32BitNumPtr)
-					{
-						*ui.numPtr32 &= ~(0x0F00 >> (ui.dstPos << 2));
-						*ui.numPtr32 |= textChar << (8 - (ui.dstPos << 2));
-					}
-					else
-					{
-						if (ui.signed12BitNumPtr && ui.dstPos == 0) {
-							*ui.numPtr16 &= ~0x0F000;
-							if (textChar >= 8) {
-								*ui.numPtr16 |= 0x0F000;
-							}
-						}
-						*ui.numPtr16 &= ~(0x0F00 >> (ui.dstPos << 2));
-						*ui.numPtr16 |= textChar << (8 - (ui.dstPos << 2));
-					}
-				}
-				else if (ui.numBits == 8)
-				{
-					*ui.numPtr8 &= ~(0xF0 >> (ui.dstPos << 2));
-					*ui.numPtr8 |= textChar << (4 - (ui.dstPos << 2));
-				}
-
-				textMarkerMoveRight();
-				if (ui.dstPos >= ui.numLen)
-					exitGetTextLine(EDIT_TEXT_UPDATE);
-			}
-		}
-	}
-
-	updateTextObject(ui.editObject);
-
-	if (!keyb.repeatKey)
-		keyb.delayCounter = 0;
-
-	keyb.repeatKey = true;
-	keyb.delayKey = true;
-}
-
-bool handleTextEditMode(SDL_Scancode scancode)
-{
-	char *readTmp;
-	int8_t readTmpNext;
-	int16_t i, j;
-	note_t *noteSrc, *noteDst;
-
-	switch (scancode)
-	{
-		case SDL_SCANCODE_ESCAPE:
-		{
-			editor.blockMarkFlag = false;
-			if (ui.editTextFlag)
-			{
-				exitGetTextLine(EDIT_TEXT_NO_UPDATE);
-				return false;
-			}
-		}
-		break;
-
-		case SDL_SCANCODE_HOME:
-		{
-			if (ui.editTextFlag && !editor.mixFlag)
-			{
-				while (ui.editPos > ui.showTextPtr)
-					textCharPrevious();
-			}
-		}
-		break;
-
-		case SDL_SCANCODE_END:
-		{
-			if (ui.editTextFlag && !editor.mixFlag)
-			{
-				if (ui.editTextType != TEXT_EDIT_STRING)
-					break;
-
-				while (!ui.dstOffsetEnd)
-					textCharNext();
-			}
-		}
-		break;
-
-		case SDL_SCANCODE_LEFT:
-		{
-			if (ui.editTextFlag)
-			{
-				textCharPrevious();
-				if (!keyb.repeatKey)
-					keyb.delayCounter = 0;
-
-				keyb.repeatKey = true;
-				keyb.delayKey = false;
-			}
-			else
-			{
-				keyb.delayKey = false;
-				keyb.repeatKey = true;
-			}
-		}
-		break;
-
-		case SDL_SCANCODE_RIGHT:
-		{
-			if (ui.editTextFlag)
-			{
-				textCharNext();
-				if (!keyb.repeatKey)
-					keyb.delayCounter = 0;
-
-				keyb.repeatKey = true;
-				keyb.delayKey = false;
-			}
-			else
-			{
-				keyb.delayKey = false;
-				keyb.repeatKey = true;
-			}
-		}
-		break;
-
-		case SDL_SCANCODE_DELETE:
-		{
-			if (ui.editTextFlag)
-			{
-				if (editor.mixFlag || ui.editTextType != TEXT_EDIT_STRING)
-					break;
-
-				readTmp = ui.editPos;
-				while (readTmp < ui.textEndPtr)
-				{
-					readTmpNext = *(readTmp + 1);
-					*readTmp++ = readTmpNext;
-				}
-
-				// kludge to prevent cloning last character if the song/sample name has one character too much
-				if (ui.editObject == PTB_SONGNAME || ui.editObject == PTB_SAMPLENAME)
-					 *ui.textEndPtr = '\0';
-
-				if (!keyb.repeatKey)
-					keyb.delayCounter = 0;
-
-				keyb.repeatKey = true;
-				keyb.delayKey = true;
-
-				updateTextObject(ui.editObject);
-			}
-		}
-		break;
-
-		case SDL_SCANCODE_BACKSPACE:
-		{
-			if (ui.editTextFlag)
-			{
-				if (editor.mixFlag || ui.editTextType != TEXT_EDIT_STRING)
-					break;
-
-				if (ui.editPos > ui.dstPtr)
-				{
-					ui.editPos--;
-
-					readTmp = ui.editPos;
-					while (readTmp < ui.textEndPtr)
-					{
-						readTmpNext = *(readTmp + 1);
-						*readTmp++ = readTmpNext;
-					}
-
-					// kludge to prevent cloning last character if the song/sample name has one character too much
-					if (ui.editObject == PTB_SONGNAME || ui.editObject == PTB_SAMPLENAME)
-						*ui.textEndPtr = '\0';
-
-					textMarkerMoveLeft();
-					updateTextObject(ui.editObject);
-				}
-
-				if (!keyb.repeatKey)
-					keyb.delayCounter = 0;
-
-				keyb.repeatKey = true;
-				keyb.delayKey = false;
-			}
-			else
-			{
-				if (ui.diskOpScreenShown)
-				{
-#ifdef _WIN32
-					diskOpSetPath(L"..", DISKOP_CACHE);
-#else
-					diskOpSetPath("..", DISKOP_CACHE);
-#endif
-				}
-				else if (keyb.shiftPressed || keyb.leftAltPressed || keyb.leftCtrlPressed)
-				{
-					saveUndo();
-					if (keyb.leftAltPressed && !keyb.leftCtrlPressed)
-					{
-						if (song->currRow > 0)
-						{
-							for (i = 0; i < AMIGA_VOICES; i++)
-							{
-								for (j = (song->currRow - 1); j < MOD_ROWS; j++)
-								{
-									noteSrc = &song->patterns[song->currPattern][((j + 1) * AMIGA_VOICES) + i];
-									song->patterns[song->currPattern][(j * AMIGA_VOICES) + i] = *noteSrc;
-								}
-
-								// clear newly made row on very bottom
-								noteDst = &song->patterns[song->currPattern][(63 * AMIGA_VOICES) + i];
-								noteDst->period = 0;
-								noteDst->sample = 0;
-								noteDst->command = 0;
-								noteDst->param = 0;
-							}
-
-							song->currRow--;
-							ui.updatePatternData = true;
-						}
-					}
-					else
-					{
-						if (song->currRow > 0)
-						{
-							for (i = song->currRow-1; i < MOD_ROWS-1; i++)
-							{
-								noteSrc = &song->patterns[song->currPattern][((i + 1) * AMIGA_VOICES) + cursor.channel];
-								noteDst = &song->patterns[song->currPattern][(i * AMIGA_VOICES) + cursor.channel];
-
-								if (keyb.leftCtrlPressed)
-								{
-									noteDst->command = noteSrc->command;
-									noteDst->param = noteSrc->param;
-								}
-								else
-								{
-									*noteDst = *noteSrc;
-								}
-							}
-
-							// clear newly made row on very bottom
-							noteDst = &song->patterns[song->currPattern][(63 * AMIGA_VOICES) + cursor.channel];
-							noteDst->period = 0;
-							noteDst->sample = 0;
-							noteDst->command = 0;
-							noteDst->param = 0;
-
-							song->currRow--;
-							ui.updatePatternData = true;
-						}
-					}
-				}
-				else
-				{
-					editor.stepPlayEnabled = true;
-					editor.stepPlayBackwards = true;
-
-					editor.stepPlayLastMode = editor.currMode;
-
-					if (config.keepEditModeAfterStepPlay && editor.stepPlayLastMode == MODE_EDIT)
-						doStopIt(false);
-					else
-						doStopIt(true);
-
-					playPattern((song->currRow - 1) & 0x3F);
-
-					if (config.keepEditModeAfterStepPlay && editor.stepPlayLastMode == MODE_EDIT)
-					{
-						pointerSetMode(POINTER_MODE_EDIT, DO_CARRY);
-						editor.playMode = PLAY_MODE_NORMAL;
-						editor.currMode = MODE_EDIT;
-					}
-				}
-			}
-		}
-		break;
-
-		default: break;
-	}
-
-	if (ui.editTextFlag)
-	{
-		if (scancode == SDL_SCANCODE_RETURN || scancode == SDL_SCANCODE_KP_ENTER)
-		{
-			// dirty hack
-			if (ui.editObject == PTB_SAMPLES)
-				ui.tmpDisp8++;
-
-			exitGetTextLine(EDIT_TEXT_UPDATE);
-
-			if (editor.mixFlag)
-			{
-				editor.mixFlag = false;
-				ui.updateMixText = true;
-				doMix();
-			}
-		}
-
-		return false; // don't continue further key handling
-	}
-
-	return true; // continue further key handling (we're not editing text)
-}

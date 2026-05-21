@@ -22,21 +22,21 @@
     <ProjectGuid>{6C633792-F87D-4F1C-AB02-C25202FFEDE6}</ProjectGuid>
     <RootNamespace>pt2-clone</RootNamespace>
     <ProjectName>pt2-clone</ProjectName>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
@@ -88,7 +88,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;HAS_LIBFLAC</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -104,6 +104,8 @@
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,6 +122,7 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
     </Link>
     <PostBuildEvent />
     <Manifest>
@@ -134,7 +137,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;HAS_LIBFLAC</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <StringPooling>true</StringPooling>
@@ -148,6 +151,8 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,6 +167,8 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <FixedBaseAddress>false</FixedBaseAddress>
       <SetChecksum>true</SetChecksum>
+      <MinimumRequiredVersion>5.2</MinimumRequiredVersion>
+      <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
     </Link>
     <PostBuildEvent />
     <Manifest>
@@ -175,10 +182,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;DEBUG;_DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;DEBUG;_DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;HAS_LIBFLAC</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -191,6 +200,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -203,10 +213,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;DEBUG;_DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRTDBG_MAP_ALLOC;DEBUG;_DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;HAS_LIBFLAC</PreprocessorDefinitions>
       <OmitFramePointers>false</OmitFramePointers>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -220,6 +231,8 @@
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <ImageHasSafeExceptionHandlers>
       </ImageHasSafeExceptionHandlers>
+      <MinimumRequiredVersion>5.2</MinimumRequiredVersion>
+      <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -237,6 +250,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\modloaders\pt2_load_mod15.h" />
+    <ClInclude Include="..\..\src\modloaders\pt2_load_mod31.h" />
+    <ClInclude Include="..\..\src\modloaders\pt2_pp_unpack.h" />
+    <ClInclude Include="..\..\src\modloaders\pt2_xpk_unpack.h" />
+    <ClInclude Include="..\..\src\pt2_askbox.h" />
     <ClInclude Include="..\..\src\pt2_audio.h" />
     <ClInclude Include="..\..\src\pt2_blep.h" />
     <ClInclude Include="..\..\src\pt2_bmp.h" />
@@ -248,8 +266,6 @@
     <ClInclude Include="..\..\src\pt2_helpers.h" />
     <ClInclude Include="..\..\src\pt2_hpc.h" />
     <ClInclude Include="..\..\src\pt2_keyboard.h" />
-    <ClInclude Include="..\..\src\pt2_ledfilter.h" />
-    <ClInclude Include="..\..\src\pt2_math.h" />
     <ClInclude Include="..\..\src\pt2_mod2wav.h" />
     <ClInclude Include="..\..\src\pt2_module_loader.h" />
     <ClInclude Include="..\..\src\pt2_module_saver.h" />
@@ -257,32 +273,32 @@
     <ClInclude Include="..\..\src\pt2_palette.h" />
     <ClInclude Include="..\..\src\pt2_pat2smp.h" />
     <ClInclude Include="..\..\src\pt2_pattern_viewer.h" />
-    <ClInclude Include="..\..\src\pt2_rcfilter.h" />
+    <ClInclude Include="..\..\src\pt2_paula.h" />
+    <ClInclude Include="..\..\src\pt2_posed.h" />
+    <ClInclude Include="..\..\src\pt2_rcfilters.h" />
     <ClInclude Include="..\..\src\pt2_downsample2x.h" />
+    <ClInclude Include="..\..\src\pt2_replayer.h" />
     <ClInclude Include="..\..\src\pt2_sample_loader.h" />
     <ClInclude Include="..\..\src\pt2_sampler.h" />
     <ClInclude Include="..\..\src\pt2_sample_saver.h" />
     <ClInclude Include="..\..\src\pt2_sampling.h" />
     <ClInclude Include="..\..\src\pt2_scopes.h" />
     <ClInclude Include="..\..\src\pt2_structs.h" />
-    <ClInclude Include="..\..\src\pt2_sync.h" />
+    <ClInclude Include="..\..\src\pt2_textedit.h" />
+    <ClInclude Include="..\..\src\pt2_visuals_sync.h" />
     <ClInclude Include="..\..\src\pt2_tables.h" />
     <ClInclude Include="..\..\src\pt2_textout.h" />
     <ClInclude Include="..\..\src\pt2_unicode.h" />
     <ClInclude Include="..\..\src\pt2_visuals.h" />
-    <ClInclude Include="..\..\src\pt2_xpk.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\gfx\pt2_gfx_aboutscreen.c" />
-    <ClCompile Include="..\..\src\gfx\pt2_gfx_clear.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_diskop.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_editop.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_font.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_icon.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_loop_pins.c" />
-    <ClCompile Include="..\..\src\gfx\pt2_gfx_mod2wav.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_mute_buttons.c" />
-    <ClCompile Include="..\..\src\gfx\pt2_gfx_pat2smp_dialog.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_patcursor.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_pointer.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_posed.c" />
@@ -290,7 +306,11 @@
     <ClCompile Include="..\..\src\gfx\pt2_gfx_spectrum.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_tracker.c" />
     <ClCompile Include="..\..\src\gfx\pt2_gfx_vumeter.c" />
-    <ClCompile Include="..\..\src\gfx\pt2_gfx_yes_no_dialog.c" />
+    <ClCompile Include="..\..\src\modloaders\pt2_load_mod15.c" />
+    <ClCompile Include="..\..\src\modloaders\pt2_load_mod31.c" />
+    <ClCompile Include="..\..\src\modloaders\pt2_pp_unpack.c" />
+    <ClCompile Include="..\..\src\modloaders\pt2_xpk_unpack.c" />
+    <ClCompile Include="..\..\src\pt2_askbox.c" />
     <ClCompile Include="..\..\src\pt2_audio.c" />
     <ClCompile Include="..\..\src\pt2_blep.c" />
     <ClCompile Include="..\..\src\pt2_bmp.c" />
@@ -301,12 +321,12 @@
     <ClCompile Include="..\..\src\pt2_helpers.c" />
     <ClCompile Include="..\..\src\pt2_hpc.c" />
     <ClCompile Include="..\..\src\pt2_keyboard.c" />
-    <ClCompile Include="..\..\src\pt2_ledfilter.c" />
     <ClCompile Include="..\..\src\pt2_main.c" />
-    <ClCompile Include="..\..\src\pt2_math.c" />
     <ClCompile Include="..\..\src\pt2_mod2wav.c" />
     <ClCompile Include="..\..\src\pt2_module_loader.c" />
-    <ClCompile Include="..\..\src\pt2_rcfilter.c" />
+    <ClCompile Include="..\..\src\pt2_paula.c" />
+    <ClCompile Include="..\..\src\pt2_posed.c" />
+    <ClCompile Include="..\..\src\pt2_rcfilters.c" />
     <ClCompile Include="..\..\src\pt2_replayer.c" />
     <ClCompile Include="..\..\src\pt2_module_saver.c" />
     <ClCompile Include="..\..\src\pt2_mouse.c" />
@@ -320,12 +340,17 @@
     <ClCompile Include="..\..\src\pt2_sampling.c" />
     <ClCompile Include="..\..\src\pt2_scopes.c" />
     <ClCompile Include="..\..\src\pt2_structs.c" />
-    <ClCompile Include="..\..\src\pt2_sync.c" />
+    <ClCompile Include="..\..\src\pt2_textedit.c" />
+    <ClCompile Include="..\..\src\pt2_visuals_sync.c" />
     <ClCompile Include="..\..\src\pt2_tables.c" />
     <ClCompile Include="..\..\src\pt2_textout.c" />
     <ClCompile Include="..\..\src\pt2_unicode.c" />
     <ClCompile Include="..\..\src\pt2_visuals.c" />
-    <ClCompile Include="..\..\src\pt2_xpk.c" />
+    <ClCompile Include="..\..\src\smploaders\pt2_load_aiff.c" />
+    <ClCompile Include="..\..\src\smploaders\pt2_load_flac.c" />
+    <ClCompile Include="..\..\src\smploaders\pt2_load_iff.c" />
+    <ClCompile Include="..\..\src\smploaders\pt2_load_raw.c" />
+    <ClCompile Include="..\..\src\smploaders\pt2_load_wav.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\pt2-clone.rc">

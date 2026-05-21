@@ -1,28 +1,21 @@
-// for finding memory leaks in debug mode with Visual Studio 
-#if defined _DEBUG && defined _MSC_VER
-#include <crtdbg.h>
-#endif
-
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <sys/stat.h>
 #include "pt2_mouse.h"
-#include "pt2_header.h"
 #include "pt2_textout.h"
 #include "pt2_helpers.h"
-#include "pt2_visuals.h"
 #include "pt2_sampler.h"
 #include "pt2_config.h"
 #include "pt2_synth.h"
+#include "pt2_askbox.h"
 
 bool modSave(char *fileName)
 {
-	int32_t i, j;
-	FILE *f;
-
-	f = fopen(fileName, "wb");
+	FILE *f = fopen(fileName, "wb");
 	if (f == NULL)
 	{
 		displayErrorMsg("FILE I/O ERROR !");
@@ -31,7 +24,7 @@ bool modSave(char *fileName)
 
 	fwrite(song->header.name, 1, 20, f);
 
-	for (i = 0; i < MOD_SAMPLES; i++)
+	for (int32_t i = 0; i < MOD_SAMPLES; i++)
 	{
 		moduleSample_t *s = &song->samples[i];
 
@@ -62,17 +55,17 @@ bool modSave(char *fileName)
 		fwrite(&loopLength16, sizeof (int16_t), 1, f);
 	}
 
-	fputc((uint8_t)song->header.numOrders, f);
+	fputc((uint8_t)song->header.songLength, f);
 	fputc(0x7F, f); // ProTracker puts 0x7F at this place (restartPos/tempo in other trackers)
 
-	for (i = 0; i < MOD_ORDERS; i++)
-		fputc((uint8_t)song->header.order[i], f);
+	for (int32_t i = 0; i < 128; i++)
+		fputc((uint8_t)song->header.patternTable[i], f);
 
 	int32_t numPatterns = 0;
-	for (i = 0; i < MOD_ORDERS; i++)
+	for (int32_t i = 0; i < 128; i++)
 	{
-		if (song->header.order[i] > numPatterns)
-			numPatterns = song->header.order[i];
+		if (song->header.patternTable[i] > numPatterns)
+			numPatterns = song->header.patternTable[i];
 	}
 
 	numPatterns++;
@@ -81,10 +74,10 @@ bool modSave(char *fileName)
 
 	fwrite((numPatterns <= 64) ? "M.K." : "M!K!", 1, 4, f);
 
-	for (i = 0; i < numPatterns; i++)
+	for (int32_t i = 0; i < numPatterns; i++)
 	{
 		note_t *note = song->patterns[i];
-		for (j = 0; j < MOD_ROWS * AMIGA_VOICES; j++, note++)
+		for (int32_t j = 0; j < MOD_ROWS * PAULA_VOICES; j++, note++)
 		{
 			fputc((note->sample & 0xF0) | (note->period >> 8), f);
 			fputc(note->period & 0xFF, f);
@@ -93,12 +86,12 @@ bool modSave(char *fileName)
 		}
 	}
 
-	for (i = 0; i < MOD_SAMPLES; i++)
+	for (int32_t i = 0; i < MOD_SAMPLES; i++)
 	{
 		moduleSample_t *s = &song->samples[i];
 		const int8_t *smpPtr8 = &song->sampleData[s->offset];
 
-		// clear first two bytes of non-looping samples (prevents stuck "BEEEEEP")
+		// clear first two bytes of non-looping samples (prevents stuck beep)
 		if (s->length >= 2 && s->loopStart+s->loopLength == 2)
 		{
 			fputc(0, f);
@@ -131,7 +124,6 @@ bool modSave(char *fileName)
 bool saveModule(bool checkIfFileExist, bool giveNewFreeFilename)
 {
 	char fileName[128], tmpBuffer[64];
-	int32_t i, j;
 	struct stat statBuffer;
 
 	memset(tmpBuffer, 0, sizeof (tmpBuffer));
@@ -147,7 +139,7 @@ bool saveModule(bool checkIfFileExist, bool giveNewFreeFilename)
 		else
 		{
 			strcat(fileName, "mod.");
-			for (i = 4; i < 20+4; i++)
+			for (int32_t i = 4; i < 20+4; i++)
 			{
 				fileName[i] = (char)tolower(song->header.name[i-4]);
 				if (fileName[i] == '\0') break;
@@ -164,7 +156,7 @@ bool saveModule(bool checkIfFileExist, bool giveNewFreeFilename)
 		}
 		else
 		{
-			for (i = 0; i < 20; i++)
+			for (int32_t i = 0; i < 20; i++)
 			{
 				fileName[i] = (char)tolower(song->header.name[i]);
 				if (fileName[i] == '\0') break;
@@ -176,7 +168,7 @@ bool saveModule(bool checkIfFileExist, bool giveNewFreeFilename)
 
 	if (giveNewFreeFilename && stat(fileName, &statBuffer) == 0)
 	{
-		for (i = 1; i <= 999; i++)
+		for (int32_t i = 1; i <= 999; i++)
 		{
 			if (config.modDot)
 			{
@@ -187,7 +179,7 @@ bool saveModule(bool checkIfFileExist, bool giveNewFreeFilename)
 				}
 				else
 				{
-					for (j = 0; j < 20; j++)
+					for (int32_t j = 0; j < 20; j++)
 					{
 						tmpBuffer[j] = (char)tolower(song->header.name[j]);
 						if (tmpBuffer[j] == '\0') break;
@@ -205,7 +197,7 @@ bool saveModule(bool checkIfFileExist, bool giveNewFreeFilename)
 				}
 				else
 				{
-					for (j = 0; j < 20; j++)
+					for (int32_t j = 0; j < 20; j++)
 					{
 						tmpBuffer[j] = (char)tolower(song->header.name[j]);
 						if (tmpBuffer[j] == '\0') break;
@@ -222,21 +214,9 @@ bool saveModule(bool checkIfFileExist, bool giveNewFreeFilename)
 
 	if (checkIfFileExist && stat(fileName, &statBuffer) == 0)
 	{
-		ui.askScreenShown = true;
-		ui.askScreenType = ASK_SAVEMOD_OVERWRITE;
-		pointerSetMode(POINTER_MODE_MSG1, NO_CARRY);
-		setStatusMessage("OVERWRITE FILE ?", NO_CARRY);
-		renderAskDialog();
-		return -1;
-	}
-
-	if (ui.askScreenShown)
-	{
-		ui.answerNo = false;
-		ui.answerYes = false;
-		ui.askScreenShown = false;
+		if (!askBox(ASKBOX_YES_NO, "OVERWRITE FILE ?"))
+			return false;
 	}
 
 	return modSave(fileName);
 }
-

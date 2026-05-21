@@ -5,6 +5,8 @@
 #include "pt2_header.h"
 #include "pt2_hpc.h"
 
+#define MAX_UPSCALE_FACTOR 16 // 5120x4080 - ought to be good enough for many years to come
+
 enum
 {
 	SPRITE_PATTERN_CURSOR = 0,
@@ -19,14 +21,20 @@ enum
 	SPRITE_TYPE_RGB = 1
 };
 
+void resetFPSCounter(void);
+void beginFPSCounter(void);
+void endFPSCounter(void);
+
 void blit32(int32_t x, int32_t y, int32_t w, int32_t h, const uint32_t *src);
 void putPixel(int32_t x, int32_t y, const uint32_t pixelColor);
 void hLine(int32_t x, int32_t y, int32_t w, const uint32_t pixelColor);
 void vLine(int32_t x, int32_t y, int32_t h, const uint32_t pixelColor);
 void drawFramework1(int32_t x, int32_t y, int32_t w, int32_t h);
 void drawFramework2(int32_t x, int32_t y, int32_t w, int32_t h);
+void drawFramework3(int32_t x, int32_t y, int32_t w, int32_t h);
 void fillRect(int32_t x, int32_t y, int32_t w, int32_t h, const uint32_t pixelColor);
-void drawButton(int32_t x, int32_t y, int32_t w, const char *text);
+void drawButton1(int32_t x, int32_t y, int32_t w, int32_t h, const char *text);
+void drawButton2(int32_t x, int32_t y, int32_t w, int32_t h, const char *text);
 void drawUpButton(int32_t x, int32_t y);
 void drawDownButton(int32_t x, int32_t y);
 
@@ -35,44 +43,38 @@ void statusOutOfMemory(void);
 void statusSampleIsEmpty(void);
 void statusNotSampleZero(void);
 void changeStatusText(const char *text);
-
 void resetAllScreens(void);
 void handleAskNo(void);
 void handleAskYes(void);
+void removeClearScreen(void);
+void renderClearScreen(void);
+void renderAskDialog(void);
+void removeAskDialog(void);
+
 bool setupVideo(void);
+void renderFrame2(void);
 void renderFrame(void);
 void flipFrame(void);
-void updateSpectrumAnalyzer(int8_t vol, int16_t period);
+void updateSpectrumAnalyzer(uint8_t vol, uint16_t period);
 void sinkVisualizerBars(void);
 void updatePosEd(void);
 void updateVisualizer(void);
 void updateEditOp(void);
 void updateSynth(void);
-void toggleFullScreen(void);
+void toggleFullscreen(void);
 void videoClose(void);
-
 void displayMainScreen(void);
-void renderAskDialog(void);
-void renderBigAskDialog(void);
-void showDownsampleAskDialog(void);
-void renderPosEdScreen(void);
 void renderMuteButtons(void);
-void renderClearScreen(void);
 void renderAboutScreen(void);
 void renderQuadrascopeBg(void);
 void renderSpectrumAnalyzerBg(void);
-void renderMOD2WAVDialog(void);
 void renderEditOpMode(void);
-void renderTextEditMarker(void);
 void renderEditOpScreen(void);
 void renderSynthScreen(void);
 void renderSamplerVolBox(void);
 void renderSamplerFiltersBox(void);
-void removeTextEditMarker(void);
-void removeClearScreen(void);
 void removeSamplerVolBox(void);
 void removeSamplerFiltersBox(void);
-void removeAskDialog(void);
 void fillToVuMetersBgBuffer(void);
 void showVolFromSlider(void);
 void showVolToSlider(void);

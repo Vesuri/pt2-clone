@@ -10,7 +10,7 @@
  == Where's the Amiga key? ==
    PC keyboard:
       Left Amiga key = left Windows key
-     Right Amiga key = right Alt Gr key
+     Right Amiga key = right alt key
  
    Mac keyboard:
       Left Amiga key = left Command key
@@ -21,11 +21,28 @@
    alt+F11     - Toggle between real/fake VU-Meters
    F11         - Toggle fullscreen
    F12         - Toggle Amiga model (for low-pass filter)
-   shift+F12   - Toggle Amiga panning (100% stereo separation)
+   shift+F12   - Toggle audio panning between mono/custom/Amiga
    ctrl+F12    - Toggle CIA/VBLANK timing for tempo/speed effect (Fxx)
    alt+1/2/3/4 - Increase Multi ordering (when in idle, not play/edit/rec.)
+   home        - Go to row 0
+   end         - Go to row 63
+   page up     - Go 16 rows up
+   page down   - Go 16 rows down
+   ctrl+del    - Delete note+sample from pattern data
+   
+   When sample editor is open:
+     shift+(alt/ctrl)+z     = play sample range
+     shift+(alt/ctrl)+left  = decrease sample range start
+     shift+(alt/ctrl)+right = increase sample range start
+     shift+(alt/ctrl)+up    = increase sample range end
+     shift+(alt/ctrl)+down  = decrease sample range end
+  
+   shift+"COPY"-button in sampler editor:
+     Finds a free sample slot and clones the sample to it.
+     If you have marked part of the sample, only the slice
+     will get copied.
  -------------------------------------------------
- 
+                  (US keyboard layout)
  High note keys:  2 3   5 6 7   9 0   =
                  Q W E R T Y U I O P [ ]
                    
@@ -35,6 +52,13 @@
  F1 - Choose low octave (from C-1 to G-3)
  F2 - Choose high octave (from C-2 to B-3)
 
+ up         - Go one row up
+ shift+up   - Go one row up (faster) 
+ alt+up     - Go one row up (fastest) 
+ down       - Go one row down
+ shift+down - Go one row down (faster) 
+ alt+down   - Go one row down (fastest) 
+ 
  shift+F3 - Cut channel to buffer
  shift+F4 - Copy channel to buffer
  shift+F5 - Paste channel buffer to channel
@@ -81,11 +105,11 @@
 
  space - Toggle between Stop/Edit-mode
 
-      alt gr (right alt) - Play Song
+              right alt  - Play Song
  right ctrl (cmd on Mac) - Play Pattern
              right shift - Record
         
- caps lock - Toggle Keyrepeat on/off (will use the OS settings for repeat/delay)
+ caps lock - Toggle Keyrepeat on/off (will use the OS settings for key repeat speed)
 
       del - Delete note under cursor
   alt+del - Delete command only 
@@ -127,7 +151,6 @@
  ctrl+d - Delete block, drag notes up
  ctrl+e - Expand notes in channel
  ctrl+f - Toggle LED filter on/off
- ctrl+g - Boost treble on all samples
  ctrl+h - Transpose block up
  ctrl+i - Insert block, push notes down
  ctrl+j - Join-paste block
@@ -142,7 +165,7 @@
  ctrl+s - Save module (this is 'toggle split mode' in original PT)
  ctrl+t - Swap channels
  ctrl+u - Undo last pattern edit change
- ctrl+v - Decrease treble on all samples (if sampler is open; paste data)
+ ctrl+v - If sampler is open; paste data
  ctrl+w - Polyphonize block
  ctrl+x - Cut block to buffer (if sampler is open; cut data)
  ctrl+y - Backwards block
