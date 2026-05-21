@@ -1390,6 +1390,9 @@ void displayMainScreen(void)
 			renderMuteButtons();
 		}
 	}
+
+	renderSynthScreen();
+	ui.updateSynth = true;
 }
 
 void videoClose(void)
