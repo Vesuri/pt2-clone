@@ -35,112 +35,127 @@ enum current_oscillator {
     OSCILLATOR_NOISE = 5
 };
 
+// Field ranges for program_t:
+//   mix base (oscillator_*_mix, oscillator_noise_mix, oscillator_13/23_mix): 0x000–0xfff
+//   mix modulation depths (*_mix_lfo_1/2, *_mix_env_2/3):                   -0x7ff–0x7ff (signed)
+//   pitch base (oscillator_*_pitch):                                         0x000–0x7ff
+//   pitch modulation depths (*_pitch_lfo_*, *_pitch_env_*):                  -0x800–0x7ff (signed)
+//   width base (oscillator_*_width):                                         0x000–0xfff (used as >> 4 → 0–255 waveform index)
+//   width modulation depths (*_width_lfo_*, *_width_env_*):                  -0x7ff–0x7ff (signed)
+//   sync base (oscillator_*_sync):                                           0x000–0xfff
+//   sync modulation depths (*_sync_lfo_*, *_sync_env_*):                     -0x7ff–0x7ff (signed)
+//   filter_frequency, filter_resonance (base):                               0x000–0xfff
+//   filter modulation depths (*_lfo_*, *_env_*):                             -0x7ff–0x7ff (signed)
+//   envelope_*_attack, envelope_*_decay, envelope_*_sustain:                 0x000–0xfff
+//   lfo_*_speed:                                                              0x0000–0x7fff (non-negative)
+//   lfo_*_waveform:                                                           WAVEFORM_LFO_SAW/SQUARE/TRIANGLE (0/4096/8192)
+//   oscillator_13_fm, oscillator_23_fm:                                       0 (ring mod) or 1 (FM)
 typedef struct program_t
 {
     char name[16];
     enum waveform_t oscillator_1_waveform;
-    int16_t oscillator_1_mix;
-    int16_t oscillator_1_mix_lfo_1;
-    int16_t oscillator_1_mix_lfo_2;
-    int16_t oscillator_1_mix_env_2;
-    int16_t oscillator_1_mix_env_3;
-    int16_t oscillator_1_pitch;
-    int16_t oscillator_1_pitch_lfo_1;
-    int16_t oscillator_1_pitch_lfo_2;
-    int16_t oscillator_1_pitch_env_2;
-    int16_t oscillator_1_pitch_env_3;
-    int16_t oscillator_1_width;
-    int16_t oscillator_1_width_lfo_1;
-    int16_t oscillator_1_width_lfo_2;
-    int16_t oscillator_1_width_env_2;
-    int16_t oscillator_1_width_env_3;
-    int16_t oscillator_1_sync;
-    int16_t oscillator_1_sync_lfo_1;
-    int16_t oscillator_1_sync_lfo_2;
-    int16_t oscillator_1_sync_env_2;
-    int16_t oscillator_1_sync_env_3;
+    int16_t oscillator_1_mix;           // 0x000–0xfff
+    int16_t oscillator_1_mix_lfo_1;     // signed depth
+    int16_t oscillator_1_mix_lfo_2;     // signed depth
+    int16_t oscillator_1_mix_env_2;     // signed depth
+    int16_t oscillator_1_mix_env_3;     // signed depth
+    int16_t oscillator_1_pitch;         // 0x000–0x7ff
+    int16_t oscillator_1_pitch_lfo_1;   // signed depth
+    int16_t oscillator_1_pitch_lfo_2;   // signed depth
+    int16_t oscillator_1_pitch_env_2;   // signed depth
+    int16_t oscillator_1_pitch_env_3;   // signed depth
+    int16_t oscillator_1_width;         // 0x000–0xfff
+    int16_t oscillator_1_width_lfo_1;   // signed depth
+    int16_t oscillator_1_width_lfo_2;   // signed depth
+    int16_t oscillator_1_width_env_2;   // signed depth
+    int16_t oscillator_1_width_env_3;   // signed depth
+    int16_t oscillator_1_sync;          // 0x000–0xfff
+    int16_t oscillator_1_sync_lfo_1;    // signed depth
+    int16_t oscillator_1_sync_lfo_2;    // signed depth
+    int16_t oscillator_1_sync_env_2;    // signed depth
+    int16_t oscillator_1_sync_env_3;    // signed depth
     enum waveform_t oscillator_2_waveform;
-    int16_t oscillator_2_mix;
-    int16_t oscillator_2_mix_lfo_1;
-    int16_t oscillator_2_mix_lfo_2;
-    int16_t oscillator_2_mix_env_2;
-    int16_t oscillator_2_mix_env_3;
-    int16_t oscillator_2_pitch;
-    int16_t oscillator_2_pitch_lfo_1;
-    int16_t oscillator_2_pitch_lfo_2;
-    int16_t oscillator_2_pitch_env_2;
-    int16_t oscillator_2_pitch_env_3;
-    int16_t oscillator_2_width;
-    int16_t oscillator_2_width_lfo_1;
-    int16_t oscillator_2_width_lfo_2;
-    int16_t oscillator_2_width_env_2;
-    int16_t oscillator_2_width_env_3;
-    int16_t oscillator_2_sync;
-    int16_t oscillator_2_sync_lfo_1;
-    int16_t oscillator_2_sync_lfo_2;
-    int16_t oscillator_2_sync_env_2;
-    int16_t oscillator_2_sync_env_3;
+    int16_t oscillator_2_mix;           // 0x000–0xfff
+    int16_t oscillator_2_mix_lfo_1;     // signed depth
+    int16_t oscillator_2_mix_lfo_2;     // signed depth
+    int16_t oscillator_2_mix_env_2;     // signed depth
+    int16_t oscillator_2_mix_env_3;     // signed depth
+    int16_t oscillator_2_pitch;         // 0x000–0x7ff
+    int16_t oscillator_2_pitch_lfo_1;   // signed depth
+    int16_t oscillator_2_pitch_lfo_2;   // signed depth
+    int16_t oscillator_2_pitch_env_2;   // signed depth
+    int16_t oscillator_2_pitch_env_3;   // signed depth
+    int16_t oscillator_2_width;         // 0x000–0xfff
+    int16_t oscillator_2_width_lfo_1;   // signed depth
+    int16_t oscillator_2_width_lfo_2;   // signed depth
+    int16_t oscillator_2_width_env_2;   // signed depth
+    int16_t oscillator_2_width_env_3;   // signed depth
+    int16_t oscillator_2_sync;          // 0x000–0xfff
+    int16_t oscillator_2_sync_lfo_1;    // signed depth
+    int16_t oscillator_2_sync_lfo_2;    // signed depth
+    int16_t oscillator_2_sync_env_2;    // signed depth
+    int16_t oscillator_2_sync_env_3;    // signed depth
     enum waveform_t oscillator_3_waveform;
-    int16_t oscillator_3_mix;
-    int16_t oscillator_3_mix_lfo_1;
-    int16_t oscillator_3_mix_lfo_2;
-    int16_t oscillator_3_mix_env_2;
-    int16_t oscillator_3_mix_env_3;
-    int16_t oscillator_3_pitch;
-    int16_t oscillator_3_pitch_lfo_1;
-    int16_t oscillator_3_pitch_lfo_2;
-    int16_t oscillator_3_pitch_env_2;
-    int16_t oscillator_3_pitch_env_3;
-    int16_t oscillator_3_width;
-    int16_t oscillator_3_width_lfo_1;
-    int16_t oscillator_3_width_lfo_2;
-    int16_t oscillator_3_width_env_2;
-    int16_t oscillator_3_width_env_3;
-    int16_t oscillator_3_sync;
-    int16_t oscillator_3_sync_lfo_1;
-    int16_t oscillator_3_sync_lfo_2;
-    int16_t oscillator_3_sync_env_2;
-    int16_t oscillator_3_sync_env_3;
-    int16_t oscillator_noise_mix;
-    int16_t oscillator_noise_mix_lfo_1;
-    int16_t oscillator_noise_mix_lfo_2;
-    int16_t oscillator_noise_mix_env_2;
-    int16_t oscillator_noise_mix_env_3;
-    int16_t oscillator_13_mix;
-    int16_t oscillator_13_mix_lfo_1;
-    int16_t oscillator_13_mix_lfo_2;
-    int16_t oscillator_13_mix_env_2;
-    int16_t oscillator_13_mix_env_3;
-    int16_t oscillator_13_fm;
-    int16_t oscillator_23_mix;
-    int16_t oscillator_23_mix_lfo_1;
-    int16_t oscillator_23_mix_lfo_2;
-    int16_t oscillator_23_mix_env_2;
-    int16_t oscillator_23_mix_env_3;
-    int16_t oscillator_23_fm;
-    int16_t filter_frequency;
-    int16_t filter_frequency_lfo_1;
-    int16_t filter_frequency_lfo_2;
-    int16_t filter_frequency_env_2;
-    int16_t filter_frequency_env_3;
-    int16_t filter_resonance;
-    int16_t filter_resonance_lfo_1;
-    int16_t filter_resonance_lfo_2;
-    int16_t filter_resonance_env_2;
-    int16_t filter_resonance_env_3;
-    int16_t envelope_1_attack;
-    int16_t envelope_1_decay;
-    int16_t envelope_1_sustain;
-    int16_t envelope_2_attack;
-    int16_t envelope_2_decay;
-    int16_t envelope_2_sustain;
-    int16_t envelope_3_attack;
-    int16_t envelope_3_decay;
-    int16_t envelope_3_sustain;
-    int16_t lfo_1_speed;
-    enum waveform_lfo_t lfo_1_waveform;
-    int16_t lfo_2_speed;
-    enum waveform_lfo_t lfo_2_waveform;
+    int16_t oscillator_3_mix;           // 0x000–0xfff
+    int16_t oscillator_3_mix_lfo_1;     // signed depth
+    int16_t oscillator_3_mix_lfo_2;     // signed depth
+    int16_t oscillator_3_mix_env_2;     // signed depth
+    int16_t oscillator_3_mix_env_3;     // signed depth
+    int16_t oscillator_3_pitch;         // 0x000–0x7ff
+    int16_t oscillator_3_pitch_lfo_1;   // signed depth
+    int16_t oscillator_3_pitch_lfo_2;   // signed depth
+    int16_t oscillator_3_pitch_env_2;   // signed depth
+    int16_t oscillator_3_pitch_env_3;   // signed depth
+    int16_t oscillator_3_width;         // 0x000–0xfff
+    int16_t oscillator_3_width_lfo_1;   // signed depth
+    int16_t oscillator_3_width_lfo_2;   // signed depth
+    int16_t oscillator_3_width_env_2;   // signed depth
+    int16_t oscillator_3_width_env_3;   // signed depth
+    int16_t oscillator_3_sync;          // 0x000–0xfff
+    int16_t oscillator_3_sync_lfo_1;    // signed depth
+    int16_t oscillator_3_sync_lfo_2;    // signed depth
+    int16_t oscillator_3_sync_env_2;    // signed depth
+    int16_t oscillator_3_sync_env_3;    // signed depth
+    int16_t oscillator_noise_mix;       // 0x000–0xfff
+    int16_t oscillator_noise_mix_lfo_1; // signed depth
+    int16_t oscillator_noise_mix_lfo_2; // signed depth
+    int16_t oscillator_noise_mix_env_2; // signed depth
+    int16_t oscillator_noise_mix_env_3; // signed depth
+    int16_t oscillator_13_mix;          // 0x000–0xfff
+    int16_t oscillator_13_mix_lfo_1;    // signed depth
+    int16_t oscillator_13_mix_lfo_2;    // signed depth
+    int16_t oscillator_13_mix_env_2;    // signed depth
+    int16_t oscillator_13_mix_env_3;    // signed depth
+    int16_t oscillator_13_fm;           // 0 = ring mod, 1 = FM
+    int16_t oscillator_23_mix;          // 0x000–0xfff
+    int16_t oscillator_23_mix_lfo_1;    // signed depth
+    int16_t oscillator_23_mix_lfo_2;    // signed depth
+    int16_t oscillator_23_mix_env_2;    // signed depth
+    int16_t oscillator_23_mix_env_3;    // signed depth
+    int16_t oscillator_23_fm;           // 0 = ring mod, 1 = FM
+    int16_t filter_frequency;           // 0x000–0xfff
+    int16_t filter_frequency_lfo_1;     // signed depth
+    int16_t filter_frequency_lfo_2;     // signed depth
+    int16_t filter_frequency_env_2;     // signed depth
+    int16_t filter_frequency_env_3;     // signed depth
+    int16_t filter_resonance;           // 0x000–0xfff
+    int16_t filter_resonance_lfo_1;     // signed depth
+    int16_t filter_resonance_lfo_2;     // signed depth
+    int16_t filter_resonance_env_2;     // signed depth
+    int16_t filter_resonance_env_3;     // signed depth
+    int16_t envelope_1_attack;          // 0x000–0xfff
+    int16_t envelope_1_decay;           // 0x000–0xfff
+    int16_t envelope_1_sustain;         // 0x000–0xfff
+    int16_t envelope_2_attack;          // 0x000–0xfff
+    int16_t envelope_2_decay;           // 0x000–0xfff
+    int16_t envelope_2_sustain;         // 0x000–0xfff
+    int16_t envelope_3_attack;          // 0x000–0xfff
+    int16_t envelope_3_decay;           // 0x000–0xfff
+    int16_t envelope_3_sustain;         // 0x000–0xfff
+    int16_t lfo_1_speed;                // 0x0000–0x7fff
+    enum waveform_lfo_t lfo_1_waveform; // WAVEFORM_LFO_SAW/SQUARE/TRIANGLE
+    int16_t lfo_2_speed;                // 0x0000–0x7fff
+    enum waveform_lfo_t lfo_2_waveform; // WAVEFORM_LFO_SAW/SQUARE/TRIANGLE
 } program_t;
 
 typedef struct part_t

@@ -720,6 +720,9 @@ void renderPart(part_t* part, bool add)
 	program_t* program = &synth.programs[part->program];
 	uint16_t SAMPLERATE = part->sampleRate;
 
+	// oscillator_*_position: 24-bit phase accumulator, 0–0xffffff (masked with & 0xffffff)
+	// oscillator_*_delta:    int32_t step per sample; ((pitch << 16) / SAMPLERATE) << 8;
+	//                        clamped >= 0 (backwards oscillation not allowed)
 	uint32_t oscillator_1_position = 0;
 	int32_t oscillator_1_delta = 0;
 	uint32_t oscillator_2_position = 0;
@@ -727,24 +730,32 @@ void renderPart(part_t* part, bool add)
 	uint32_t oscillator_3_position = 0;
 	int32_t oscillator_3_delta = 0;
 	uint32_t oscillator_noise_position = 0;
+	// oscillator_*_sync_position: same 24-bit range as oscillator_*_position
+	// oscillator_*_sync_delta:    same range as oscillator_*_delta; clamped >= 0
 	uint32_t oscillator_1_sync_position = 0;
 	int32_t oscillator_1_sync_delta = 0;
 	uint32_t oscillator_2_sync_position = 0;
 	int32_t oscillator_2_sync_delta = 0;
 	uint32_t oscillator_3_sync_position = 0;
 	int32_t oscillator_3_sync_delta = 0;
+	// lfo_*_position: wraps at 0x10000000 (28-bit); upper 16 bits used as table index (0–4095)
 	uint32_t lfo_1_position = 0;
 	uint32_t lfo_2_position = 0;
+	// envelope_*_current: 0–0xffff (upper 12 bits used as modulation value after >> 4)
+	// envelope_*_delta:   signed step added every envelope_stretch+1 samples;
+	//                     computed as 0xffff / (attack+1) or -(current - sustain<<4) / (decay+1)
 	int32_t envelope_1_current = 0;
 	int32_t envelope_1_delta = 0;
 	int32_t envelope_2_current = 0;
 	int32_t envelope_2_delta = 0;
 	int32_t envelope_3_current = 0;
 	int32_t envelope_3_delta = 0;
-	int32_t envelope_stretch = 7;
+	int32_t envelope_stretch = 7; // envelopes update every 8th sample (position & 7 == 0)
+	// oscillator_*_current: -0x7fff–0x7fff (waveform sample value)
 	int16_t oscillator_1_current = 0;
 	int16_t oscillator_2_current = 0;
 	int16_t oscillator_3_current = 0;
+	// envelope_*_counter: counts down from attack/decay/0x7fff; negative triggers mode transition
 	int16_t envelope_1_counter = 0;
 	int16_t envelope_2_counter = 0;
 	int16_t envelope_3_counter = 0;
@@ -769,6 +780,8 @@ void renderPart(part_t* part, bool add)
 		}
 	}
 
+	// Moog ladder filter state. filter_in = sample << 5, range -4096–4064.
+	// b0–b4 converge to the filtered signal; steady-state range mirrors filter_in (-4096–4064).
 	int16_t b0 = 0;
 	int16_t b1 = 0;
 	int16_t b2 = 0;
