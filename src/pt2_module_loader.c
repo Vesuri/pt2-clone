@@ -280,7 +280,16 @@ void setupLoadedMod(void)
 	editor.samplePos = 0;
 	updateSamplePos();
 
-	synthRender();
+	int savedSample = editor.currSample;
+	for (int i = 0; i < MOD_SAMPLES; i++)
+	{
+		if (synth.performanceEnabled[i])
+		{
+			editor.currSample = i;
+			synthRender();
+		}
+	}
+	editor.currSample = savedSample;
 }
 
 void loadModFromArg(char *arg)
