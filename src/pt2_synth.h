@@ -37,20 +37,15 @@ enum current_oscillator {
 
 // Field ranges for program_t:
 //   mix base (oscillator_*_mix, oscillator_noise_mix, oscillator_13/23_mix): uint16_t, 0x000–0xfff
-//   mix lfo depths (*_mix_lfo_1/2):                                          int16_t,  −0x7ff–0x7ff
-//   mix env depths (*_mix_env_2/3):                                          int16_t,  0x000–0xfff (unsigned input)
+//   mix modulation depths (*_mix_lfo_1/2, *_mix_env_2/3):                   int16_t,  −0x7ff–0x7ff
 //   pitch base (oscillator_*_pitch):                                         uint16_t, 0x000–0x7ff
-//   pitch lfo depths (*_pitch_lfo_*):                                        int16_t,  −0x7ff–0x7ff
-//   pitch env depths (*_pitch_env_*):                                        int16_t,  0x000–0xfff (unsigned input)
+//   pitch modulation depths (*_pitch_lfo_*, *_pitch_env_*):                  int16_t,  −0x7ff–0x7ff
 //   width base (oscillator_*_width):                                         uint16_t, 0x000–0xfff (>> 4 → 0–255 waveform index)
-//   width lfo depths (*_width_lfo_*):                                        int16_t,  −0x7ff–0x7ff
-//   width env depths (*_width_env_*):                                        int16_t,  0x000–0xfff (unsigned input)
+//   width modulation depths (*_width_lfo_*, *_width_env_*):                  int16_t,  −0x7ff–0x7ff
 //   sync base (oscillator_*_sync):                                           uint16_t, 0x000–0xfff
-//   sync lfo depths (*_sync_lfo_*):                                          int16_t,  −0x7ff–0x7ff
-//   sync env depths (*_sync_env_*):                                          int16_t,  0x000–0xfff (unsigned input)
+//   sync modulation depths (*_sync_lfo_*, *_sync_env_*):                     int16_t,  −0x7ff–0x7ff
 //   filter_frequency, filter_resonance (base):                               uint16_t, 0x000–0xfff
-//   filter lfo depths (*_lfo_*):                                             int16_t,  −0x7ff–0x7ff
-//   filter env depths (*_env_*):                                             int16_t,  0x000–0xfff (unsigned input)
+//   filter modulation depths (*_lfo_*, *_env_*):                             int16_t,  −0x7ff–0x7ff
 //   envelope_*_attack, envelope_*_decay, envelope_*_sustain:                 uint16_t, 0x000–0xfff
 //   lfo_*_speed:                                                              uint16_t, 0x0000–0x7fff
 //   lfo_*_waveform:                                                           WAVEFORM_LFO_SAW/SQUARE/TRIANGLE (0/4096/8192); clamped to SAW on invalid load

@@ -4536,7 +4536,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
 			textEdit.cursorStartY = 362;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_MIX_ENV2);
 		}
 		break;
@@ -4570,7 +4570,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
 			textEdit.cursorStartY = 372;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_MIX_ENV3);
 		}
 		break;
@@ -4677,7 +4677,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
 			textEdit.cursorStartY = 362;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PITCH_ENV2);
 		}
 		break;
@@ -4704,7 +4704,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
 			textEdit.cursorStartY = 372;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_PITCH_ENV3);
 		}
 		break;
@@ -4811,7 +4811,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 208;
 			textEdit.cursorStartY = 362;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_WIDTH_ENV2);
 		}
 		break;
@@ -4838,7 +4838,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 208;
 			textEdit.cursorStartY = 372;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_WIDTH_ENV3);
 		}
 		break;
@@ -4945,7 +4945,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 288;
 			textEdit.cursorStartY = 362;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV2);
 		}
 		break;
@@ -4972,7 +4972,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 288;
 			textEdit.cursorStartY = 372;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_SYNC_ENV3);
 		}
 		break;
@@ -5023,7 +5023,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
 			textEdit.cursorStartY = 422;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_ENV2);
 		}
 		break;
@@ -5036,7 +5036,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 48;
 			textEdit.cursorStartY = 432;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_FREQUENCY_ENV3);
 		}
 		break;
@@ -5087,7 +5087,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
 			textEdit.cursorStartY = 422;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV2);
 		}
 		break;
@@ -5100,7 +5100,7 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			textEdit.numBits = 12;
 			textEdit.cursorStartX = 128;
 			textEdit.cursorStartY = 432;
-			textEdit.signed12BitNumPtr = false;
+			textEdit.signed12BitNumPtr = true;
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_RESONANCE_ENV3);
 		}
 		break;
