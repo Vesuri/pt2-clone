@@ -327,11 +327,11 @@ void initSynth(void)
 	synth.programs[1].oscillator_1_mix = 0xfff;
 	synth.programs[1].oscillator_1_pitch = 55;
 	synth.programs[1].oscillator_1_pitch_lfo_1 = -20;
-	synth.programs[1].oscillator_1_pitch_env_3 = 0x18;
+	synth.programs[1].oscillator_1_pitch_env_3 = 0x30;
 	synth.programs[1].oscillator_2_waveform = WAVEFORM_SINUS;
 	synth.programs[1].oscillator_2_mix_env_2 = 0x7ff;
 	synth.programs[1].oscillator_2_pitch = 55;
-	synth.programs[1].oscillator_2_pitch_env_3 = 0x18;
+	synth.programs[1].oscillator_2_pitch_env_3 = 0x30;
 	synth.programs[1].oscillator_3_mix = 0;
 	synth.programs[1].filter_frequency = 0xfff;
 	synth.programs[1].envelope_1_decay = 0x800;
@@ -345,7 +345,7 @@ void initSynth(void)
 	synth.programs[2].oscillator_1_waveform = WAVEFORM_SINUS;
 	synth.programs[2].oscillator_1_mix_env_2 = 0x580;
 	synth.programs[2].oscillator_1_pitch = 275;
-	synth.programs[2].oscillator_1_pitch_env_3 = 7;
+	synth.programs[2].oscillator_1_pitch_env_3 = 15;
 	synth.programs[2].oscillator_3_mix = 0;
 	synth.programs[2].oscillator_noise_mix_env_3 = 0x7ff;
 	synth.programs[2].filter_frequency = 0xfff;
@@ -433,14 +433,14 @@ void initSynth(void)
 	synth.programs[6].oscillator_1_waveform = WAVEFORM_SQUARE_1;
 	synth.programs[6].oscillator_1_pitch = 66;
 	synth.programs[6].oscillator_1_pitch_lfo_1 = 25;
-	synth.programs[6].oscillator_1_pitch_env_2 = 250;
+	synth.programs[6].oscillator_1_pitch_env_2 = 500;
 	synth.programs[6].oscillator_1_width = 0x800;
 	synth.programs[6].oscillator_1_width_env_2 = 0x300;
 	synth.programs[6].oscillator_3_waveform = WAVEFORM_SQUARE_3;
 	synth.programs[6].oscillator_3_mix = 0;
 	synth.programs[6].oscillator_3_pitch = 44;
 	synth.programs[6].oscillator_3_pitch_lfo_2 = 50;
-	synth.programs[6].oscillator_3_pitch_env_3 = 0x100;
+	synth.programs[6].oscillator_3_pitch_env_3 = 0x200;
 	synth.programs[6].oscillator_3_width = 0x800;
 	synth.programs[6].oscillator_13_mix = 0xfff;
 	synth.programs[6].filter_frequency = 0x580;
@@ -604,7 +604,7 @@ void initSynth(void)
 	synth.programs[19].oscillator_1_waveform = WAVEFORM_SINUS;
 	synth.programs[19].oscillator_1_pitch = 352;
 	synth.programs[19].oscillator_1_pitch_lfo_1 = 15;
-	synth.programs[19].oscillator_1_pitch_env_3 = 210;
+	synth.programs[19].oscillator_1_pitch_env_3 = 420;
 	synth.programs[19].oscillator_2_waveform = WAVEFORM_SINUS;
 	synth.programs[19].oscillator_2_pitch = 370;
 	synth.programs[19].oscillator_2_pitch_lfo_2 = 35;
@@ -629,7 +629,7 @@ void initSynth(void)
 	synth.programs[20].oscillator_1_waveform = WAVEFORM_SINUS;
 	synth.programs[20].oscillator_1_pitch = 352;
 	synth.programs[20].oscillator_1_pitch_lfo_1 = 15;
-	synth.programs[20].oscillator_1_pitch_env_3 = 210;
+	synth.programs[20].oscillator_1_pitch_env_3 = 420;
 	synth.programs[20].oscillator_2_waveform = WAVEFORM_SINUS;
 	synth.programs[20].oscillator_2_pitch = 200;
 	synth.programs[20].oscillator_3_waveform = WAVEFORM_SINUS;
