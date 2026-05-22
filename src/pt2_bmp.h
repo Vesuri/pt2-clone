@@ -38,7 +38,7 @@ extern const uint8_t spectrumVisualsPackedBMP[2217];
 extern const uint8_t tracker128KFixPackedBMP[363];
 extern const uint8_t trackerFramePackedBMP[8337];
 extern const uint8_t samplingBoxPackedBMP[1379];
-extern const uint8_t synthPackedBMP[10561];
+extern const uint8_t synthPackedBMP[10557];
 
 // these are filled/normalized on init, so no const
 extern uint32_t vuMeterBMP[480];
