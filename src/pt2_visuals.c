@@ -879,6 +879,10 @@ void updateCurrSample(void)
 
 	sampler.tmpLoopStart = 0;
 	sampler.tmpLoopLength = 0;
+
+	ui.updatePerformanceName = true;
+	ui.updateProgramName = true;
+	ui.updateSynth = true;
 }
 
 void updatePatternData(void)
