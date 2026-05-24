@@ -103,18 +103,20 @@ def lfo1_waveform(params_145):
         return WAVEFORM_LFO_SAW
     return WAVEFORM_LFO_TRIANGLE  # 18=triangle, 19=s/h, anything else
 
-def lfo2_waveform(params_150):
+def lfo2_waveform(params_155):
     """
-    Approximate LFO2 waveform from params[150].
+    Convert params[155] to LFO2 waveform enum.
 
-    This encoding is incomplete — it conflates waveform with LFO2 Range:
-      64 → TRIANGLE or S/H, or any waveform at fast range → WAVEFORM_LFO_TRIANGLE
-      66 → SAW or SQUARE at slow range → WAVEFORM_LFO_SAW (SAW/SQUARE indistinguishable)
-
-    TODO: resolve once a more complete LFO2 waveform encoding is found.
-    See SYSEX_FORMAT.md § LFO waveform full encoding.
+    Packed NRPN 1 values (OS 2.0 manual p.149), confirmed against 7 hardware programs:
+      20 = SQUARE,   21 = SAW,   22 = TRIANGLE (default),   23 = S/H → TRIANGLE
+    S/H is not implemented in pt2_synth; TRIANGLE is the closest approximation.
+    Mirrors LFO1 layout: [154]=Delay, [155]=waveform, [157]=Speed.
     """
-    return WAVEFORM_LFO_SAW if params_150 == 66 else WAVEFORM_LFO_TRIANGLE
+    if params_155 == 20:
+        return WAVEFORM_LFO_SQUARE
+    if params_155 == 21:
+        return WAVEFORM_LFO_SAW
+    return WAVEFORM_LFO_TRIANGLE  # 22=triangle, 23=s/h, anything else
 
 def lfo_wf_for_jrm(wf_enum):
     """
@@ -363,7 +365,7 @@ def convert_program(msg02, msg1f):
     out += pu16(u7_to_u15(p[147]))                       # LFO1 speed
     out += pu16(lfo_wf_for_jrm(lfo1_waveform(p[145])))   # LFO1 waveform
     out += pu16(u7_to_u15(p[157]))                       # LFO2 speed
-    out += pu16(lfo_wf_for_jrm(lfo2_waveform(p[150])))   # LFO2 waveform (approx)
+    out += pu16(lfo_wf_for_jrm(lfo2_waveform(p[155])))   # LFO2 waveform
 
     assert len(out) == 222, f"program_t size error: {len(out)}"
     return bytes(out)
