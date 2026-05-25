@@ -388,7 +388,7 @@ def convert_program(msg02, msg1f):
     out += pu16(1 if (f[3] & 0x02) else 0)  # FM flag (type-1F[3] bit 1)
 
     # ── Filter ────────────────────────────────────────────────────────────────
-    out += pu16(u7_to_u12(p[195]))            # frequency   (direct 0-127)
+    out += pu16(u7_to_u12(p[195]) // 2)       # frequency   (halved — empirical calibration)
     out += ps16(bipolar_to_s12(p[200]))       # freq lfo_1
     out += ps16(bipolar_to_s12(p[201]))       # freq lfo_2
     out += ps16(bipolar_to_s12(p[198]))       # freq env_2
