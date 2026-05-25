@@ -15,11 +15,14 @@ Install:
 
 Mapping completeness (see SYSEX_FORMAT.md for details):
   Confirmed:   oscillator waveforms, mix levels/mods, width/sync/pitch mods,
-               filter cutoff/resonance and freq mods, all envelope ADS,
-               LFO1 speed+waveform, LFO2 speed, FM flags
-  Approximate: LFO2 waveform (partial — SAW/SQUARE indistinguishable at some ranges)
-  Missing:     oscillator coarse pitch (sysex position not yet decoded → defaults to 0),
-               filter resonance mods (lfo_1/2/env_2/3 → 0)
+               filter cutoff/resonance and mods, all envelope ADS,
+               LFO1+2 speed (range-aware, params[164]/[165]) + waveform, FM flags
+  Approximate: filter frequency/resonance (linear — pt2_synth Hz calibration pending)
+               LFO2 waveform (partial — SAW/SQUARE indistinguishable at some ranges)
+               modulation depths (linear — pt2_synth depth calibration pending)
+  Calibrated:  envelope attack/decay (exponential from hardware sweep),
+               envelope sustain (power-law from hardware sweep),
+               LFO speed (quadratic per range from hardware sweep)
 """
 
 import struct
@@ -40,13 +43,11 @@ WAVEFORM_LFO_TRIANGLE = 8192
 
 # ── Value scaling ─────────────────────────────────────────────────────────────
 
-def u7_to_u12(v):
-    """7-bit sysex (0-127) → 12-bit pt2_synth unsigned (0-4095)."""
-    return (v * 4095) // 127
+_SR = 22050  # pt2_synth synthesis sample rate
 
-def u7_to_u15(v):
-    """7-bit sysex (0-127) → 15-bit pt2_synth LFO speed (0-32767)."""
-    return (v * 32767) // 127
+def u7_to_u12(v):
+    """7-bit sysex (0-127) → 12-bit pt2_synth unsigned (0-4095). Linear."""
+    return (v * 4095) // 127
 
 def bipolar_to_s12(v):
     """
@@ -61,6 +62,63 @@ def bipolar_to_u12_width(v):
     Center (sysex=64) maps to pt2_synth width=2048.
     """
     return max(0, min(4095, (v - 64) * 32 + 2048))
+
+# ── Calibrated envelope mappings ──────────────────────────────────────────────
+#
+# Derived from hardware sweep recordings (see analysis/ directory).
+# pt2_synth time formula (doubled-range version):
+#   time_s = (value + 1) × 16 / SAMPLERATE
+#   → value  = T_ms × SAMPLERATE / 16000 − 1
+# Maximum reproducible time: (0xFFF+1)×16/22050 ≈ 2.97 s.
+
+def sn_attack_to_u12(v):
+    """
+    Supernova env attack (0-127) → pt2_synth u12 (0-0xFFF).
+    Measured: T_ms ≈ 2 × 2^(v/10).  Values ≥ 106 exceed 2.97 s → clamped.
+    """
+    T_ms = 2.0 * (2.0 ** (v / 10.0))
+    return max(0, min(0xFFF, round(T_ms * _SR / 16000.0 - 1)))
+
+def sn_decay_to_u12(v):
+    """
+    Supernova env decay (0-127) → pt2_synth u12 (0-0xFFF).
+    Measured: T_ms ≈ 0.625 × 2^(v/10).  Values ≥ 123 exceed 2.97 s → clamped.
+    """
+    T_ms = 0.625 * (2.0 ** (v / 10.0))
+    return max(0, min(0xFFF, round(T_ms * _SR / 16000.0 - 1)))
+
+def sn_sustain_to_u12(v):
+    """
+    Supernova env sustain (0-127) → pt2_synth u12 (0-0xFFF).
+    Measured: amplitude fraction ≈ (v/127)^1.81.
+    """
+    if v == 0:
+        return 0
+    return round((v / 127.0) ** 1.81 * 0xFFF)
+
+# ── Calibrated LFO speed mapping ──────────────────────────────────────────────
+#
+# Supernova LFO speed ∝ v² within each range (confirmed Slow and Normal from
+# hardware sweep; Fast extrapolated as 10× Normal).
+# pt2_synth: f_Hz = speed / 1024  (from position-increment formula).
+# Range stored at params[164] (LFO1) and params[165] (LFO2).
+# Packed NRPN 1 values: 28/31=Slow, 29/32=Normal, 30/33=Fast.
+
+_LFO_COEFF = {
+    28: 0.625,  29: 6.25,  30: 62.5,   # LFO1: Slow/Normal/Fast
+    31: 0.625,  32: 6.25,  33: 62.5,   # LFO2: Slow/Normal/Fast
+}
+
+def sn_lfo_speed_to_u15(v, range_byte):
+    """
+    Supernova LFO speed (0-127) → pt2_synth u15 (0-0x7FFF).
+    range_byte: params[164] for LFO1, params[165] for LFO2 (see _LFO_COEFF).
+    Defaults to Normal (6.25) if range_byte is not in table.
+    Normal-range values ≥ 73 and Fast-range values ≥ 23 saturate at 0x7FFF.
+    """
+    if v == 0:
+        return 0
+    return min(0x7FFF, round(_LFO_COEFF.get(range_byte, 6.25) * v * v))
 
 # ── Waveform conversion ───────────────────────────────────────────────────────
 
@@ -192,8 +250,6 @@ def parse_sysex_bank(path):
 #
 # Keyboard tracking (relative offset 0 of each block = params[11/45/79]) is
 # ignored — it cannot be replicated in a render-based synthesizer.
-
-import math
 
 OSC_OCT_POS    = {1:  7, 2: 41, 3: 75}
 OSC_SEMI_POS   = {1:  8, 2: 42, 3: 76}
@@ -348,23 +404,24 @@ def convert_program(msg02, msg1f):
 
     # ── Envelopes (ADS — pt2_synth does not use Release) ─────────────────────
     # Env1 (amplifier):  params[178]=Attack, [179]=Decay, [180]=Sustain
-    out += pu16(u7_to_u12(p[178]))
-    out += pu16(u7_to_u12(p[179]))
-    out += pu16(u7_to_u12(p[180]))
+    out += pu16(sn_attack_to_u12(p[178]))
+    out += pu16(sn_decay_to_u12(p[179]))
+    out += pu16(sn_sustain_to_u12(p[180]))
     # Env2 (modulation): params[172]=Attack, [173]=Decay, [174]=Sustain
-    out += pu16(u7_to_u12(p[172]))
-    out += pu16(u7_to_u12(p[173]))
-    out += pu16(u7_to_u12(p[174]))
+    out += pu16(sn_attack_to_u12(p[172]))
+    out += pu16(sn_decay_to_u12(p[173]))
+    out += pu16(sn_sustain_to_u12(p[174]))
     # Env3 (modulation): params[166]=Attack, [167]=Decay, [168]=Sustain
-    out += pu16(u7_to_u12(p[166]))
-    out += pu16(u7_to_u12(p[167]))
-    out += pu16(u7_to_u12(p[168]))
+    out += pu16(sn_attack_to_u12(p[166]))
+    out += pu16(sn_decay_to_u12(p[167]))
+    out += pu16(sn_sustain_to_u12(p[168]))
 
     # ── LFOs ──────────────────────────────────────────────────────────────────
-    # LFO waveforms are stored on disk as: enum_value * 2 + 1536 (68k byte offset).
-    out += pu16(u7_to_u15(p[147]))                       # LFO1 speed
+    # LFO waveforms stored on disk as: enum_value * 2 + 1536 (68k byte offset).
+    # LFO range: params[164]=LFO1 range byte, params[165]=LFO2 range byte.
+    out += pu16(sn_lfo_speed_to_u15(p[147], p[164]))     # LFO1 speed
     out += pu16(lfo_wf_for_jrm(lfo1_waveform(p[145])))   # LFO1 waveform
-    out += pu16(u7_to_u15(p[157]))                       # LFO2 speed
+    out += pu16(sn_lfo_speed_to_u15(p[157], p[165]))     # LFO2 speed
     out += pu16(lfo_wf_for_jrm(lfo2_waveform(p[155])))   # LFO2 waveform
 
     assert len(out) == 222, f"program_t size error: {len(out)}"
