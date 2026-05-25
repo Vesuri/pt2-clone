@@ -802,12 +802,13 @@ void renderPart(part_t* part, bool add)
 				envelope_1_mode++;
 				switch (envelope_1_mode) {
 				case ENVELOPE_ATTACK:
-					envelope_1_delta = 0xffff / (program->envelope_1_attack + 1);
-					envelope_1_counter = program->envelope_1_attack;
+					envelope_1_delta = 0x7fff / (program->envelope_1_attack + 1);
+					envelope_1_counter = program->envelope_1_attack * 2 + 1;
 					break;
 				case ENVELOPE_DECAY:
-					envelope_1_delta = -((0xfff - program->envelope_1_sustain) << 4) / (program->envelope_1_decay + 1);
-					envelope_1_counter = program->envelope_1_decay;
+					envelope_1_current = 0xffff;
+					envelope_1_delta = -((0xfff - program->envelope_1_sustain) << 3) / (program->envelope_1_decay + 1);
+					envelope_1_counter = program->envelope_1_decay * 2 + 1;
 					break;
 				default:
 					envelope_1_current = program->envelope_1_sustain << 4;
@@ -827,12 +828,13 @@ void renderPart(part_t* part, bool add)
 				envelope_2_mode++;
 				switch (envelope_2_mode) {
 				case ENVELOPE_ATTACK:
-					envelope_2_delta = 0xffff / (program->envelope_2_attack + 1);
-					envelope_2_counter = program->envelope_2_attack;
+					envelope_2_delta = 0x7fff / (program->envelope_2_attack + 1);
+					envelope_2_counter = program->envelope_2_attack * 2 + 1;
 					break;
 				case ENVELOPE_DECAY:
-					envelope_2_delta = -((0xfff - program->envelope_2_sustain) << 4) / (program->envelope_2_decay + 1);
-					envelope_2_counter = program->envelope_2_decay;
+					envelope_2_current = 0xffff;
+					envelope_2_delta = -((0xfff - program->envelope_2_sustain) << 3) / (program->envelope_2_decay + 1);
+					envelope_2_counter = program->envelope_2_decay * 2 + 1;
 					break;
 				default:
 					envelope_2_current = program->envelope_2_sustain << 4;
@@ -852,12 +854,13 @@ void renderPart(part_t* part, bool add)
 				envelope_3_mode++;
 				switch (envelope_3_mode) {
 				case ENVELOPE_ATTACK:
-					envelope_3_delta = 0xffff / (program->envelope_3_attack + 1);
-					envelope_3_counter = program->envelope_3_attack;
+					envelope_3_delta = 0x7fff / (program->envelope_3_attack + 1);
+					envelope_3_counter = program->envelope_3_attack * 2 + 1;
 					break;
 				case ENVELOPE_DECAY:
-					envelope_3_delta = -((0xfff - program->envelope_3_sustain) << 4) / (program->envelope_3_decay + 1);
-					envelope_3_counter = program->envelope_3_decay;
+					envelope_3_current = 0xffff;
+					envelope_3_delta = -((0xfff - program->envelope_3_sustain) << 3) / (program->envelope_3_decay + 1);
+					envelope_3_counter = program->envelope_3_decay * 2 + 1;
 					break;
 				default:
 					envelope_3_current = program->envelope_3_sustain << 4;
