@@ -246,10 +246,12 @@ def parse_sysex_bank(path):
 #   Osc2: oct=params[41], semi=params[42], fine=params[43]
 #   Osc3: oct=params[75], semi=params[76], fine=params[77]
 #
-# Encoding (confirmed from hardware cross-reference):
-#   octave:    stored = 32 + oct      (all oscillators; center=32)
-#   semitone:  stored = C  + semi     (C=57/82/107 for Osc1/2/3 respectively)
-#   fine tune: stored = 64 + cents    (bipolar, center=64; all oscillators)
+# Encoding (OS 2.0 manual p.148, Packed NRPN 0 table):
+#   The sysex stores Packed NRPN 0 data values directly.  Those values form a flat
+#   sequential space across all oscillators, so each oscillator has a different center:
+#     octave:    stored = C_oct  + oct   (C_oct  = 32/37/42 for Osc1/2/3; oct ±2)
+#     semitone:  stored = C_semi + semi  (C_semi = 57/82/107 for Osc1/2/3; semi ±12)
+#     fine tune: stored = 64    + cents  (center=64; ±64 cents; all oscillators)
 #
 # Keyboard tracking (relative offset 0 of each block = params[11/45/79]) is
 # ignored — it cannot be replicated in a render-based synthesizer.
@@ -257,9 +259,8 @@ def parse_sysex_bank(path):
 OSC_OCT_POS    = {1:  7, 2: 41, 3: 75}
 OSC_SEMI_POS   = {1:  8, 2: 42, 3: 76}
 OSC_FINE_POS   = {1:  9, 2: 43, 3: 77}
-OSC_OCT_CENTER  = {1: 32, 2: 37, 3: 42}   # confirmed per-oscillator centers
-OSC_SEMI_CENTER = {1: 57, 2: 82, 3: 107}  # increment of 25 per oscillator
-# Fine tune center is always 64 (standard bipolar) for all three oscillators
+OSC_OCT_CENTER  = {1: 32, 2: 37, 3: 42}   # Packed NRPN 0: Osc1 oct0=32, Osc2 oct0=37, Osc3 oct0=42
+OSC_SEMI_CENTER = {1: 57, 2: 82, 3: 107}  # Packed NRPN 0: Osc1 semi0=57, Osc2 semi0=82, Osc3 semi0=107
 
 PITCH_NEUTRAL = 0xAF  # pt2_synth pitch value for no transposition (oct=0, semi=0, fine=0)
 
