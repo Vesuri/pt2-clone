@@ -82,9 +82,12 @@ def sn_attack_to_u12(v):
 def sn_decay_to_u12(v):
     """
     Supernova env decay (0-127) → pt2_synth u12 (0-0xFFF).
-    Measured: T_ms ≈ 0.625 × 2^(v/10).  Values ≥ 123 exceed 2.97 s → clamped.
+    Hardware sweep measured T ≈ 0.625 × 2^(v/10) ms at sustain=50%, but that
+    captures only the time to the halfway point. Factory programs with low sustain
+    require the full-range decay time, which matches the attack curve (2 × 2^(v/10)).
+    Values ≥ 106 exceed 2.97 s → clamped.
     """
-    T_ms = 0.625 * (2.0 ** (v / 10.0))
+    T_ms = 2.0 * (2.0 ** (v / 10.0))
     return max(0, min(0xFFF, round(T_ms * _SR / 16000.0 - 1)))
 
 def sn_sustain_to_u12(v):
