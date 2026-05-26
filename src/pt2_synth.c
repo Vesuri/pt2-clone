@@ -190,13 +190,22 @@ uint32_t generate_random()
 	return random_number;
 }
 
-// Calculate filter coefficients
+// Calculate Moog ladder filter coefficients
 void filter_coefficients()
 {
 	filter_q = 0xfff - filter_frequency_current; // q = 1.0f - frequency;
 	filter_p = (((filter_frequency_current << 2) / 5 * filter_q) >> 12) + filter_frequency_current; // frequency + 0.8f * frequency * q;
 	filter_f = filter_p + filter_p - 0xfff; // f = p + p - 1.0f;
 	filter_q = ((((((((filter_q * filter_q) >> 12) * 56 / 10 - filter_q + 0xfff) >> 1) * filter_q) >> 12) + 0xfff) * filter_resonance_current) >> 12; // q = resonance * (1.0f + 0.5f * q * (1.0f - q + 5.6f * q * q));
+}
+
+// Calculate SVF (state-variable filter) coefficients
+// filter_p = svf_f (cutoff, Q12), filter_q = svf_damp (1 - resonance, Q12)
+void svf_filter_coefficients()
+{
+	filter_p = filter_frequency_current;
+	filter_q = 0xfff - filter_resonance_current;
+	filter_f = 0;
 }
 
 // Create saw waveform
@@ -411,6 +420,9 @@ void renderPart(part_t* part, bool add)
 	int16_t b2 = 0;
 	int16_t b3 = 0;
 	int16_t b4 = 0;
+	// SVF (state-variable filter) state for HPF/BPF modes.
+	int16_t svf_lp = 0;
+	int16_t svf_bp = 0;
 	for (int buffer_position = part->offset; buffer_position < song->samples[editor.currSample].length; buffer_position++) {
 		// Only update envelopes every envelope_stretch samples due to resolution
 		if ((buffer_position & envelope_stretch) == 0) {
@@ -902,26 +914,36 @@ void renderPart(part_t* part, bool add)
 			}
 
 			// Update filter coefficients
-			filter_coefficients();
+			if (program->filter_type >= FILTER_TYPE_HPF_12DB)
+				svf_filter_coefficients();
+			else
+				filter_coefficients();
 		}
 
-		// Apply Moog resonant filter (all 4 poles with cubic saturation on b4)
-		filter_in -= (filter_q * b4) >> 12;
-		int16_t t1 = b1;
-		b1 = (((filter_in + b0) * filter_p) >> 12) - ((b1 * filter_f) >> 12);
-		int16_t t2 = b2;
-		b2 = (((b1 + t1) * filter_p) >> 12) - ((b2 * filter_f) >> 12);
-		t1 = b3;
-		b3 = (((b2 + t2) * filter_p) >> 12) - ((b3 * filter_f) >> 12);
-		b4 = (((b3 + t1) * filter_p) >> 12) - ((b4 * filter_f) >> 12);
-		b4 -= ((((b4 * b4) >> 12) * b4) >> 12) / 6;
-		b0 = filter_in;
-
 		int16_t filtered;
-		switch (program->filter_type) {
-		case FILTER_TYPE_LPF_12DB: filtered = b2; break;
-		case FILTER_TYPE_LPF_18DB: filtered = b3; break;
-		default:                   filtered = b4; break;
+		if (program->filter_type >= FILTER_TYPE_HPF_12DB) {
+			// SVF: hp = in - damp*bp - lp;  bp += f*hp;  lp += f*bp
+			int16_t hp = filter_in - ((filter_q * svf_bp) >> 12) - svf_lp;
+			svf_bp = ((filter_p * hp) >> 12) + svf_bp;
+			svf_lp = ((filter_p * svf_bp) >> 12) + svf_lp;
+			filtered = (program->filter_type == FILTER_TYPE_HPF_12DB) ? hp : svf_bp;
+		} else {
+			// Moog ladder (all 4 poles with cubic saturation on b4)
+			filter_in -= (filter_q * b4) >> 12;
+			int16_t t1 = b1;
+			b1 = (((filter_in + b0) * filter_p) >> 12) - ((b1 * filter_f) >> 12);
+			int16_t t2 = b2;
+			b2 = (((b1 + t1) * filter_p) >> 12) - ((b2 * filter_f) >> 12);
+			t1 = b3;
+			b3 = (((b2 + t2) * filter_p) >> 12) - ((b3 * filter_f) >> 12);
+			b4 = (((b3 + t1) * filter_p) >> 12) - ((b4 * filter_f) >> 12);
+			b4 -= ((((b4 * b4) >> 12) * b4) >> 12) / 6;
+			b0 = filter_in;
+			switch (program->filter_type) {
+			case FILTER_TYPE_LPF_12DB: filtered = b2; break;
+			case FILTER_TYPE_LPF_18DB: filtered = b3; break;
+			default:                   filtered = b4; break;
+			}
 		}
 		int16_t output = (filtered * part->volume) >> 11;
 		if (add) {

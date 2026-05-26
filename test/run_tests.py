@@ -406,6 +406,51 @@ def gen_test_cases():
         ), S
 
     # ------------------------------------------------------------------ #
+    # SVF 12dB HPF and BPF modes                                         #
+    # ------------------------------------------------------------------ #
+
+    for ft, label in [(FILTER_TYPE_HPF_12DB, 'hpf12'), (FILTER_TYPE_BPF_12DB, 'bpf12')]:
+        for ffreq in [0x100, 0x400, 0x800, 0xc00]:
+            for res in [0, 0x400, 0x800]:
+                yield f"{label}_f{ffreq:03x}_r{res:03x}", make_program(
+                    oscillator_3_waveform=WAVEFORM_SAW,
+                    oscillator_3_mix=0xfff,
+                    oscillator_3_pitch=175,
+                    oscillator_3_width=0x800,
+                    filter_frequency=ffreq,
+                    filter_resonance=res,
+                    filter_type=ft,
+                    envelope_1_sustain=0xfff,
+                ), S
+        # With LFO modulation on filter frequency
+        yield f"{label}_lfo_filter", make_program(
+            oscillator_3_waveform=WAVEFORM_SAW,
+            oscillator_3_mix=0xfff,
+            oscillator_3_pitch=175,
+            filter_frequency=0x600,
+            filter_frequency_lfo_1=0x400,
+            filter_resonance=0x400,
+            filter_type=ft,
+            envelope_1_sustain=0xfff,
+            lfo_1_speed=600,
+            lfo_1_waveform=WAVEFORM_LFO_TRIANGLE,
+        ), S
+        # With ENV2 modulation
+        yield f"{label}_env2_filter", make_program(
+            oscillator_3_waveform=WAVEFORM_SAW,
+            oscillator_3_mix=0xfff,
+            oscillator_3_pitch=175,
+            filter_frequency=0x300,
+            filter_frequency_env_2=0x600,
+            filter_resonance=0x500,
+            filter_type=ft,
+            envelope_1_sustain=0xfff,
+            envelope_2_attack=0x100,
+            envelope_2_decay=0x400,
+            envelope_2_sustain=0x200,
+        ), S
+
+    # ------------------------------------------------------------------ #
     # ENV1 (amplitude) shapes                                             #
     # ------------------------------------------------------------------ #
 
