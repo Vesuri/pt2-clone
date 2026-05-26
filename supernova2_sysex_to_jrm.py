@@ -554,19 +554,20 @@ def convert_program(msg02, msg1f):
     out += pu16(1 if is_fm23 else 0)  # FM flag (type-1F[3] bit 1)
 
     # ── Filter ────────────────────────────────────────────────────────────────
-    out += pu16(u7_to_u12(p[195]) // 2)              # frequency   (halved — empirical calibration)
+    out += pu16(u7_to_u12(p[195]) // 2)              # frequency   (halved — Moog coefficients saturate above ~2800)
     out += ps16(bipolar_to_filter_lfo_s12(p[200]))   # freq lfo_1
     out += ps16(bipolar_to_filter_lfo_s12(p[201]))   # freq lfo_2
     out += ps16(bipolar_to_filter_env_s12(p[198]))   # freq env_2
     out += ps16(bipolar_to_filter_env_s12(p[199]))   # freq env_3
-    out += pu16(u7_to_u12(p[205]))            # resonance (direct 0-127)
+    out += pu16(u7_to_u12(p[205]) // 2)       # resonance (halved — same range as frequency)
     # "Resonance/Width" mods: hardware displays as "width mod" for standard filter types
     # (12/18/24dB, HPF, BPF) but the destination is Resonance, not Width.
     # Only the Special dual-filter type uses true Width. See manual pp.85-87.
-    out += ps16(bipolar_to_s12(p[210]))       # res lfo_1
-    out += ps16(bipolar_to_s12(p[211]))       # res lfo_2
-    out += ps16(bipolar_to_s12(p[208]))       # res env_2
-    out += ps16(bipolar_to_s12(p[209]))       # res env_3
+    # Resonance is now halved (0-2047), so modulation depths use factor 8 like filter freq.
+    out += ps16(bipolar_to_filter_lfo_s12(p[210]))   # res lfo_1
+    out += ps16(bipolar_to_filter_lfo_s12(p[211]))   # res lfo_2
+    out += ps16(bipolar_to_filter_env_s12(p[208]))   # res env_2
+    out += ps16(bipolar_to_filter_env_s12(p[209]))   # res env_3
 
     # ── Envelopes (ADS — pt2_synth does not use Release) ─────────────────────
     # Env1 (amplifier):  params[178]=Attack, [179]=Decay, [180]=Sustain
