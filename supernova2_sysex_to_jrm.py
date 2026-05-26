@@ -68,6 +68,57 @@ def bipolar_to_s12(v):
     """
     return max(-2047, min(2047, (v - 64) * 32))
 
+def bipolar_to_filter_lfo_s12(v):
+    """
+    Sysex bipolar filter-frequency LFO modulation depth → pt2_synth signed depth.
+
+    Filter frequency is stored halved (u7_to_u12(v)//2 → 0–2047), so 1 Supernova
+    filter unit ≈ 16.1 pt2_synth units.  The LFO formula contributes
+    (LFO_value × depth) >> 11; at LFO peak (±32767): 16 × depth.
+
+    For N Supernova units of modulation:  16 × depth = N × 16.1  →  depth ≈ N
+    Factor is 1 (vs. 32 for full-range parameters), i.e. just (v − 64).
+
+    Calibration check (A008 Toyotsu Chu): base ff=24→386, fl1 net=+18.
+      Correct range: [386−288, 386+288] = [98, 674]  (filter stays partially open)
+      Old bipolar_to_s12: swing ±9222 → [0, 4095]    (filter slams shut → silence)
+    """
+    return v - 64
+
+def bipolar_to_filter_env_s12(v):
+    """
+    Sysex bipolar filter-frequency envelope modulation depth → pt2_synth signed depth.
+
+    Same filter-frequency halving applies.  The envelope formula contributes
+    ((env >> 4) × depth) >> 11; at env peak (0xffff >> 4 = 4095): 2 × depth.
+
+    For N Supernova units of modulation:  2 × depth = N × 16.1  →  depth ≈ N × 8
+    Factor is 8.
+
+    Calibration check (A024 Hoover Sync): base ff=13→209, fe2 net=+63.
+      With factor 8:  depth=504, env peak adds ≈1008 → filter opens to ~1217
+      (= u7_to_u12(76)//2, i.e. Supernova filter goes from 13 to 76 ≈ correct)
+    """
+    return (v - 64) * 8
+
+def bipolar_to_pitch_s12(v):
+    """
+    Sysex bipolar pitch-modulation depth (0-127, 64=center) → pt2_synth signed depth.
+
+    pt2_synth pitch is in Hz, so the same factor-32 scaling used for mix/filter depths
+    (which operate in the 0-4095 range) would give ±2048 Hz of swing — thousands of
+    semitones.  The Supernova II stores pitch LFO/env depth in semitones; the full
+    bipolar range (net ±63) represents approximately ±24 semitones (confirmed by
+    surveying bank A: "Birdy" uses net=+13 for a bird-call sweep, "Soft Voices" net=+4
+    for gentle vibrato).
+
+    Calibration (linear approx at PITCH_NEUTRAL = 175 Hz):
+      1 semitone ≈ 175 × (2^(1/12) − 1) ≈ 10.4 Hz
+      24 semitones at peak LFO (±32767): depth = 24 × 10.4 × 2048 / 32767 ≈ 15.6 → 16
+      Factor per net unit: 16 / 63 ≈ 0.25  →  (v − 64) // 4
+    """
+    return (v - 64) // 4
+
 def bipolar_to_u12_width(v):
     """
     Sysex bipolar Width byte (0-127, 64=center/50% duty) → unsigned 12-bit (0-4095).
@@ -427,11 +478,12 @@ def convert_program(msg02, msg1f):
 
         # Pitch: combined from Octave+Semitone+Cents (see SYSEX_FORMAT.md § Per-oscillator data).
         # Keyboard tracking (params[base+0]) is intentionally ignored.
+        # Modulation depths use bipolar_to_pitch_s12 (semitone-scaled), not bipolar_to_s12.
         out += pu16(osc_pitch_jrm(p, osc))
-        out += ps16(bipolar_to_s12(p[base + REL_PITCH + SLOT_LFO1]))
-        out += ps16(bipolar_to_s12(p[base + REL_PITCH + SLOT_LFO2]))
-        out += ps16(bipolar_to_s12(p[base + REL_PITCH + SLOT_ENV2]))
-        out += ps16(bipolar_to_s12(p[base + REL_PITCH + SLOT_ENV3]))
+        out += ps16(bipolar_to_pitch_s12(p[base + REL_PITCH + SLOT_LFO1]))
+        out += ps16(bipolar_to_pitch_s12(p[base + REL_PITCH + SLOT_LFO2]))
+        out += ps16(bipolar_to_pitch_s12(p[base + REL_PITCH + SLOT_ENV2]))
+        out += ps16(bipolar_to_pitch_s12(p[base + REL_PITCH + SLOT_ENV3]))
 
         # Width: level (bipolar, center=64 → pt2_synth center=2048), then mods
         out += pu16(bipolar_to_u12_width(p[base + REL_WIDTH + SLOT_LEVEL]))
@@ -480,11 +532,11 @@ def convert_program(msg02, msg1f):
     out += pu16(1 if is_fm23 else 0)  # FM flag (type-1F[3] bit 1)
 
     # ── Filter ────────────────────────────────────────────────────────────────
-    out += pu16(u7_to_u12(p[195]) // 2)       # frequency   (halved — empirical calibration)
-    out += ps16(bipolar_to_s12(p[200]))       # freq lfo_1
-    out += ps16(bipolar_to_s12(p[201]))       # freq lfo_2
-    out += ps16(bipolar_to_s12(p[198]))       # freq env_2
-    out += ps16(bipolar_to_s12(p[199]))       # freq env_3
+    out += pu16(u7_to_u12(p[195]) // 2)              # frequency   (halved — empirical calibration)
+    out += ps16(bipolar_to_filter_lfo_s12(p[200]))   # freq lfo_1
+    out += ps16(bipolar_to_filter_lfo_s12(p[201]))   # freq lfo_2
+    out += ps16(bipolar_to_filter_env_s12(p[198]))   # freq env_2
+    out += ps16(bipolar_to_filter_env_s12(p[199]))   # freq env_3
     out += pu16(u7_to_u12(p[205]))            # resonance (direct 0-127)
     # "Resonance/Width" mods: hardware displays as "width mod" for standard filter types
     # (12/18/24dB, HPF, BPF) but the destination is Resonance, not Width.
