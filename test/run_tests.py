@@ -156,9 +156,10 @@ PROGRAM_T_FIELDS = [
     ('lfo_1_waveform',             False),
     ('lfo_2_speed',                True),
     ('lfo_2_waveform',             False),
+    ('filter_type',                False),
 ]
 
-assert len(PROGRAM_T_FIELDS) == 103
+assert len(PROGRAM_T_FIELDS) == 104
 
 
 def make_program(**kwargs):
@@ -185,9 +186,9 @@ _LFO_FIELDS = {'lfo_1_waveform', 'lfo_2_waveform'}
 def serialize_program(prog, for_68k=False, render_size=DEFAULT_RENDER_SIZE):
     """Serialize program_t to params.bin blob.
 
-    C side: big-endian 206-byte blob (103 fields × 2 bytes).
-    68k side: same 206 bytes followed by a big-endian uint32 render_size_param
-    (4 bytes), total 210 bytes.  The 68k load_params routine reads the full
+    C side: big-endian 208-byte blob (104 fields × 2 bytes).
+    68k side: same 208 bytes followed by a big-endian uint32 render_size_param
+    (4 bytes), total 212 bytes.  The 68k load_params routine reads the full
     block and copies render_size_param into buffer_render_size if non-zero.
 
     When for_68k=True, LFO waveform constants are translated from C values
@@ -204,7 +205,7 @@ def serialize_program(prog, for_68k=False, render_size=DEFAULT_RENDER_SIZE):
             buf += struct.pack('>H', v)
     if for_68k:
         buf += struct.pack('>I', render_size)
-    assert len(buf) == (210 if for_68k else 206)
+    assert len(buf) == (212 if for_68k else 208)
     return bytes(buf)
 
 

@@ -30,7 +30,7 @@ OUT_BIN = os.path.join(os.path.dirname(__file__), "synth_render")
 LOAD_PARAMS_ROUTINE = """
 ; Load synthesis parameters from WORK:params.bin into the parameter globals.
 ; The file is a flat big-endian binary matching the parameter block layout
-; from oscillator_1_waveform through render_size_param (210 bytes / 103 words
+; from oscillator_1_waveform through render_size_param (212 bytes / 104 words
 ; + one longword for the render size).  If render_size_param is non-zero it
 ; is copied into buffer_render_size so the caller can pass a per-test size.
 load_params:
@@ -208,10 +208,10 @@ def patch(src):
             i += 1
             continue
 
-        # 4. Add render_size_param field and params_end label after lfo_2_waveform.
+        # 4. Add render_size_param field and params_end label after filter_type.
         #    render_size_param is read by load_params; if non-zero it overrides
         #    buffer_render_size so tests can request a specific render length.
-        if re.match(r'^lfo_2_waveform:', line):
+        if re.match(r'^filter_type:', line):
             out.append(line)
             i += 1
             out.append('render_size_param:\t\tdc.l\t12288\n')

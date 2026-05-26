@@ -26,6 +26,14 @@ enum waveform_lfo_t {
     WAVEFORM_LFO_TRIANGLE = 8192
 };
 
+enum filter_type_t {
+    FILTER_TYPE_LPF_24DB = 0,
+    FILTER_TYPE_LPF_12DB = 1,
+    FILTER_TYPE_LPF_18DB = 2,
+    FILTER_TYPE_HPF_12DB = 3,
+    FILTER_TYPE_BPF_12DB = 4,
+};
+
 enum current_oscillator {
     OSCILLATOR_1 = 0,
     OSCILLATOR_2 = 1,
@@ -50,6 +58,7 @@ enum current_oscillator {
 //   lfo_*_speed:                                                              uint16_t, 0x0000–0x7fff
 //   lfo_*_waveform:                                                           WAVEFORM_LFO_SAW/SQUARE/TRIANGLE (0/4096/8192); clamped to SAW on invalid load
 //   oscillator_13_fm, oscillator_23_fm:                                       uint16_t, 0 (ring mod) or 1 (FM); normalised to 0/1 on load
+//   filter_type:                                                               enum filter_type_t (0–4); clamped to LPF_24DB on invalid load
 typedef struct program_t
 {
     char name[16];
@@ -156,6 +165,7 @@ typedef struct program_t
     enum waveform_lfo_t lfo_1_waveform; // WAVEFORM_LFO_SAW/SQUARE/TRIANGLE
     uint16_t lfo_2_speed;                // 0x0000–0x7fff
     enum waveform_lfo_t lfo_2_waveform; // WAVEFORM_LFO_SAW/SQUARE/TRIANGLE
+    uint16_t filter_type;                // enum filter_type_t, 0–4
 } program_t;
 
 typedef struct part_t

@@ -972,7 +972,7 @@ void getPerformance(performance_t* performance, FILE* file)
 	}
 }
 
-void getProgram(program_t* program, FILE* file)
+void getProgram(program_t* program, FILE* file, bool readFilterType)
 {
 	fread(program->name, 1, sizeof(program->name), file);
     program->oscillator_1_waveform = (enum waveform_t)getWord(file);
@@ -1084,6 +1084,12 @@ void getProgram(program_t* program, FILE* file)
         enum waveform_lfo_t wf = (enum waveform_lfo_t)((getWord(file) - 1536) / 2);
         program->lfo_2_waveform = (wf == WAVEFORM_LFO_SQUARE || wf == WAVEFORM_LFO_TRIANGLE) ? wf : WAVEFORM_LFO_SAW;
     }
+    if (readFilterType) {
+        uint16_t ft = getWord(file);
+        program->filter_type = (ft <= FILTER_TYPE_BPF_12DB) ? ft : FILTER_TYPE_LPF_24DB;
+    } else {
+        program->filter_type = FILTER_TYPE_LPF_24DB;
+    }
 }
 
 void putPart(part_t* part, FILE* file)
@@ -1105,7 +1111,8 @@ void putPerformance(performance_t* performance, FILE* file)
 	}
 }
 
-#define PROGRAM_T_SIZE_ON_DISK 222
+#define PROGRAM_T_SIZE_ON_DISK_V1 222  // pre-filter_type format
+#define PROGRAM_T_SIZE_ON_DISK    224  // current format (adds filter_type)
 
 void putProgram(program_t* program, FILE* file)
 {
@@ -1213,6 +1220,7 @@ void putProgram(program_t* program, FILE* file)
     putWord(program->lfo_1_waveform * 2 + 1536, file);
     putWord(program->lfo_2_speed, file);
     putWord(program->lfo_2_waveform * 2 + 1536, file);
+    putWord(program->filter_type, file);
 }
 
 // Directory where protracker.jrm was found on load, or where it will be saved.
@@ -1319,11 +1327,20 @@ void synthLoad(UNICHAR *fileName, bool allPerformances)
 				}
 			}
 
+			// Count enabled programs to detect old (222-byte) vs new (224-byte) format
+			uint32_t numEnabledPrograms = 0;
+			for (int i = 0; i < 4; i++) {
+				uint32_t tmp = enabledPrograms[i];
+				while (tmp) { numEnabledPrograms += tmp & 1; tmp >>= 1; }
+			}
+			bool newFormat = (availableBytes >= numEnabledPrograms * PROGRAM_T_SIZE_ON_DISK);
+			uint32_t progSize = newFormat ? PROGRAM_T_SIZE_ON_DISK : PROGRAM_T_SIZE_ON_DISK_V1;
+
 			for (int programLong = 0; programLong < 4; programLong++) {
 				for (int programBit = 0; programBit < 32; programBit++) {
-					if ((enabledPrograms[programLong] & 1) && availableBytes >= PROGRAM_T_SIZE_ON_DISK) {
-						getProgram(&synth.programs[(programLong << 5) + programBit], file);
-						availableBytes -= PROGRAM_T_SIZE_ON_DISK;
+					if ((enabledPrograms[programLong] & 1) && availableBytes >= progSize) {
+						getProgram(&synth.programs[(programLong << 5) + programBit], file, newFormat);
+						availableBytes -= progSize;
 					}
 					enabledPrograms[programLong] >>= 1;
 				}
