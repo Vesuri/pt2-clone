@@ -315,7 +315,7 @@ def ps16(v): return struct.pack(">h", max(-32768, min(32767, v)))
 
 def convert_program(msg02, msg1f):
     """
-    Convert one program from raw sysex bytes to a 222-byte big-endian program_t record.
+    Convert one program from raw sysex bytes to a 224-byte big-endian program_t record.
 
     msg02: 286-byte block (name[16] + params[270])
     msg1f: 88-byte type-1F data block
@@ -427,8 +427,9 @@ def convert_program(msg02, msg1f):
     out += pu16(lfo_wf_for_jrm(lfo1_waveform(p[145])))   # LFO1 waveform
     out += pu16(sn_lfo_speed_to_u15(p[157], p[165]))     # LFO2 speed
     out += pu16(lfo_wf_for_jrm(lfo2_waveform(p[155])))   # LFO2 waveform
+    out += pu16(0)                                        # filter_type = LPF_24DB
 
-    assert len(out) == 222, f"program_t size error: {len(out)}"
+    assert len(out) == 224, f"program_t size error: {len(out)}"
     return bytes(out)
 
 # ── JRM file writer ───────────────────────────────────────────────────────────
@@ -467,7 +468,7 @@ def write_jrm(programs, program_names, out_path):
         buf += make_blank_part() * 7
 
     for idx in range(128):
-        buf += programs.get(idx, b'\x00' * 222)
+        buf += programs.get(idx, b'\x00' * 224)
 
     with open(out_path, 'wb') as f:
         f.write(buf)
