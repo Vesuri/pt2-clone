@@ -166,7 +166,7 @@ def sn_lfo_speed_to_u15(v, range_byte):
 
 # ── Waveform conversion ───────────────────────────────────────────────────────
 
-def osc_waveform(syx_byte):
+def osc_waveform(syx_byte, hardness):
     """
     Convert type-1F oscillator waveform byte to pt2_synth waveform enum.
 
@@ -178,11 +178,16 @@ def osc_waveform(syx_byte):
       64      = SAW                      → WAVEFORM_SAW
       65–127  = Special (Double Saw, Audio inputs) → WAVEFORM_SAW (closest)
 
+    hardness: OSC params[base+8], direct 0–127. Hardness=0 on a SQUARE waveform
+    produces a sine on the Supernova II, so map that to WAVEFORM_SINUS.
+
     TODO: verify which SQUARE_N variant best matches each PW range once the
     pt2_synth waveform table duty cycles are documented.
     """
     if syx_byte >= 64:
         return WAVEFORM_SAW
+    if hardness == 0:
+        return WAVEFORM_SINUS
     if syx_byte == 0:
         return WAVEFORM_SQUARE_2
     if syx_byte <= 21:
@@ -410,8 +415,8 @@ def convert_program(msg02, msg1f):
         base = OSC_BASE[osc]
         mbase = MIX_BASE[osc]
 
-        # Waveform
-        out += pu16(osc_waveform(f[OSC_WF_BYTE[osc]]))
+        # Waveform (hardness=0 on a SQUARE waveform → SINUS)
+        out += pu16(osc_waveform(f[OSC_WF_BYTE[osc]], p[base + 8]))
 
         # Mix: level (direct 0-127 → u12), then lfo1/lfo2/env2/env3 (bipolar)
         out += pu16(u7_to_u12(p[mbase + SLOT_LEVEL]))
