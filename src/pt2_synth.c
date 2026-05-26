@@ -673,7 +673,7 @@ void renderPart(part_t* part, bool add)
 		int16_t sample = 0;
 
 		// Sum oscillator 1
-		oscillator_1_current = (waveform_saw[(oscillator_1_position >> 16) + program->oscillator_1_waveform] + waveform_saw[(oscillator_1_sync_position >> 16) + program->oscillator_1_waveform]) >> 1;
+		oscillator_1_current = waveform_saw[(oscillator_1_sync_position >> 16) + program->oscillator_1_waveform];
 		int16_t oscillator_1_mix_current = program->oscillator_1_mix;
 		if (program->oscillator_1_mix_lfo_1 != 0) {
 			oscillator_1_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_1_mix_lfo_1) >> 11;
@@ -690,7 +690,7 @@ void renderPart(part_t* part, bool add)
 		sample += (((((envelope_1_current >> 4) * oscillator_1_mix_current) >> 12) * oscillator_1_current) << 4) >> 16;
 
 		// Sum oscillator 2
-		oscillator_2_current = (waveform_saw[(oscillator_2_position >> 16) + program->oscillator_2_waveform] + waveform_saw[(oscillator_2_sync_position >> 16) + program->oscillator_2_waveform]) >> 1;
+		oscillator_2_current = waveform_saw[(oscillator_2_sync_position >> 16) + program->oscillator_2_waveform];
 		int16_t oscillator_2_mix_current = program->oscillator_2_mix;
 		if (program->oscillator_2_mix_lfo_1 != 0) {
 			oscillator_2_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_2_mix_lfo_1) >> 11;
@@ -706,8 +706,37 @@ void renderPart(part_t* part, bool add)
 		}
 		sample += (((((envelope_1_current >> 4) * oscillator_2_mix_current) >> 12) * oscillator_2_current) << 4) >> 16;
 
-		// Sum oscillator 3
-		oscillator_3_current = (waveform_saw[(oscillator_3_position >> 16) + program->oscillator_3_waveform] + waveform_saw[(oscillator_3_sync_position >> 16) + program->oscillator_3_waveform]) >> 1;
+		// Sum oscillator 3 — read position offset by PM (phase modulation) if FM mode active
+		{
+			uint32_t osc3_pm_pos = oscillator_3_sync_position;
+			if (program->oscillator_13_fm != 0) {
+				int16_t pm13_mix = program->oscillator_13_mix;
+				if (program->oscillator_13_mix_lfo_1 != 0)
+					pm13_mix += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_13_mix_lfo_1) >> 11;
+				if (program->oscillator_13_mix_lfo_2 != 0)
+					pm13_mix += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_13_mix_lfo_2) >> 11;
+				if (program->oscillator_13_mix_env_2 != 0)
+					pm13_mix += ((envelope_2_current >> 4) * program->oscillator_13_mix_env_2) >> 11;
+				if (program->oscillator_13_mix_env_3 != 0)
+					pm13_mix += ((envelope_3_current >> 4) * program->oscillator_13_mix_env_3) >> 11;
+				int16_t osc1_sine = waveform_saw[(oscillator_1_sync_position >> 16) + WAVEFORM_SINUS];
+				osc3_pm_pos += (uint32_t)((((osc1_sine * pm13_mix) << 4) / SAMPLERATE) << 16);
+			}
+			if (program->oscillator_23_fm != 0) {
+				int16_t pm23_mix = program->oscillator_23_mix;
+				if (program->oscillator_23_mix_lfo_1 != 0)
+					pm23_mix += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_23_mix_lfo_1) >> 11;
+				if (program->oscillator_23_mix_lfo_2 != 0)
+					pm23_mix += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_23_mix_lfo_2) >> 11;
+				if (program->oscillator_23_mix_env_2 != 0)
+					pm23_mix += ((envelope_2_current >> 4) * program->oscillator_23_mix_env_2) >> 11;
+				if (program->oscillator_23_mix_env_3 != 0)
+					pm23_mix += ((envelope_3_current >> 4) * program->oscillator_23_mix_env_3) >> 11;
+				int16_t osc2_sine = waveform_saw[(oscillator_2_sync_position >> 16) + WAVEFORM_SINUS];
+				osc3_pm_pos += (uint32_t)((((osc2_sine * pm23_mix) << 4) / SAMPLERATE) << 16);
+			}
+			oscillator_3_current = waveform_saw[((osc3_pm_pos & 0xFFFFFF) >> 16) + program->oscillator_3_waveform];
+		}
 		int16_t oscillator_3_mix_current = program->oscillator_3_mix;
 		if (program->oscillator_3_mix_lfo_1 != 0) {
 			oscillator_3_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_3_mix_lfo_1) >> 11;
@@ -813,47 +842,6 @@ void renderPart(part_t* part, bool add)
 		// Update oscillator 3
 		oscillator_3_position += oscillator_3_delta;
 
-		// Oscillator 1 -> oscillator 3 frequency modulation
-		if (program->oscillator_13_fm != 0) {
-			int16_t oscillator_13_mix_current = program->oscillator_13_mix;
-			if (program->oscillator_13_mix_lfo_1 != 0) {
-				oscillator_13_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_13_mix_lfo_1) >> 11;
-			}
-			if (program->oscillator_13_mix_lfo_2 != 0) {
-				oscillator_13_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_13_mix_lfo_2) >> 11;
-			}
-			if (program->oscillator_13_mix_env_2 != 0) {
-				oscillator_13_mix_current += ((envelope_2_current >> 4) * program->oscillator_13_mix_env_2) >> 11;
-			}
-			if (program->oscillator_13_mix_env_3 != 0) {
-				oscillator_13_mix_current += ((envelope_3_current >> 4) * program->oscillator_13_mix_env_3) >> 11;
-			}
-			int32_t delta = (((oscillator_1_current * oscillator_13_mix_current) << 4) / SAMPLERATE) << 13;
-			oscillator_3_position += delta;
-			oscillator_3_sync_position += delta;
-			oscillator_3_sync_position &= 0xffffff;
-		}
-
-		// Oscillator 2 -> oscillator 3 frequency modulation
-		if (program->oscillator_23_fm != 0) {
-			int16_t oscillator_23_mix_current = program->oscillator_23_mix;
-			if (program->oscillator_23_mix_lfo_1 != 0) {
-				oscillator_23_mix_current += (waveforms_lfo[(lfo_1_position >> 16) + program->lfo_1_waveform] * program->oscillator_23_mix_lfo_1) >> 11;
-			}
-			if (program->oscillator_23_mix_lfo_2 != 0) {
-				oscillator_23_mix_current += (waveforms_lfo[(lfo_2_position >> 16) + program->lfo_2_waveform] * program->oscillator_23_mix_lfo_2) >> 11;
-			}
-			if (program->oscillator_23_mix_env_2 != 0) {
-				oscillator_23_mix_current += ((envelope_2_current >> 4) * program->oscillator_23_mix_env_2) >> 11;
-			}
-			if (program->oscillator_23_mix_env_3 != 0) {
-				oscillator_23_mix_current += ((envelope_3_current >> 4) * program->oscillator_23_mix_env_3) >> 11;
-			}
-			int32_t delta = (((oscillator_2_current * oscillator_23_mix_current) << 4) / SAMPLERATE) << 13;
-			oscillator_3_position += delta;
-			oscillator_3_sync_position += delta;
-			oscillator_3_sync_position &= 0xffffff;
-		}
 
 		if (oscillator_3_position >= 0x1000000) {
 			oscillator_3_position &= 0xffffff;
