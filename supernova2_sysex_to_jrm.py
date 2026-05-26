@@ -68,36 +68,60 @@ def bipolar_to_s12(v):
     """
     return max(-2047, min(2047, (v - 64) * 32))
 
+def bipolar_to_sync_s12(v):
+    """
+    Sysex bipolar sync modulation depth → pt2_synth signed depth (LFO and env).
+
+    The sync base uses a quadratic mapping (sn_sync_to_u12).  Both LFO waveforms
+    and the envelope (0xffff >> 4 = 4095) peak at ±4095, so both modulation sources
+    contribute  2 × depth  at peak.  To produce the correct pt2_synth swing at that
+    peak (calibrated for sync_base=0):
+
+      2 × depth = sn_sync_to_u12(|net|)  →  depth = sn_sync_to_u12(|net|) / 2
+
+    For non-zero sync bases the calibration is approximate (hardware modulates in
+    pre-quadratic Supernova space; pt2_synth modulates post-conversion).  This formula
+    correctly reproduces the zero-to-N swing; the positive swing from a non-zero base
+    is underestimated by ~50% at high base values, but is far better than bipolar_to_s12.
+    """
+    net = v - 64
+    depth = round(sn_sync_to_u12(abs(net)) / 2)
+    return depth if net >= 0 else -depth
+
+def bipolar_to_fm_mix_s12(v):
+    """
+    Sysex bipolar FM/ring-mod mix modulation depth → pt2_synth signed depth (LFO and env).
+
+    FM mix base uses sn_fm_mix_to_u12 (quadratic calibration for PM+sine at <<16).
+    Both LFO and env peak at ±4095 → contribution = 2 × depth at peak.
+
+      2 × depth = sn_fm_mix_to_u12(|net|)  →  depth = sn_fm_mix_to_u12(|net|) / 2
+    """
+    net = v - 64
+    depth = round(sn_fm_mix_to_u12(abs(net)) / 2)
+    return depth if net >= 0 else -depth
+
 def bipolar_to_filter_lfo_s12(v):
     """
-    Sysex bipolar filter-frequency LFO modulation depth → pt2_synth signed depth.
+    Sysex bipolar filter-frequency modulation depth → pt2_synth signed depth (LFO and env).
 
     Filter frequency is stored halved (u7_to_u12(v)//2 → 0–2047), so 1 Supernova
-    filter unit ≈ 16.1 pt2_synth units.  The LFO formula contributes
-    (LFO_value × depth) >> 11; at LFO peak (±32767): 16 × depth.
-
-    For N Supernova units of modulation:  16 × depth = N × 16.1  →  depth ≈ N
-    Factor is 1 (vs. 32 for full-range parameters), i.e. just (v − 64).
+    filter unit ≈ 16.1 pt2_synth units.  LFO and env both peak at ±4095, contributing
+    2 × depth.  For N Supernova units:  2 × depth = N × 16.1  →  depth ≈ N × 8.
 
     Calibration check (A008 Toyotsu Chu): base ff=24→386, fl1 net=+18.
-      Correct range: [386−288, 386+288] = [98, 674]  (filter stays partially open)
-      Old bipolar_to_s12: swing ±9222 → [0, 4095]    (filter slams shut → silence)
+      Factor 8: depth=144, swing ±288 → range [98, 674]  (filter stays partially open)
+      Old factor 1: swing ±36 (barely moves)
+      Old bipolar_to_s12 factor 32: swing ±9222 → [0, 4095]  (slams shut → silence)
     """
-    return v - 64
+    return (v - 64) * 8
 
 def bipolar_to_filter_env_s12(v):
     """
     Sysex bipolar filter-frequency envelope modulation depth → pt2_synth signed depth.
 
-    Same filter-frequency halving applies.  The envelope formula contributes
-    ((env >> 4) × depth) >> 11; at env peak (0xffff >> 4 = 4095): 2 × depth.
-
-    For N Supernova units of modulation:  2 × depth = N × 16.1  →  depth ≈ N × 8
-    Factor is 8.
-
-    Calibration check (A024 Hoover Sync): base ff=13→209, fe2 net=+63.
-      With factor 8:  depth=504, env peak adds ≈1008 → filter opens to ~1217
-      (= u7_to_u12(76)//2, i.e. Supernova filter goes from 13 to 76 ≈ correct)
+    Same formula as bipolar_to_filter_lfo_s12: both LFO and env peak at ±4095,
+    so the factor is identical (×8).  Kept as a separate name for call-site clarity.
     """
     return (v - 64) * 8
 
@@ -105,19 +129,17 @@ def bipolar_to_pitch_s12(v):
     """
     Sysex bipolar pitch-modulation depth (0-127, 64=center) → pt2_synth signed depth.
 
-    pt2_synth pitch is in Hz, so the same factor-32 scaling used for mix/filter depths
-    (which operate in the 0-4095 range) would give ±2048 Hz of swing — thousands of
-    semitones.  The Supernova II stores pitch LFO/env depth in semitones; the full
-    bipolar range (net ±63) represents approximately ±24 semitones (confirmed by
-    surveying bank A: "Birdy" uses net=+13 for a bird-call sweep, "Soft Voices" net=+4
-    for gentle vibrato).
+    pt2_synth pitch is in Hz; LFO and env peak at ±4095, contributing 2 × depth.
+    The Supernova stores pitch depth in semitones; ±12 semitones at full range (net ±63)
+    is consistent with bank A survey data (Birdy net=+13 ≈ bird-call sweep ~2.5 st;
+    Soft Voices net=+4 ≈ gentle vibrato ~0.75 st at PITCH_NEUTRAL = 175 Hz).
 
     Calibration (linear approx at PITCH_NEUTRAL = 175 Hz):
       1 semitone ≈ 175 × (2^(1/12) − 1) ≈ 10.4 Hz
-      24 semitones at peak LFO (±32767): depth = 24 × 10.4 × 2048 / 32767 ≈ 15.6 → 16
-      Factor per net unit: 16 / 63 ≈ 0.25  →  (v − 64) // 4
+      12 semitones at peak (±4095): depth = 12 × 10.4 / 2 ≈ 62  →  factor ≈ 1 per net unit
+      →  (v − 64) × 1
     """
-    return (v - 64) // 4
+    return v - 64
 
 def bipolar_to_u12_width(v):
     """
@@ -492,12 +514,12 @@ def convert_program(msg02, msg1f):
         out += ps16(bipolar_to_s12(p[base + REL_WIDTH + SLOT_ENV2]))
         out += ps16(bipolar_to_s12(p[base + REL_WIDTH + SLOT_ENV3]))
 
-        # Sync: level (quadratic — see sn_sync_to_u12), then mods (bipolar)
+        # Sync: level (quadratic — see sn_sync_to_u12), mods use same quadratic curve.
         out += pu16(sn_sync_to_u12(p[base + REL_SYNC + SLOT_LEVEL]))
-        out += ps16(bipolar_to_s12(p[base + REL_SYNC + SLOT_LFO1]))
-        out += ps16(bipolar_to_s12(p[base + REL_SYNC + SLOT_LFO2]))
-        out += ps16(bipolar_to_s12(p[base + REL_SYNC + SLOT_ENV2]))
-        out += ps16(bipolar_to_s12(p[base + REL_SYNC + SLOT_ENV3]))
+        out += ps16(bipolar_to_sync_s12(p[base + REL_SYNC + SLOT_LFO1]))
+        out += ps16(bipolar_to_sync_s12(p[base + REL_SYNC + SLOT_LFO2]))
+        out += ps16(bipolar_to_sync_s12(p[base + REL_SYNC + SLOT_ENV2]))
+        out += ps16(bipolar_to_sync_s12(p[base + REL_SYNC + SLOT_ENV3]))
 
     # ── Noise mix ─────────────────────────────────────────────────────────────
     nb = MIX_BASE['noise']
@@ -514,10 +536,10 @@ def convert_program(msg02, msg1f):
     is_fm13 = bool(f[3] & 0x01)
     mix13 = sn_fm_mix_to_u12(p[b13 + SLOT_LEVEL]) if is_fm13 else u7_to_u12(p[b13 + SLOT_LEVEL])
     out += pu16(mix13)
-    out += ps16(bipolar_to_s12(p[b13 + SLOT_LFO1]))
-    out += ps16(bipolar_to_s12(p[b13 + SLOT_LFO2]))
-    out += ps16(bipolar_to_s12(p[b13 + SLOT_ENV2]))
-    out += ps16(bipolar_to_s12(p[b13 + SLOT_ENV3]))
+    out += ps16(bipolar_to_fm_mix_s12(p[b13 + SLOT_LFO1]))
+    out += ps16(bipolar_to_fm_mix_s12(p[b13 + SLOT_LFO2]))
+    out += ps16(bipolar_to_fm_mix_s12(p[b13 + SLOT_ENV2]))
+    out += ps16(bipolar_to_fm_mix_s12(p[b13 + SLOT_ENV3]))
     out += pu16(1 if is_fm13 else 0)  # FM flag (type-1F[3] bit 0)
 
     # ── Osc 2×3 ring mod / FM ────────────────────────────────────────────────
@@ -525,10 +547,10 @@ def convert_program(msg02, msg1f):
     is_fm23 = bool(f[3] & 0x02)
     mix23 = sn_fm_mix_to_u12(p[b23 + SLOT_LEVEL]) if is_fm23 else u7_to_u12(p[b23 + SLOT_LEVEL])
     out += pu16(mix23)
-    out += ps16(bipolar_to_s12(p[b23 + SLOT_LFO1]))
-    out += ps16(bipolar_to_s12(p[b23 + SLOT_LFO2]))
-    out += ps16(bipolar_to_s12(p[b23 + SLOT_ENV2]))
-    out += ps16(bipolar_to_s12(p[b23 + SLOT_ENV3]))
+    out += ps16(bipolar_to_fm_mix_s12(p[b23 + SLOT_LFO1]))
+    out += ps16(bipolar_to_fm_mix_s12(p[b23 + SLOT_LFO2]))
+    out += ps16(bipolar_to_fm_mix_s12(p[b23 + SLOT_ENV2]))
+    out += ps16(bipolar_to_fm_mix_s12(p[b23 + SLOT_ENV3]))
     out += pu16(1 if is_fm23 else 0)  # FM flag (type-1F[3] bit 1)
 
     # ── Filter ────────────────────────────────────────────────────────────────
