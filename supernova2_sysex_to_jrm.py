@@ -14,7 +14,7 @@ Install:
     cp output.jrm ~/.config/protracker/protracker.jrm
 
 Mapping completeness (see SYSEX_FORMAT.md for details):
-  Confirmed:   oscillator waveforms, mix levels/mods, width/sync/pitch mods,
+  Confirmed:   oscillator waveforms, mix levels/mods, width/pitch mods,
                filter cutoff/resonance and mods, all envelope ADS,
                LFO1+2 speed (range-aware, params[164]/[165]) + waveform, FM flags
   Approximate: filter frequency/resonance (linear — pt2_synth Hz calibration pending)
@@ -22,7 +22,11 @@ Mapping completeness (see SYSEX_FORMAT.md for details):
                modulation depths (linear — pt2_synth depth calibration pending)
   Calibrated:  envelope attack/decay (exponential from hardware sweep),
                envelope sustain (power-law from hardware sweep),
-               LFO speed (quadratic per range from hardware sweep)
+               LFO speed (quadratic per range from hardware sweep),
+               oscillator sync level (quadratic — Supernova sync barely audible at low
+                 values, accelerates at high values; hardware sweep calibrated),
+               FM mix depth (quadratic — Supernova FM barely audible at low values;
+                 calibrated for pt2_synth PM+sine implementation at <<16 depth)
 """
 
 import struct
@@ -70,6 +74,35 @@ def bipolar_to_u12_width(v):
     Center (sysex=64) maps to pt2_synth width=2048.
     """
     return max(0, min(4095, (v - 64) * 32 + 2048))
+
+# ── Calibrated sync / FM depth mappings ──────────────────────────────────────
+#
+# Both derived from hardware sweep recordings (analysis/osc3_sync.csv and
+# analysis/fm13_1_1.csv) compared against pt2_synth sweep results.
+#
+# Sync: Supernova sync centroid rises from baseline at v=10 by only ~17 Hz
+# (barely audible) then accelerates sharply.  pt2_synth with linear mapping
+# produces 720 Hz centroid rise at v=10 — far too strong.  A quadratic curve
+# (v/127)² matches the hardware profile: v=10→8, v=40→406, v=80→1625, v=127→4095.
+#
+# FM: With pt2_synth's PM+sine implementation at <<16, modulation index β scales
+# linearly with mix, so Supernova v=10 (barely audible, Δcentroid≈21 Hz) requires
+# a very small mix.  Numerical fit gives exactly α=2.00: mix = (v/127)² × 4095.
+
+def sn_sync_to_u12(v):
+    """
+    Supernova oscillator sync (0-127) → pt2_synth u12 (0-4095).
+    Quadratic curve calibrated from hardware sweep.
+    """
+    return round((v / 127) ** 2 * 4095)
+
+def sn_fm_mix_to_u12(v):
+    """
+    Supernova FM mix depth (0-127) → pt2_synth u12 (0-4095).
+    Quadratic curve calibrated for pt2_synth PM+sine at <<16.
+    Ring-mod mode uses u7_to_u12() (linear) instead — see convert_program().
+    """
+    return round((v / 127) ** 2 * 4095)
 
 # ── Calibrated envelope mappings ──────────────────────────────────────────────
 #
@@ -402,8 +435,8 @@ def convert_program(msg02, msg1f):
         out += ps16(bipolar_to_s12(p[base + REL_WIDTH + SLOT_ENV2]))
         out += ps16(bipolar_to_s12(p[base + REL_WIDTH + SLOT_ENV3]))
 
-        # Sync: level (direct 0-127 → u12), then mods (bipolar)
-        out += pu16(u7_to_u12(p[base + REL_SYNC + SLOT_LEVEL]))
+        # Sync: level (quadratic — see sn_sync_to_u12), then mods (bipolar)
+        out += pu16(sn_sync_to_u12(p[base + REL_SYNC + SLOT_LEVEL]))
         out += ps16(bipolar_to_s12(p[base + REL_SYNC + SLOT_LFO1]))
         out += ps16(bipolar_to_s12(p[base + REL_SYNC + SLOT_LFO2]))
         out += ps16(bipolar_to_s12(p[base + REL_SYNC + SLOT_ENV2]))
@@ -418,22 +451,28 @@ def convert_program(msg02, msg1f):
     out += ps16(bipolar_to_s12(p[nb + SLOT_ENV3]))
 
     # ── Osc 1×3 ring mod / FM ────────────────────────────────────────────────
+    # FM depth uses quadratic mapping (calibrated for PM+sine); ring mod keeps
+    # linear because ring-mod depth doesn't share the same response curve.
     b13 = MIX_BASE['13']
-    out += pu16(u7_to_u12(p[b13 + SLOT_LEVEL]))
+    is_fm13 = bool(f[3] & 0x01)
+    mix13 = sn_fm_mix_to_u12(p[b13 + SLOT_LEVEL]) if is_fm13 else u7_to_u12(p[b13 + SLOT_LEVEL])
+    out += pu16(mix13)
     out += ps16(bipolar_to_s12(p[b13 + SLOT_LFO1]))
     out += ps16(bipolar_to_s12(p[b13 + SLOT_LFO2]))
     out += ps16(bipolar_to_s12(p[b13 + SLOT_ENV2]))
     out += ps16(bipolar_to_s12(p[b13 + SLOT_ENV3]))
-    out += pu16(1 if (f[3] & 0x01) else 0)  # FM flag (type-1F[3] bit 0)
+    out += pu16(1 if is_fm13 else 0)  # FM flag (type-1F[3] bit 0)
 
     # ── Osc 2×3 ring mod / FM ────────────────────────────────────────────────
     b23 = MIX_BASE['23']
-    out += pu16(u7_to_u12(p[b23 + SLOT_LEVEL]))
+    is_fm23 = bool(f[3] & 0x02)
+    mix23 = sn_fm_mix_to_u12(p[b23 + SLOT_LEVEL]) if is_fm23 else u7_to_u12(p[b23 + SLOT_LEVEL])
+    out += pu16(mix23)
     out += ps16(bipolar_to_s12(p[b23 + SLOT_LFO1]))
     out += ps16(bipolar_to_s12(p[b23 + SLOT_LFO2]))
     out += ps16(bipolar_to_s12(p[b23 + SLOT_ENV2]))
     out += ps16(bipolar_to_s12(p[b23 + SLOT_ENV3]))
-    out += pu16(1 if (f[3] & 0x02) else 0)  # FM flag (type-1F[3] bit 1)
+    out += pu16(1 if is_fm23 else 0)  # FM flag (type-1F[3] bit 1)
 
     # ── Filter ────────────────────────────────────────────────────────────────
     out += pu16(u7_to_u12(p[195]) // 2)       # frequency   (halved — empirical calibration)
