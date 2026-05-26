@@ -533,6 +533,8 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_1_width_env_3 != 0) {
 				oscillator_1_width_current += ((envelope_3_current >> 4) * program->oscillator_1_width_env_3) >> 11;
 			}
+			if (oscillator_1_width_current < 0) oscillator_1_width_current = 0;
+			else if (oscillator_1_width_current > 0xfff) oscillator_1_width_current = 0xfff;
 
 			// Update oscillator 2 width
 			oscillator_2_width_current = program->oscillator_2_width;
@@ -548,6 +550,8 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_2_width_env_3 != 0) {
 				oscillator_2_width_current += ((envelope_3_current >> 4) * program->oscillator_2_width_env_3) >> 11;
 			}
+			if (oscillator_2_width_current < 0) oscillator_2_width_current = 0;
+			else if (oscillator_2_width_current > 0xfff) oscillator_2_width_current = 0xfff;
 
 			// Update oscillator 3 width
 			oscillator_3_width_current = program->oscillator_3_width;
@@ -563,6 +567,8 @@ void renderPart(part_t* part, bool add)
 			if (program->oscillator_3_width_env_3 != 0) {
 				oscillator_3_width_current += ((envelope_3_current >> 4) * program->oscillator_3_width_env_3) >> 11;
 			}
+			if (oscillator_3_width_current < 0) oscillator_3_width_current = 0;
+			else if (oscillator_3_width_current > 0xfff) oscillator_3_width_current = 0xfff;
 
 			waveform_square_create();
 
