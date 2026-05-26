@@ -198,6 +198,9 @@ int main(int argc, char **argv)
 	memset(&prog, 0, sizeof(prog));
 	deserialize_program(&prog, raw);
 
+	/* Initialize waveform tables (normally done at startup by initSynth). */
+	initSynth();
+
 	/* Store program in synth slot 0 so renderPart() can find it. */
 	synth.programs[0] = prog;
 

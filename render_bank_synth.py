@@ -138,6 +138,24 @@ def main():
             new_val = min(0xFFF, max(0, round((val + 1) * playback_ratio) - 1))
             struct.pack_into('>H', params_bin, ad_offset, new_val)
 
+        # pt2_synth initialises LFO positions at 0. For a SQUARE LFO the position-0
+        # value is -4095 (the negative half), which can push filter_frequency below 0
+        # (clamped to 0 = completely closed) for programs where speed=0 keeps the LFO
+        # frozen there. On hardware a frozen LFO sits at an arbitrary phase, not
+        # necessarily the most harmful one. Treat speed=0 LFOs as contributing no
+        # modulation by zeroing their modulation depth fields.
+        # LFO1/2 speed at offsets 198/202. Modulation depth fields:
+        #   LFO1: osc mix 4/46/88, pitch 14/56/98, width 24/66/108, sync 34/76/118,
+        #          noise mix 128, osc13 mix 138, osc23 mix 150, ff 162, res 172
+        #   LFO2: same fields +2 each: 6/48/90, 16/58/100, 26/68/110, 36/78/120,
+        #          130, 140, 152, 164, 174
+        _LFO1_MODS = (4,14,24,34, 46,56,66,76, 88,98,108,118, 128, 138, 150, 162, 172)
+        _LFO2_MODS = (6,16,26,36, 48,58,68,78, 90,100,110,120, 130, 140, 152, 164, 174)
+        for speed_off, mod_offs in ((198, _LFO1_MODS), (202, _LFO2_MODS)):
+            if struct.unpack_from('>H', params_bin, speed_off)[0] == 0:
+                for off in mod_offs:
+                    struct.pack_into('>H', params_bin, off, 0)
+
         params_bin = bytes(params_bin)
 
         try:
