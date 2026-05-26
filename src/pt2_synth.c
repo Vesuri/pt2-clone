@@ -905,7 +905,7 @@ void renderPart(part_t* part, bool add)
 			filter_coefficients();
 		}
 
-		// Apply 24dB resonant filter
+		// Apply Moog resonant filter (all 4 poles with cubic saturation on b4)
 		filter_in -= (filter_q * b4) >> 12;
 		int16_t t1 = b1;
 		b1 = (((filter_in + b0) * filter_p) >> 12) - ((b1 * filter_f) >> 12);
@@ -917,7 +917,13 @@ void renderPart(part_t* part, bool add)
 		b4 -= ((((b4 * b4) >> 12) * b4) >> 12) / 6;
 		b0 = filter_in;
 
-		int16_t output = (b4 * part->volume) >> 11;
+		int16_t filtered;
+		switch (program->filter_type) {
+		case FILTER_TYPE_LPF_12DB: filtered = b2; break;
+		case FILTER_TYPE_LPF_18DB: filtered = b3; break;
+		default:                   filtered = b4; break;
+		}
+		int16_t output = (filtered * part->volume) >> 11;
 		if (add) {
 			output += buffer_render[buffer_position];
 		}

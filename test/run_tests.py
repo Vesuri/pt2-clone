@@ -43,6 +43,12 @@ WAVEFORM_LFO_SAW      = 0
 WAVEFORM_LFO_SQUARE   = 4096
 WAVEFORM_LFO_TRIANGLE = 8192
 
+FILTER_TYPE_LPF_24DB = 0
+FILTER_TYPE_LPF_12DB = 1
+FILTER_TYPE_LPF_18DB = 2
+FILTER_TYPE_HPF_12DB = 3
+FILTER_TYPE_BPF_12DB = 4
+
 PROGRAM_T_FIELDS = [
     # (name, signed)
     ('oscillator_1_waveform',      False),
@@ -367,6 +373,37 @@ def gen_test_cases():
                 filter_resonance=res,
                 envelope_1_sustain=0xfff,
             ), S
+
+    # ------------------------------------------------------------------ #
+    # 12dB and 18dB LPF modes                                            #
+    # ------------------------------------------------------------------ #
+
+    for ft, label in [(FILTER_TYPE_LPF_12DB, 'lpf12'), (FILTER_TYPE_LPF_18DB, 'lpf18')]:
+        for ffreq in [0x100, 0x400, 0x800, 0xfff]:
+            for res in [0, 0x400, 0x800]:
+                yield f"{label}_f{ffreq:03x}_r{res:03x}", make_program(
+                    oscillator_3_waveform=WAVEFORM_SAW,
+                    oscillator_3_mix=0xfff,
+                    oscillator_3_pitch=175,
+                    oscillator_3_width=0x800,
+                    filter_frequency=ffreq,
+                    filter_resonance=res,
+                    filter_type=ft,
+                    envelope_1_sustain=0xfff,
+                ), S
+        # With LFO modulation
+        yield f"{label}_lfo_filter", make_program(
+            oscillator_3_waveform=WAVEFORM_SAW,
+            oscillator_3_mix=0xfff,
+            oscillator_3_pitch=175,
+            filter_frequency=0x400,
+            filter_frequency_lfo_2=0x300,
+            filter_resonance=0x600,
+            filter_type=ft,
+            envelope_1_sustain=0xfff,
+            lfo_2_speed=800,
+            lfo_2_waveform=WAVEFORM_LFO_TRIANGLE,
+        ), S
 
     # ------------------------------------------------------------------ #
     # ENV1 (amplitude) shapes                                             #
