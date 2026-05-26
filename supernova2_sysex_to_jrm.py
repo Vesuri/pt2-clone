@@ -28,6 +28,14 @@ Mapping completeness (see SYSEX_FORMAT.md for details):
 import struct
 import sys
 
+# ── pt2_synth filter_type_t enum values ───────────────────────────────────────
+
+FILTER_TYPE_LPF_24DB = 0
+FILTER_TYPE_LPF_12DB = 1
+FILTER_TYPE_LPF_18DB = 2
+FILTER_TYPE_HPF_12DB = 3
+FILTER_TYPE_BPF_12DB = 4
+
 # ── pt2_synth waveform enum values ────────────────────────────────────────────
 
 WAVEFORM_SAW      = 0
@@ -306,6 +314,42 @@ SLOT_ENV3   = 3
 SLOT_LFO1   = 4
 SLOT_LFO2   = 5
 
+# ── Filter type conversion ────────────────────────────────────────────────────
+
+def filter_type_from_sysex(ft):
+    """
+    Map Supernova II filter type byte (params[192], Packed NRPN 1 data value) to
+    pt2_synth filter_type_t.
+
+    Confirmed from hardware (SYSEX_FORMAT.md §Filter):
+      0 = 12dB LPF  → FILTER_TYPE_LPF_12DB
+      1 = 18dB LPF  → FILTER_TYPE_LPF_18DB  (confirmed: Propellor Fans)
+      2 = 24dB LPF  → FILTER_TYPE_LPF_24DB  (confirmed: Ghostwalk, Jan Hammer Lead)
+
+    Direct equivalents from NRPN table (OS 2.0 manual Packed NRPN 1 values):
+      4 = BPF        → FILTER_TYPE_BPF_12DB
+      5 = HPF        → FILTER_TYPE_HPF_12DB
+
+    Fallbacks — no pt2_synth equivalent; nearest character chosen:
+      3 = LPF (unspecified dB slope) → FILTER_TYPE_LPF_24DB
+      6–8 = Resonance filter variants → FILTER_TYPE_LPF_24DB
+      9 = Notch                       → FILTER_TYPE_BPF_12DB  (adjacent character)
+      10–14 = Dual-filter types       → FILTER_TYPE_LPF_24DB
+    """
+    if ft == 0:
+        return FILTER_TYPE_LPF_12DB
+    if ft == 1:
+        return FILTER_TYPE_LPF_18DB
+    if ft == 2:
+        return FILTER_TYPE_LPF_24DB
+    if ft == 4:
+        return FILTER_TYPE_BPF_12DB
+    if ft == 5:
+        return FILTER_TYPE_HPF_12DB
+    if ft == 9:
+        return FILTER_TYPE_BPF_12DB   # Notch — BPF is closest available
+    return FILTER_TYPE_LPF_24DB       # 3=LPF, 6-8=Res variants, 10-14=dual
+
 # ── Struct packing helpers ────────────────────────────────────────────────────
 
 def pu16(v): return struct.pack(">H", v & 0xFFFF)
@@ -425,9 +469,9 @@ def convert_program(msg02, msg1f):
     # LFO range: params[164]=LFO1 range byte, params[165]=LFO2 range byte.
     out += pu16(sn_lfo_speed_to_u15(p[147], p[164]))     # LFO1 speed
     out += pu16(lfo_wf_for_jrm(lfo1_waveform(p[145])))   # LFO1 waveform
-    out += pu16(sn_lfo_speed_to_u15(p[157], p[165]))     # LFO2 speed
+    out += pu16(sn_lfo_speed_to_u15(p[157], p[165]))       # LFO2 speed
     out += pu16(lfo_wf_for_jrm(lfo2_waveform(p[155])))   # LFO2 waveform
-    out += pu16(0)                                        # filter_type = LPF_24DB
+    out += pu16(filter_type_from_sysex(p[192]))           # filter_type (params[192])
 
     assert len(out) == 224, f"program_t size error: {len(out)}"
     return bytes(out)
