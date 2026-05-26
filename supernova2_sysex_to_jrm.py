@@ -138,7 +138,7 @@ def bipolar_to_filter_env_s12(v):
 # bank_a_synth to bank_a_dry (SEMITONE_SHIFT = -5), the synthesis runs at 2× the
 # calibration pitch, so the filter must also sit 2× higher to preserve the same
 # harmonic-cutoff relationship.
-_SN_FF_ANCHORS = [(0, 236.0), (60, 580.0), (80, 2250.0), (100, 5610.0), (127, 18682.0)]
+_SN_FF_ANCHORS = [(0, 236.0), (60, 580.0), (70, 1700.0), (80, 2250.0), (100, 5610.0), (127, 18682.0)]
 
 def sn_ff_to_u12(v):
     """Supernova II filter frequency byte (0-127) → pt2_synth filter_frequency (0-4095).
@@ -165,15 +165,18 @@ def sn_ff_to_u12(v):
     return min(4095, max(0, int(round(hz / (_SR / 2) * 4095))))
 
 def sn_ff_depth_to_s12(base_sysex, depth_sysex):
-    """Supernova II bipolar filter-freq modulation depth → pt2_synth signed depth.
+    """Supernova II bipolar filter-freq modulation depth → pt2_synth signed depth (LFO sources).
 
     The hardware applies LFO/env depths additively in sysex (log-Hz) space, so
     each unit of depth corresponds to a different absolute Hz swing depending on
-    the base cutoff.  We compute the actual pt2_synth swing by evaluating
-    sn_ff_to_u12 at base ± |net| and halving (because the LFO/env peaks at ±4095,
-    and the modulation formula is (waveform * depth) >> 11 ≈ 2×depth at peak).
+    the base cutoff.  We evaluate sn_ff_to_u12 at base ± |net| and halve,
+    because the LFO waveform peaks at ±4095 and the formula
+    (waveform * depth) >> 11 gives ≈ 2×depth at peak.
 
-    Asymmetry note: for negative LFOs/envs the true negative swing would be
+    For envelope modulation use sn_ff_depth_to_env_s12 instead — the envelope
+    formula uses (env_current >> 4) which peaks at 2047, giving 1×depth at peak.
+
+    Asymmetry note: for negative depths the true negative swing would be
     smaller (log-space floor), but we use the positive-side delta for both
     directions as a reasonable approximation.
     """
@@ -185,6 +188,23 @@ def sn_ff_depth_to_s12(base_sysex, depth_sysex):
     ff_base   = sn_ff_to_u12(base_sysex)
     ff_target = sn_ff_to_u12(target)
     depth = round((ff_target - ff_base) * 2048 / 4095)
+    return depth if net > 0 else -depth
+
+def sn_ff_depth_to_env_s12(base_sysex, depth_sysex):
+    """Supernova II bipolar filter-freq modulation depth → pt2_synth signed depth (ENV sources).
+
+    Same log-Hz swing computation as sn_ff_depth_to_s12, but no halving:
+    the envelope formula ((env_current >> 4) * depth) >> 11 peaks at
+    (2047 * depth) >> 11 ≈ 1×depth, so the full intended swing is stored directly.
+    """
+    net = depth_sysex - 64
+    if net == 0:
+        return 0
+    delta = abs(net)
+    target = max(0, min(127, base_sysex + delta))
+    ff_base   = sn_ff_to_u12(base_sysex)
+    ff_target = sn_ff_to_u12(target)
+    depth = abs(ff_target - ff_base)
     return depth if net > 0 else -depth
 
 def bipolar_to_pitch_s12(v):
@@ -620,9 +640,9 @@ def convert_program(msg02, msg1f):
     out += pu16(sn_ff_to_u12(ff_sysex))                           # frequency
     out += ps16(sn_ff_depth_to_s12(ff_sysex, p[200]))             # freq lfo_1
     out += ps16(sn_ff_depth_to_s12(ff_sysex, p[201]))             # freq lfo_2
-    out += ps16(sn_ff_depth_to_s12(ff_sysex, p[198]))             # freq env_2
-    out += ps16(sn_ff_depth_to_s12(ff_sysex, p[199]))             # freq env_3
-    out += pu16(u7_to_u12(p[205]) * 3 // 4)   # resonance (×3/4 — SN=127→3071, just above Moog self-osc threshold ≈2780)
+    out += ps16(sn_ff_depth_to_env_s12(ff_sysex, p[198]))         # freq env_2
+    out += ps16(sn_ff_depth_to_env_s12(ff_sysex, p[199]))         # freq env_3
+    out += pu16(u7_to_u12(p[205]) * 7 // 8)   # resonance (×7/8 — SN≈99→2780 self-osc threshold; SN=127→3584)
     # "Resonance/Width" mods: hardware displays as "width mod" for standard filter types
     # (12/18/24dB, HPF, BPF) but the destination is Resonance, not Width.
     # Only the Special dual-filter type uses true Width. See manual pp.85-87.

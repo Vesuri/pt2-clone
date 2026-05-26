@@ -126,6 +126,18 @@ def main():
         for lfo_wf_offset in (200, 204):
             jrm_val = struct.unpack_from('>H', params_bin, lfo_wf_offset)[0]
             struct.pack_into('>H', params_bin, lfo_wf_offset, (jrm_val - 1536) // 2)
+
+        # The synthesis renders at SYNTH_SAMPLERATE but plays back at PLAYBACK_SAMPLERATE
+        # (SEMITONE_SHIFT = -5), stretching all time values by SYNTH/PLAYBACK = 1.335×.
+        # Scale attack/decay values down by PLAYBACK_RATIO so perceived timing matches hardware.
+        # Sustain levels are amplitude, not time — not scaled.
+        # Env1/2/3 attack at offsets 180/186/192, decay at 182/188/194.
+        playback_ratio = PLAYBACK_SAMPLERATE / SYNTH_SAMPLERATE
+        for ad_offset in (180, 182, 186, 188, 192, 194):
+            val = struct.unpack_from('>H', params_bin, ad_offset)[0]
+            new_val = min(0xFFF, max(0, round((val + 1) * playback_ratio) - 1))
+            struct.pack_into('>H', params_bin, ad_offset, new_val)
+
         params_bin = bytes(params_bin)
 
         try:
