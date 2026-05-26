@@ -193,19 +193,11 @@ def sn_ff_depth_to_s12(base_sysex, depth_sysex):
 def sn_ff_depth_to_env_s12(base_sysex, depth_sysex):
     """Supernova II bipolar filter-freq modulation depth → pt2_synth signed depth (ENV sources).
 
-    Same log-Hz swing computation as sn_ff_depth_to_s12, but no halving:
-    the envelope formula ((env_current >> 4) * depth) >> 11 peaks at
-    (2047 * depth) >> 11 ≈ 1×depth, so the full intended swing is stored directly.
+    The envelope formula ((env_current >> 4) * depth) >> 11 peaks at
+    (4095 * depth) >> 11 ≈ 2×depth, identical to the LFO peak behaviour.
+    Same halved formula as sn_ff_depth_to_s12 — kept as a separate call-site name.
     """
-    net = depth_sysex - 64
-    if net == 0:
-        return 0
-    delta = abs(net)
-    target = max(0, min(127, base_sysex + delta))
-    ff_base   = sn_ff_to_u12(base_sysex)
-    ff_target = sn_ff_to_u12(target)
-    depth = abs(ff_target - ff_base)
-    return depth if net > 0 else -depth
+    return sn_ff_depth_to_s12(base_sysex, depth_sysex)
 
 def bipolar_to_pitch_s12(v):
     """
