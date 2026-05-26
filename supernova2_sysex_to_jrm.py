@@ -559,7 +559,7 @@ def convert_program(msg02, msg1f):
     out += ps16(bipolar_to_filter_lfo_s12(p[201]))   # freq lfo_2
     out += ps16(bipolar_to_filter_env_s12(p[198]))   # freq env_2
     out += ps16(bipolar_to_filter_env_s12(p[199]))   # freq env_3
-    out += pu16(u7_to_u12(p[205]) // 2)       # resonance (halved — same range as frequency)
+    out += pu16(u7_to_u12(p[205]) * 3 // 4)   # resonance (×3/4 — SN=127→3071, just above Moog self-osc threshold ≈2780)
     # "Resonance/Width" mods: hardware displays as "width mod" for standard filter types
     # (12/18/24dB, HPF, BPF) but the destination is Resonance, not Width.
     # Only the Special dual-filter type uses true Width. See manual pp.85-87.
