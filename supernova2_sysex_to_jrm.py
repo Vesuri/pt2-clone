@@ -17,9 +17,11 @@ Mapping completeness (see SYSEX_FORMAT.md for details):
   Confirmed:   oscillator waveforms, mix levels/mods, width/pitch mods,
                filter cutoff/resonance and mods, all envelope ADS,
                LFO1+2 speed (range-aware, params[164]/[165]) + waveform, FM flags
-  Approximate: filter frequency/resonance (linear — pt2_synth Hz calibration pending)
+  Approximate: filter resonance (linear — pt2_synth Hz calibration pending)
                LFO2 waveform (partial — SAW/SQUARE indistinguishable at some ranges)
-               modulation depths (linear — pt2_synth depth calibration pending)
+               resonance modulation depths (linear — pt2_synth depth calibration pending)
+  Calibrated:  filter frequency (log-linear interp from hardware sweep anchor points),
+               filter freq modulation depths (computed from actual Hz swing via sn_ff_to_u12)
   Calibrated:  envelope attack/decay (exponential from hardware sweep),
                envelope sustain (power-law from hardware sweep),
                LFO speed (quadratic per range from hardware sweep),
@@ -29,6 +31,7 @@ Mapping completeness (see SYSEX_FORMAT.md for details):
                  calibrated for pt2_synth PM+sine implementation at <<16 depth)
 """
 
+import math
 import struct
 import sys
 
@@ -103,27 +106,86 @@ def bipolar_to_fm_mix_s12(v):
 
 def bipolar_to_filter_lfo_s12(v):
     """
-    Sysex bipolar filter-frequency modulation depth → pt2_synth signed depth (LFO and env).
+    Sysex bipolar resonance modulation depth → pt2_synth signed depth (LFO and env).
 
-    Filter frequency is stored halved (u7_to_u12(v)//2 → 0–2047), so 1 Supernova
-    filter unit ≈ 16.1 pt2_synth units.  LFO and env both peak at ±4095, contributing
-    2 × depth.  For N Supernova units:  2 × depth = N × 16.1  →  depth ≈ N × 8.
+    Used only for resonance modulations (params[210]/[211] LFO, [208]/[209] ENV).
+    Filter-frequency modulations use sn_ff_depth_to_s12() instead.
 
-    Calibration check (A008 Toyotsu Chu): base ff=24→386, fl1 net=+18.
-      Factor 8: depth=144, swing ±288 → range [98, 674]  (filter stays partially open)
-      Old factor 1: swing ±36 (barely moves)
-      Old bipolar_to_s12 factor 32: swing ±9222 → [0, 4095]  (slams shut → silence)
+    Resonance is stored ×3/4 (u7_to_u12(v)*3//4 → 0–3071), so 1 Supernova
+    resonance unit ≈ 24.2 pt2_synth units.  Using factor 8 is approximate; resonance
+    modulation calibration remains pending.
     """
     return (v - 64) * 8
 
 def bipolar_to_filter_env_s12(v):
     """
-    Sysex bipolar filter-frequency envelope modulation depth → pt2_synth signed depth.
+    Sysex bipolar resonance envelope modulation depth → pt2_synth signed depth.
 
-    Same formula as bipolar_to_filter_lfo_s12: both LFO and env peak at ±4095,
-    so the factor is identical (×8).  Kept as a separate name for call-site clarity.
+    Used only for resonance modulations (params[208]/[209] ENV).
+    Filter-frequency modulations use sn_ff_depth_to_s12() instead.
+    Same formula as bipolar_to_filter_lfo_s12; kept as a separate name for call-site clarity.
     """
     return (v - 64) * 8
+
+# ── Filter frequency — hardware-calibrated exponential mapping ────────────────
+
+# Anchor points from hardware sweep recordings (filter_freq_low.csv reliable at
+# low end, filter_freq.csv reliable at high end; v=127 extrapolated from 90-100
+# slope).  Between anchors, log-linear (equal-ratio) interpolation is used.
+# Anchor Hz values are doubled relative to raw hardware sweep (filter_freq_low.csv /
+# filter_freq.csv at MIDI-60 reference note) to account for the synthesis rendering
+# one octave higher than the hardware calibration recordings.  When comparing
+# bank_a_synth to bank_a_dry (SEMITONE_SHIFT = -5), the synthesis runs at 2× the
+# calibration pitch, so the filter must also sit 2× higher to preserve the same
+# harmonic-cutoff relationship.
+_SN_FF_ANCHORS = [(0, 236.0), (60, 580.0), (80, 2250.0), (100, 5610.0), (127, 18682.0)]
+
+def sn_ff_to_u12(v):
+    """Supernova II filter frequency byte (0-127) → pt2_synth filter_frequency (0-4095).
+
+    The hardware knob is highly non-linear: barely moves from 0-60 (~118-290 Hz),
+    then rises steeply to ~9 kHz at 127.  Uses log-linear interpolation between
+    hardware-measured anchor points.  No halving — the non-linear distribution
+    keeps values well inside the stable Moog range for most programs.
+    """
+    v = max(0, min(127, v))
+    pts = _SN_FF_ANCHORS
+    if v <= pts[0][0]:
+        hz = pts[0][1]
+    elif v >= pts[-1][0]:
+        hz = pts[-1][1]
+    else:
+        for i in range(len(pts) - 1):
+            v0, f0 = pts[i]
+            v1, f1 = pts[i + 1]
+            if v0 <= v <= v1:
+                t = (v - v0) / (v1 - v0)
+                hz = math.exp(math.log(f0) + t * (math.log(f1) - math.log(f0)))
+                break
+    return min(4095, max(0, int(round(hz / (_SR / 2) * 4095))))
+
+def sn_ff_depth_to_s12(base_sysex, depth_sysex):
+    """Supernova II bipolar filter-freq modulation depth → pt2_synth signed depth.
+
+    The hardware applies LFO/env depths additively in sysex (log-Hz) space, so
+    each unit of depth corresponds to a different absolute Hz swing depending on
+    the base cutoff.  We compute the actual pt2_synth swing by evaluating
+    sn_ff_to_u12 at base ± |net| and halving (because the LFO/env peaks at ±4095,
+    and the modulation formula is (waveform * depth) >> 11 ≈ 2×depth at peak).
+
+    Asymmetry note: for negative LFOs/envs the true negative swing would be
+    smaller (log-space floor), but we use the positive-side delta for both
+    directions as a reasonable approximation.
+    """
+    net = depth_sysex - 64
+    if net == 0:
+        return 0
+    delta = abs(net)
+    target = max(0, min(127, base_sysex + delta))
+    ff_base   = sn_ff_to_u12(base_sysex)
+    ff_target = sn_ff_to_u12(target)
+    depth = round((ff_target - ff_base) * 2048 / 4095)
+    return depth if net > 0 else -depth
 
 def bipolar_to_pitch_s12(v):
     """
@@ -132,14 +194,14 @@ def bipolar_to_pitch_s12(v):
     pt2_synth pitch is in Hz; LFO and env peak at ±4095, contributing 2 × depth.
     The Supernova stores pitch depth in semitones; ±12 semitones at full range (net ±63)
     is consistent with bank A survey data (Birdy net=+13 ≈ bird-call sweep ~2.5 st;
-    Soft Voices net=+4 ≈ gentle vibrato ~0.75 st at PITCH_NEUTRAL = 175 Hz).
+    Soft Voices net=+4 ≈ gentle vibrato ~0.75 st at PITCH_NEUTRAL = 350 Hz).
 
-    Calibration (linear approx at PITCH_NEUTRAL = 175 Hz):
-      1 semitone ≈ 175 × (2^(1/12) − 1) ≈ 10.4 Hz
-      12 semitones at peak (±4095): depth = 12 × 10.4 / 2 ≈ 62  →  factor ≈ 1 per net unit
-      →  (v − 64) × 1
+    Calibration (linear approx at PITCH_NEUTRAL = 350 Hz):
+      1 semitone ≈ 350 × (2^(1/12) − 1) ≈ 20.8 Hz
+      12 semitones at peak (±4095): depth = 12 × 20.8 / 2 ≈ 125  →  factor ≈ 2 per net unit
+      →  (v − 64) × 2
     """
-    return v - 64
+    return (v - 64) * 2
 
 def bipolar_to_u12_width(v):
     """
@@ -381,14 +443,14 @@ OSC_FINE_POS   = {1:  9, 2: 43, 3: 77}
 OSC_OCT_CENTER  = {1: 32, 2: 37, 3: 42}   # Packed NRPN 0: Osc1 oct0=32, Osc2 oct0=37, Osc3 oct0=42
 OSC_SEMI_CENTER = {1: 57, 2: 82, 3: 107}  # Packed NRPN 0: Osc1 semi0=57, Osc2 semi0=82, Osc3 semi0=107
 
-PITCH_NEUTRAL = 0xAF  # pt2_synth pitch value for no transposition (oct=0, semi=0, fine=0)
+PITCH_NEUTRAL = 0x15E  # pt2_synth pitch value for no transposition (oct=0, semi=0, fine=0); one octave up from 0xAF
 
 def osc_pitch_jrm(p, osc):
     """
     Compute pt2_synth oscillator_N_pitch from type-02 params.
 
-    Formula: pitch = round(0xAF * 2^((oct*12 + semi + cents/100) / 12))
-    where 0xAF is the neutral pitch for no transposition.
+    Formula: pitch = round(0x15E * 2^((oct*12 + semi + cents/100) / 12))
+    where 0x15E is the neutral pitch for no transposition.
     Clamped to 0x000–0x7FF (pt2_synth range).
     """
     oct_hw  = p[OSC_OCT_POS[osc]]  - OSC_OCT_CENTER[osc]
@@ -554,11 +616,12 @@ def convert_program(msg02, msg1f):
     out += pu16(1 if is_fm23 else 0)  # FM flag (type-1F[3] bit 1)
 
     # ── Filter ────────────────────────────────────────────────────────────────
-    out += pu16(u7_to_u12(p[195]) // 2)              # frequency   (halved — Moog coefficients saturate above ~2800)
-    out += ps16(bipolar_to_filter_lfo_s12(p[200]))   # freq lfo_1
-    out += ps16(bipolar_to_filter_lfo_s12(p[201]))   # freq lfo_2
-    out += ps16(bipolar_to_filter_env_s12(p[198]))   # freq env_2
-    out += ps16(bipolar_to_filter_env_s12(p[199]))   # freq env_3
+    ff_sysex = p[195]
+    out += pu16(sn_ff_to_u12(ff_sysex))                           # frequency
+    out += ps16(sn_ff_depth_to_s12(ff_sysex, p[200]))             # freq lfo_1
+    out += ps16(sn_ff_depth_to_s12(ff_sysex, p[201]))             # freq lfo_2
+    out += ps16(sn_ff_depth_to_s12(ff_sysex, p[198]))             # freq env_2
+    out += ps16(sn_ff_depth_to_s12(ff_sysex, p[199]))             # freq env_3
     out += pu16(u7_to_u12(p[205]) * 3 // 4)   # resonance (×3/4 — SN=127→3071, just above Moog self-osc threshold ≈2780)
     # "Resonance/Width" mods: hardware displays as "width mod" for standard filter types
     # (12/18/24dB, HPF, BPF) but the destination is Resonance, not Width.
