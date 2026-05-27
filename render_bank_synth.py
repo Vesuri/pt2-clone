@@ -29,8 +29,6 @@ sys.path.insert(0, str(Path(__file__).parent))
 from supernova2_sysex_to_jrm import parse_sysex_bank, convert_program
 
 SYNTH_SAMPLERATE = 22050
-SEMITONE_SHIFT = -5
-PLAYBACK_SAMPLERATE = int(round(SYNTH_SAMPLERATE * 2 ** (SEMITONE_SHIFT / 12)))
 
 
 def write_wav_header(f, n_samples, sr=SYNTH_SAMPLERATE, bits=16, channels=1):
@@ -50,7 +48,7 @@ def write_wav_header(f, n_samples, sr=SYNTH_SAMPLERATE, bits=16, channels=1):
     f.write(struct.pack('<I', data_bytes))
 
 
-def render_program(params_bin: bytes, out_wav: Path, synth_test_bin: str, render_size: int):
+def render_program(params_bin: bytes, out_wav: Path, synth_test_bin: str, render_size: int, playback_samplerate: int):
     """Run synth_test with the given 208-byte params.bin and write a 16-bit WAV."""
     with tempfile.TemporaryDirectory() as tmp:
         params_path = Path(tmp) / 'params.bin'
@@ -67,7 +65,7 @@ def render_program(params_bin: bytes, out_wav: Path, synth_test_bin: str, render
     pcm16 = pcm8.astype(np.int16) << 8
 
     with open(out_wav, 'wb') as f:
-        write_wav_header(f, len(pcm16), sr=PLAYBACK_SAMPLERATE)
+        write_wav_header(f, len(pcm16), sr=playback_samplerate)
         f.write(pcm16.tobytes())
 
 
@@ -79,9 +77,13 @@ def main():
     ap.add_argument('--render-seconds', type=float, default=6.0)
     ap.add_argument('--prefix',          default='A',
                     help='Filename prefix before the program index (default: A)')
+    ap.add_argument('--semitone-shift',  type=int, default=-5,
+                    help='Pitch shift in semitones via WAV sample rate (default: -5)')
     ap.add_argument('--start-from',     type=int, default=0,
                     help='Skip programs before this index (for resuming)')
     args = ap.parse_args()
+
+    playback_samplerate = int(round(SYNTH_SAMPLERATE * 2 ** (args.semitone_shift / 12)))
 
     synth_test = str(Path(args.synth_test).resolve())
     if not Path(synth_test).exists():
@@ -94,7 +96,7 @@ def main():
 
     p02, p1f = parse_sysex_bank(args.bank_file)
     print(f"Parsed {len(p02)} programs from {args.bank_file}")
-    print(f"Output → {out_dir}/   render={args.render_seconds}s  ({render_size} samples @ {SYNTH_SAMPLERATE} Hz)")
+    print(f"Output → {out_dir}/   render={args.render_seconds}s  ({render_size} samples @ {SYNTH_SAMPLERATE} Hz, playback @ {playback_samplerate} Hz, shift={args.semitone_shift:+d}st)")
     print()
 
     errors = []
@@ -134,7 +136,7 @@ def main():
         # Scale attack/decay values down by PLAYBACK_RATIO so perceived timing matches hardware.
         # Sustain levels are amplitude, not time — not scaled.
         # Env1/2/3 attack at offsets 180/186/192, decay at 182/188/194.
-        playback_ratio = PLAYBACK_SAMPLERATE / SYNTH_SAMPLERATE
+        playback_ratio = playback_samplerate / SYNTH_SAMPLERATE
         for ad_offset in (180, 182, 186, 188, 192, 194):
             val = struct.unpack_from('>H', params_bin, ad_offset)[0]
             new_val = min(0xFFF, max(0, round((val + 1) * playback_ratio) - 1))
@@ -161,7 +163,7 @@ def main():
         params_bin = bytes(params_bin)
 
         try:
-            render_program(params_bin, wav_path, synth_test, render_size)
+            render_program(params_bin, wav_path, synth_test, render_size, playback_samplerate)
             print(f"→ {wav_path.name}")
         except subprocess.CalledProcessError as e:
             print(f"SKIP (synth_test error: {e})")
