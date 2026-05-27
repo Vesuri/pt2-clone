@@ -5275,6 +5275,45 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 		}
 		break;
 
+		case PTB_SY_FILTER_TYPE:
+		{
+			program_t *prog = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program];
+			switch (prog->filter_type) {
+			case FILTER_TYPE_LPF_12DB:
+			case FILTER_TYPE_LPF_18DB:
+			case FILTER_TYPE_LPF_24DB:
+				prog->filter_type = FILTER_TYPE_BPF_12DB;
+				break;
+			case FILTER_TYPE_BPF_12DB:
+				prog->filter_type = FILTER_TYPE_HPF_12DB;
+				break;
+			default:
+				prog->filter_type = FILTER_TYPE_LPF_24DB;
+				break;
+			}
+			ui.updateSynth = true;
+		}
+		break;
+		case PTB_SY_FILTER_SLOPE:
+		{
+			program_t *prog = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program];
+			switch (prog->filter_type) {
+			case FILTER_TYPE_LPF_24DB:
+				prog->filter_type = FILTER_TYPE_LPF_12DB;
+				break;
+			case FILTER_TYPE_LPF_12DB:
+				prog->filter_type = FILTER_TYPE_LPF_18DB;
+				break;
+			case FILTER_TYPE_LPF_18DB:
+				prog->filter_type = FILTER_TYPE_LPF_24DB;
+				break;
+			default:
+				break;
+			}
+			ui.updateSynth = true;
+		}
+		break;
+
 		default: displayErrorMsg("NOT IMPLEMENTED"); return false; // button not mapped
 	}
 

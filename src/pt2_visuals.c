@@ -2618,6 +2618,32 @@ void updateSynth(void)
 	printThreeHexBg(128, 255 + 152, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(128, 255 + 162, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_2, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(128, 255 + 172, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_env_3, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	const char* filterType;
+	const char* filterSlope;
+	switch (synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_type) {
+	case FILTER_TYPE_BPF_12DB:
+		filterType = "BAND";
+		filterSlope = "12DB";
+		break;
+	case FILTER_TYPE_HPF_12DB:
+		filterType = "HIGH";
+		filterSlope = "12DB";
+		break;
+	case FILTER_TYPE_LPF_12DB:
+		filterType = "LOW ";
+		filterSlope = "12DB";
+		break;
+	case FILTER_TYPE_LPF_18DB:
+		filterType = "LOW ";
+		filterSlope = "18DB";
+		break;
+	default:
+		filterType = "LOW ";
+		filterSlope = "24DB";
+		break;
+	}
+	textOutBg(208, 255 + 122, filterType, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	textOutBg(208, 255 + 132, filterSlope, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(64, 255 + 192, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(64, 255 + 202, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(64, 255 + 212, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
