@@ -77,6 +77,8 @@ def main():
     ap.add_argument('--synth-test',     default='test/synth_test')
     ap.add_argument('--out-dir',        default='bank_a_synth')
     ap.add_argument('--render-seconds', type=float, default=6.0)
+    ap.add_argument('--prefix',          default='A',
+                    help='Filename prefix before the program index (default: A)')
     ap.add_argument('--start-from',     type=int, default=0,
                     help='Skip programs before this index (for resuming)')
     args = ap.parse_args()
@@ -105,7 +107,7 @@ def main():
         name_bytes = p02[idx][0:16]
         name = name_bytes.rstrip(b'\x00').decode('latin-1').strip()
         safe_name = ''.join(c if c.isalnum() or c in ' _-' else '_' for c in name).strip()
-        wav_path = out_dir / f"A{idx:03d}_{safe_name}.wav"
+        wav_path = out_dir / f"{args.prefix}{idx:03d}_{safe_name}.wav"
 
         print(f"[{idx:03d}] {name:<24}", end='  ', flush=True)
 
