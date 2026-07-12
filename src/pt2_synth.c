@@ -865,6 +865,19 @@ void renderPart(part_t* part, bool add)
 		}
 		filter_in = sample << 5;
 
+		// Filter overdrive: drive the pre-filter signal and hard-clip it back
+		// into range. Because this happens before the filter, the harmonics the
+		// clipping adds are shaped by the filter rather than removed by it.
+		if (program->filter_overdrive != 0) {
+			int32_t driven = ((int32_t)filter_in * (0x1000 + (program->filter_overdrive << 2))) >> 12;
+			if (driven > 4095) {
+				driven = 4095;
+			} else if (driven < -4096) {
+				driven = -4096;
+			}
+			filter_in = (int16_t)driven;
+		}
+
 		// Update filter frequency and resonance every 64th sample
 		if ((buffer_position & 63) == 0) {
 			// Update filter frequency
@@ -1087,6 +1100,7 @@ void getProgram(program_t* program, FILE* file)
     program->filter_resonance_lfo_2 = getWord(file);
     program->filter_resonance_env_2 = getWord(file);
     program->filter_resonance_env_3 = getWord(file);
+    program->filter_overdrive = getWord(file);
     program->envelope_1_attack = getWord(file);
     program->envelope_1_decay = getWord(file);
     program->envelope_1_sustain = getWord(file);
@@ -1131,7 +1145,7 @@ void putPerformance(performance_t* performance, FILE* file)
 	}
 }
 
-#define PROGRAM_T_SIZE_ON_DISK 224
+#define PROGRAM_T_SIZE_ON_DISK 226
 
 void putProgram(program_t* program, FILE* file)
 {
@@ -1226,6 +1240,7 @@ void putProgram(program_t* program, FILE* file)
     putWord(program->filter_resonance_lfo_2, file);
     putWord(program->filter_resonance_env_2, file);
     putWord(program->filter_resonance_env_3, file);
+    putWord(program->filter_overdrive, file);
     putWord(program->envelope_1_attack, file);
     putWord(program->envelope_1_decay, file);
     putWord(program->envelope_1_sustain, file);

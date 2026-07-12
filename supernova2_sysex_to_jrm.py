@@ -544,7 +544,7 @@ def ps16(v): return struct.pack(">h", max(-32768, min(32767, v)))
 
 def convert_program(msg02, msg1f):
     """
-    Convert one program from raw sysex bytes to a 224-byte big-endian program_t record.
+    Convert one program from raw sysex bytes to a 226-byte big-endian program_t record.
 
     msg02: 286-byte block (name[16] + params[270])
     msg1f: 88-byte type-1F data block
@@ -644,6 +644,11 @@ def convert_program(msg02, msg1f):
     out += ps16(bipolar_to_filter_env_s12(p[208]))   # res env_2
     out += ps16(bipolar_to_filter_env_s12(p[209]))   # res env_3
 
+    # ── Filter overdrive (params[194], direct 0-127, 0 = off) ───────────────
+    # Pre-filter drive + hard clip in pt2_synth. Linear map; calibrate against
+    # hardware recordings if the drive amount reads too strong/weak.
+    out += pu16(u7_to_u12(p[194]))                   # filter_overdrive
+
     # ── Envelopes (ADS — pt2_synth does not use Release) ─────────────────────
     # Env1 (amplifier):  params[178]=Attack, [179]=Decay, [180]=Sustain
     out += pu16(sn_attack_to_u12(p[178]))
@@ -667,7 +672,7 @@ def convert_program(msg02, msg1f):
     out += pu16(lfo_wf_for_jrm(lfo2_waveform(p[155])))   # LFO2 waveform
     out += pu16(filter_type_from_sysex(p[192]))           # filter_type (params[192])
 
-    assert len(out) == 224, f"program_t size error: {len(out)}"
+    assert len(out) == 226, f"program_t size error: {len(out)}"
     return bytes(out)
 
 # ── JRM file writer ───────────────────────────────────────────────────────────

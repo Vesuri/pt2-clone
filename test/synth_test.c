@@ -151,6 +151,7 @@ static void deserialize_program(program_t *p, const uint8_t *buf)
 	p->filter_resonance_lfo_2     = RS();
 	p->filter_resonance_env_2     = RS();
 	p->filter_resonance_env_3     = RS();
+	p->filter_overdrive           = RU();
 
 	p->envelope_1_attack          = RS();
 	p->envelope_1_decay           = RS();
@@ -186,9 +187,9 @@ int main(int argc, char **argv)
 	/* Read params.bin */
 	FILE *pf = fopen(argv[1], "rb");
 	if (!pf) { perror(argv[1]); return 1; }
-	uint8_t raw[208];
-	if (fread(raw, 1, 208, pf) != 208) {
-		fprintf(stderr, "params.bin must be exactly 208 bytes\n");
+	uint8_t raw[210];
+	if (fread(raw, 1, 210, pf) != 210) {
+		fprintf(stderr, "params.bin must be exactly 210 bytes\n");
 		return 1;
 	}
 	fclose(pf);

@@ -147,6 +147,7 @@ PROGRAM_T_FIELDS = [
     ('filter_resonance_lfo_2',     True),
     ('filter_resonance_env_2',     True),
     ('filter_resonance_env_3',     True),
+    ('filter_overdrive',           True),
 
     ('envelope_1_attack',          True),
     ('envelope_1_decay',           True),
@@ -165,7 +166,7 @@ PROGRAM_T_FIELDS = [
     ('filter_type',                False),
 ]
 
-assert len(PROGRAM_T_FIELDS) == 104
+assert len(PROGRAM_T_FIELDS) == 105
 
 
 def make_program(**kwargs):
@@ -192,9 +193,9 @@ _LFO_FIELDS = {'lfo_1_waveform', 'lfo_2_waveform'}
 def serialize_program(prog, for_68k=False, render_size=DEFAULT_RENDER_SIZE):
     """Serialize program_t to params.bin blob.
 
-    C side: big-endian 208-byte blob (104 fields × 2 bytes).
-    68k side: same 208 bytes followed by a big-endian uint32 render_size_param
-    (4 bytes), total 212 bytes.  The 68k load_params routine reads the full
+    C side: big-endian 210-byte blob (105 fields × 2 bytes).
+    68k side: same 210 bytes followed by a big-endian uint32 render_size_param
+    (4 bytes), total 214 bytes.  The 68k load_params routine reads the full
     block and copies render_size_param into buffer_render_size if non-zero.
 
     When for_68k=True, LFO waveform constants are translated from C values
@@ -211,7 +212,7 @@ def serialize_program(prog, for_68k=False, render_size=DEFAULT_RENDER_SIZE):
             buf += struct.pack('>H', v)
     if for_68k:
         buf += struct.pack('>I', render_size)
-    assert len(buf) == (212 if for_68k else 208)
+    assert len(buf) == (214 if for_68k else 210)
     return bytes(buf)
 
 
@@ -448,6 +449,38 @@ def gen_test_cases():
             envelope_2_attack=0x100,
             envelope_2_decay=0x400,
             envelope_2_sustain=0x200,
+        ), S
+
+    # ------------------------------------------------------------------ #
+    # Filter overdrive (pre-filter drive + hard clip)                     #
+    # ------------------------------------------------------------------ #
+
+    # Drive amounts against a saw into the Moog ladder, low cutoff so the
+    # clipping harmonics are exercised through a near-closed filter.
+    for od in [0x100, 0x400, 0x800, 0xfff]:
+        for ffreq in [0x080, 0x400, 0xfff]:
+            yield f"overdrive_od{od:03x}_f{ffreq:03x}", make_program(
+                oscillator_3_waveform=WAVEFORM_SAW,
+                oscillator_3_mix=0xfff,
+                oscillator_3_pitch=175,
+                oscillator_3_width=0x800,
+                filter_frequency=ffreq,
+                filter_resonance=0x400,
+                filter_overdrive=od,
+                envelope_1_sustain=0xfff,
+            ), S
+
+    # Overdrive combined with the SVF (HPF/BPF) paths
+    for ft, label in [(FILTER_TYPE_HPF_12DB, 'hpf12'), (FILTER_TYPE_BPF_12DB, 'bpf12')]:
+        yield f"overdrive_{label}", make_program(
+            oscillator_3_waveform=WAVEFORM_SAW,
+            oscillator_3_mix=0xfff,
+            oscillator_3_pitch=175,
+            filter_frequency=0x400,
+            filter_resonance=0x600,
+            filter_type=ft,
+            filter_overdrive=0xc00,
+            envelope_1_sustain=0xfff,
         ), S
 
     # ------------------------------------------------------------------ #

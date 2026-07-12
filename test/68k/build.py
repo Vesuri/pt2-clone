@@ -30,7 +30,7 @@ OUT_BIN = os.path.join(os.path.dirname(__file__), "synth_render")
 LOAD_PARAMS_ROUTINE = """
 ; Load synthesis parameters from WORK:params.bin into the parameter globals.
 ; The file is a flat big-endian binary matching the parameter block layout
-; from oscillator_1_waveform through render_size_param (212 bytes / 104 words
+; from oscillator_1_waveform through render_size_param (214 bytes / 105 words
 ; + one longword for the render size).  If render_size_param is non-zero it
 ; is copied into buffer_render_size so the caller can pass a per-test size.
 load_params:

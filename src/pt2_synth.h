@@ -53,6 +53,7 @@ enum current_oscillator {
 //   sync base (oscillator_*_sync):                                           uint16_t, 0x000–0xfff
 //   sync modulation depths (*_sync_lfo_*, *_sync_env_*):                     int16_t,  −0x7ff–0x7ff
 //   filter_frequency, filter_resonance (base):                               uint16_t, 0x000–0xfff
+//   filter_overdrive:                                                         uint16_t, 0x000–0xfff (0 = unity/off)
 //   filter modulation depths (*_lfo_*, *_env_*):                             int16_t,  −0x7ff–0x7ff
 //   envelope_*_attack, envelope_*_decay, envelope_*_sustain:                 uint16_t, 0x000–0xfff
 //   lfo_*_speed:                                                              uint16_t, 0x0000–0x7fff
@@ -152,6 +153,7 @@ typedef struct program_t
     int16_t filter_resonance_lfo_2;     // signed depth
     int16_t filter_resonance_env_2;     // signed depth
     int16_t filter_resonance_env_3;     // signed depth
+    uint16_t filter_overdrive;           // 0x000–0xfff, pre-filter drive (0 = unity/off)
     uint16_t envelope_1_attack;          // 0x000–0xfff
     uint16_t envelope_1_decay;           // 0x000–0xfff
     uint16_t envelope_1_sustain;         // 0x000–0xfff

@@ -49,7 +49,7 @@ def write_wav_header(f, n_samples, sr=SYNTH_SAMPLERATE, bits=16, channels=1):
 
 
 def render_program(params_bin: bytes, out_wav: Path, synth_test_bin: str, render_size: int, playback_samplerate: int):
-    """Run synth_test with the given 208-byte params.bin and write a 16-bit WAV."""
+    """Run synth_test with the given 210-byte params.bin and write a 16-bit WAV."""
     with tempfile.TemporaryDirectory() as tmp:
         params_path = Path(tmp) / 'params.bin'
         raw_path    = Path(tmp) / 'out.raw'
@@ -120,14 +120,15 @@ def main():
             errors.append(f"  [{idx:03d}] {name}: {e}")
             continue
 
-        # convert_program returns 16-byte name + 208-byte params.bin in JRM format.
+        # convert_program returns 16-byte name + 210-byte params.bin in JRM format.
         # JRM stores LFO waveforms as 68k byte offsets (SAW=1536, SQUARE=9728, TRIANGLE=17920),
         # but synth_test expects C enum values (SAW=0, SQUARE=4096, TRIANGLE=8192).
         # Convert: c_value = (jrm_value - 1536) // 2.
-        # LFO1 waveform is at byte offset 200, LFO2 waveform at byte offset 204.
+        # LFO1 waveform is at byte offset 202, LFO2 waveform at byte offset 206.
+        # (filter_overdrive at offset 180 shifted every field at/after it by +2.)
         params_bin = bytearray(program_record[16:])
-        assert len(params_bin) == 208
-        for lfo_wf_offset in (200, 204):
+        assert len(params_bin) == 210
+        for lfo_wf_offset in (202, 206):
             jrm_val = struct.unpack_from('>H', params_bin, lfo_wf_offset)[0]
             struct.pack_into('>H', params_bin, lfo_wf_offset, (jrm_val - 1536) // 2)
 
@@ -135,9 +136,9 @@ def main():
         # (SEMITONE_SHIFT = -5), stretching all time values by SYNTH/PLAYBACK = 1.335×.
         # Scale attack/decay values down by PLAYBACK_RATIO so perceived timing matches hardware.
         # Sustain levels are amplitude, not time — not scaled.
-        # Env1/2/3 attack at offsets 180/186/192, decay at 182/188/194.
+        # Env1/2/3 attack at offsets 182/188/194, decay at 184/190/196.
         playback_ratio = playback_samplerate / SYNTH_SAMPLERATE
-        for ad_offset in (180, 182, 186, 188, 192, 194):
+        for ad_offset in (182, 184, 188, 190, 194, 196):
             val = struct.unpack_from('>H', params_bin, ad_offset)[0]
             new_val = min(0xFFF, max(0, round((val + 1) * playback_ratio) - 1))
             struct.pack_into('>H', params_bin, ad_offset, new_val)
@@ -148,14 +149,15 @@ def main():
         # frozen there. On hardware a frozen LFO sits at an arbitrary phase, not
         # necessarily the most harmful one. Treat speed=0 LFOs as contributing no
         # modulation by zeroing their modulation depth fields.
-        # LFO1/2 speed at offsets 198/202. Modulation depth fields:
+        # LFO1/2 speed at offsets 200/204. Modulation depth fields (all sit before
+        # filter_overdrive at offset 180, so these are unaffected by the +2 shift):
         #   LFO1: osc mix 4/46/88, pitch 14/56/98, width 24/66/108, sync 34/76/118,
         #          noise mix 128, osc13 mix 138, osc23 mix 150, ff 162, res 172
         #   LFO2: same fields +2 each: 6/48/90, 16/58/100, 26/68/110, 36/78/120,
         #          130, 140, 152, 164, 174
         _LFO1_MODS = (4,14,24,34, 46,56,66,76, 88,98,108,118, 128, 138, 150, 162, 172)
         _LFO2_MODS = (6,16,26,36, 48,58,68,78, 90,100,110,120, 130, 140, 152, 164, 174)
-        for speed_off, mod_offs in ((198, _LFO1_MODS), (202, _LFO2_MODS)):
+        for speed_off, mod_offs in ((200, _LFO1_MODS), (204, _LFO2_MODS)):
             if struct.unpack_from('>H', params_bin, speed_off)[0] == 0:
                 for off in mod_offs:
                     struct.pack_into('>H', params_bin, off, 0)
