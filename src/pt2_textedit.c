@@ -419,6 +419,7 @@ static void redrawTextEditObject(void)
 		case PTB_SY_FREQUENCY_ENV2: ui.updateFrequencyEnv2Text = true; break;
 		case PTB_SY_FREQUENCY_ENV3: ui.updateFrequencyEnv3Text = true; break;
 		case PTB_SY_RESONANCE_LEVEL: ui.updateResonanceLevelText = true; break;
+		case PTB_SY_FILTER_OVERDRIVE: ui.updateOverdriveText = true; break;
 		case PTB_SY_RESONANCE_LFO1: ui.updateResonanceLFO1Text = true; break;
 		case PTB_SY_RESONANCE_LFO2: ui.updateResonanceLFO2Text = true; break;
 		case PTB_SY_RESONANCE_ENV2: ui.updateResonanceEnv2Text = true; break;
@@ -1982,6 +1983,22 @@ void leaveTextEditMode(bool updateValue)
 					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance = tmp16;
 
 					ui.updateResonanceLevelText = true;
+					ui.updateSynth = true;
+				}
+			}
+			break;
+
+			case PTB_SY_FILTER_OVERDRIVE:
+			{
+				editor.currOverdriveDisp = &synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_overdrive;
+
+				if (updateValue)
+				{
+					tmp16 = CLAMP(textEdit.tmpDisp16, 0, 0xfff);
+
+					synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_overdrive = tmp16;
+
+					ui.updateOverdriveText = true;
 					ui.updateSynth = true;
 				}
 			}

@@ -36,7 +36,7 @@ extern uint16_t vuMeterColors[48];
 #define EDITOP3_BUTTONS 29
 #define EDITOP4_BUTTONS 29
 #define SAMPLER_BUTTONS 25
-#define SYNTH_BUTTONS 67
+#define SYNTH_BUTTONS 68
 // -----------------------------------------------
 
 extern const guiButton_t bTopScreen[];

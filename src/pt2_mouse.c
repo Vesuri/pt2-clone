@@ -5052,6 +5052,18 @@ static bool handleGUIButtons(int32_t button) // are you prepared to enter the ju
 			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_RESONANCE_LEVEL);
 		}
 		break;
+		case PTB_SY_FILTER_OVERDRIVE:
+		{
+			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_overdrive;
+			editor.currOverdriveDisp = (volatile uint16_t*)&textEdit.tmpDisp16;
+			textEdit.numPtr16 = &textEdit.tmpDisp16;
+			textEdit.numDigits = 3;
+			textEdit.numBits = 12;
+			textEdit.cursorStartX = 208;
+			textEdit.cursorStartY = 402;
+			enterNumberEditMode(TEXT_EDIT_HEX, PTB_SY_FILTER_OVERDRIVE);
+		}
+		break;
 		case PTB_SY_RESONANCE_LFO1:
 		{
 			textEdit.tmpDisp16 = synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_resonance_lfo_1;

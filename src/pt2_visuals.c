@@ -2286,6 +2286,12 @@ void updateSynth(void)
 		printThreeHexBg(128, 255 + 132, *editor.currResonanceLevelDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	}
 
+	if (ui.updateOverdriveText)
+	{
+		ui.updateOverdriveText = false;
+		printThreeHexBg(208, 255 + 142, *editor.currOverdriveDisp, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	}
+
 	if (ui.updateResonanceLFO1Text)
 	{
 		ui.updateResonanceLFO1Text = false;
@@ -2644,6 +2650,8 @@ void updateSynth(void)
 	}
 	textOutBg(208, 255 + 122, filterType, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	textOutBg(208, 255 + 132, filterSlope, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
+	// Filter overdrive (DRIVE label is baked into the panel bitmap)
+	printThreeHexBg(208, 255 + 142, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].filter_overdrive, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(64, 255 + 192, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_attack, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(64, 255 + 202, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_decay, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);
 	printThreeHexBg(64, 255 + 212, synth.programs[synth.performances[editor.currSample].parts[synth.currPart].program].envelope_1_sustain, video.palette[PAL_GENTXT], video.palette[PAL_GENBKG]);

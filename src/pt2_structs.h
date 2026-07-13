@@ -168,6 +168,7 @@ typedef struct editor_t
 	volatile int16_t *currFrequencyLFO1Disp, *currFrequencyLFO2Disp, *currFrequencyEnv2Disp, *currFrequencyEnv3Disp;
 	volatile uint16_t *currResonanceLevelDisp;
 	volatile int16_t *currResonanceLFO1Disp, *currResonanceLFO2Disp, *currResonanceEnv2Disp, *currResonanceEnv3Disp;
+	volatile uint16_t *currOverdriveDisp;
 	volatile uint16_t *currEnv1AttackDisp, *currEnv1DecayDisp, *currEnv1SustainDisp;
 	volatile uint16_t *currEnv2AttackDisp, *currEnv2DecayDisp, *currEnv2SustainDisp;
 	volatile uint16_t *currEnv3AttackDisp, *currEnv3DecayDisp, *currEnv3SustainDisp;
@@ -284,6 +285,7 @@ typedef struct ui_t
 	bool updateSyncLevelText, updateSyncLFO1Text, updateSyncLFO2Text, updateSyncEnv2Text, updateSyncEnv3Text;
 	bool updateFrequencyLevelText, updateFrequencyLFO1Text, updateFrequencyLFO2Text, updateFrequencyEnv2Text, updateFrequencyEnv3Text;
 	bool updateResonanceLevelText, updateResonanceLFO1Text, updateResonanceLFO2Text, updateResonanceEnv2Text, updateResonanceEnv3Text;
+	bool updateOverdriveText;
 	bool updateEnv1AttackText, updateEnv1DecayText, updateEnv1SustainText;
 	bool updateEnv2AttackText, updateEnv2DecayText, updateEnv2SustainText;
 	bool updateEnv3AttackText, updateEnv3DecayText, updateEnv3SustainText;
